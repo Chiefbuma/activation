@@ -1,7 +1,8 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, UserPlus, Loader2 } from "lucide-react"
+import { ArrowUpDown, Square, UserPlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,7 +28,7 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
     };
 
     const actionLabel = isPending ? 'Complete Activation' : 'View Details';
-    const ActionIcon = isPending ? UserPlus : Eye;
+    const ActionIcon = isPending ? UserPlus : Square;
 
     return (
         <TooltipProvider>
