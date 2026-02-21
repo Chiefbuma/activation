@@ -4,6 +4,7 @@ export type User = {
   email: string;
   role: 'admin' | 'staff' | 'navigator' | 'payer' | 'physician';
   avatarUrl?: string;
+  password?: string;
 };
 
 export type Corporate = {
@@ -71,7 +72,7 @@ export type Registration = {
   user_id: number | null;
   created_at: string;
   
-  // Joined/related data
+  // Joined/related data (computed in data.ts)
   corporate_name?: string;
   vitals: Vital[];
   nutritions: Nutrition[];

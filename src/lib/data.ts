@@ -1,4 +1,4 @@
-import type { Registration, User, Corporate, Vital, Nutrition, Goal, Clinical } from './types';
+import type { Registration, User, Corporate } from './types';
 import { unstable_noStore as noStore } from 'next/cache';
 import { 
     registrations as mockRegistrations, 
@@ -70,7 +70,6 @@ export async function fetchCorporates(): Promise<Corporate[]> {
     return mockCorporates.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-// Keeping dummy clinical parameters for UI consistency
 export async function fetchClinicalParameters() {
     return [
         { id: 1, name: 'Blood Pressure', type: 'numeric', unit: 'mmHg' },

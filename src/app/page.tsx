@@ -13,7 +13,7 @@ import Logo from '@/components/logo';
 import { users } from '@/lib/mock-data';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@taria.com');
+  const [email, setEmail] = useState('admin@superadmin.com');
   const [password, setPassword] = useState('password');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -28,8 +28,6 @@ export default function LoginPage() {
 
     const user = users.find(u => u.email === email);
 
-    // In a real app, you'd compare a hashed password.
-    // For this mock setup, we'll use a simple plain text password.
     if (!user || password !== 'password') {
       toast({
         variant: 'destructive',
@@ -48,7 +46,6 @@ export default function LoginPage() {
     });
 
     router.push('/dashboard');
-    // No finally block needed, as redirection will unmount the component
   };
   
   return (
@@ -103,12 +100,6 @@ export default function LoginPage() {
                         </Button>
                         </div>
                     </form>
-                    <div className="mt-4 text-center text-sm">
-                        Don&apos;t have an account?{' '}
-                        <Link href="/register" className="underline">
-                            Sign up
-                        </Link>
-                    </div>
                 </CardContent>
             </Card>
         </div>

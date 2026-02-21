@@ -17,18 +17,8 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
@@ -61,13 +51,6 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -103,12 +86,10 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const { toast } = useToast();
 
   const [patient, setPatient] = useState<Registration>(initialPatient);
-  const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');

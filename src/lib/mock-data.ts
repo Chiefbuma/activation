@@ -1,8 +1,8 @@
 import type { User, Corporate, Registration, Vital, Nutrition, Goal, Clinical } from './types';
 
 export const users: User[] = [
-    { id: 1, name: 'Taria Admin', email: 'admin@superadmin.com', role: 'admin', password: '$2b$10$W3a1ZyygMwNhyty8RnROH.7sfbVEAdO5qrHVNh./.vAn2346k.ClW' },
-    { id: 2, name: 'buma', email: 'georgebuma.jb@gmail.com', role: 'staff', password: '$2a$10$8ojrbBVb8dsdeU000GPC.OJsZiDBVuaa03PkHcYiaHUK1v/6aWoim' },
+    { id: 1, name: 'Taria Admin', email: 'admin@superadmin.com', role: 'admin', password: 'password' },
+    { id: 2, name: 'buma', email: 'georgebuma.jb@gmail.com', role: 'staff', password: 'password' },
 ];
 
 export const corporates: Corporate[] = [
