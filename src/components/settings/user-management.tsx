@@ -34,8 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { placeholderImages } from '@/lib/placeholder-images';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface UserManagementProps {
   initialUsers: User[];
@@ -56,7 +55,6 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
   const { toast } = useToast();
-  const userAvatar = placeholderImages.find(p => p.id === 'user-avatar');
 
   const handleOpenModal = (user?: User) => {
     setCurrentUser(user || { ...emptyUser });
@@ -134,9 +132,8 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
             users.map(user => (
               <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10 ring-2 ring-background rounded-full border">
-                        <AvatarImage src={user.avatarUrl || userAvatar?.imageUrl} alt={user.name} data-ai-hint="FlatAvatar DarkSkin" />
-                        <AvatarFallback className="bg-teal-100 text-teal-700 font-bold">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <Avatar className="h-10 w-10 ring-2 ring-background rounded-full border shadow-sm">
+                        <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-bold text-foreground">{user.name}</p>

@@ -59,10 +59,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
-import { placeholderImages } from '@/lib/placeholder-images';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
-import { motion, AnimatePresence } from 'framer-motion';
 import { corporates as mockCorporates } from '@/lib/mock-data';
 
 const DetailItem = ({
@@ -105,7 +103,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     }
   }, []);
 
-  const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
+  const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`;
 
   // Form States
   const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({ bp_systolic: 0, bp_diastolic: 0, pulse: 0, temp: undefined, rbs: '' });
@@ -234,8 +232,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col items-center text-center gap-4">
                 <Avatar className="w-24 h-24 border-4 border-background shadow-lg rounded-full">
-                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} data-ai-hint="FlatAvatar DarkSkin" />}
-                  <AvatarFallback className="text-3xl bg-primary/10 text-primary">{patient.first_name[0]}</AvatarFallback>
+                  <AvatarFallback className="text-3xl bg-primary text-primary-foreground font-bold">{fallback}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
                   <CardTitle className="text-2xl">{`${patient.first_name} ${patient.surname || ''}`}</CardTitle>

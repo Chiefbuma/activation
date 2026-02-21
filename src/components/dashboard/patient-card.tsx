@@ -5,13 +5,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Target, ClipboardCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { placeholderImages } from '@/lib/placeholder-images';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 export default function PatientCard({ patient, index }: { patient: Registration, index: number }) {
-    const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
-    
     const name = `${patient.first_name} ${patient.surname || ''}`
     const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`
   
@@ -28,9 +25,8 @@ export default function PatientCard({ patient, index }: { patient: Registration,
             whileHover={{ y: -4, borderColor: 'hsl(var(--primary))' }}
         >
         <div className="flex items-start p-5 gap-5">
-            <Avatar className="h-16 w-16 sm:flex rounded-lg shadow-lg">
-                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
-                <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
+            <Avatar className="h-16 w-16 sm:flex rounded-lg shadow-md border-2 border-background">
+                <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xl font-bold">{fallback}</AvatarFallback>
             </Avatar>
 
             <div className="flex-1 flex flex-col">

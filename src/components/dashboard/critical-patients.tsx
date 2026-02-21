@@ -4,13 +4,10 @@ import type { Registration } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { placeholderImages } from "@/lib/placeholder-images";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
 
 export default function CriticalPatients({ patients }: { patients: Registration[] }) {
-    const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
-
     return (
         <Card>
             <CardHeader>
@@ -28,12 +25,11 @@ export default function CriticalPatients({ patients }: { patients: Registration[
                         return (
                             <div key={patient.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-9 w-9 border rounded-full overflow-hidden">
-                                        {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
-                                        <AvatarFallback className="bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
+                                    <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+                                        <AvatarFallback className="bg-primary text-primary-foreground font-bold text-[10px]">{fallback}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="font-semibold">{name}</p>
+                                        <p className="font-semibold text-sm">{name}</p>
                                         <p className="text-xs text-muted-foreground truncate max-w-[120px]">{patient.email || patient.phone}</p>
                                     </div>
                                 </div>

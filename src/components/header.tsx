@@ -3,7 +3,7 @@
 
 import type { User } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,8 @@ export default function Header({ user }: { user: User }) {
     router.push('/');
   };
 
+  const initials = user.name.split(' ').map(n => n[0]).join('');
+
   return (
     <div className="flex items-center gap-4">
       <ThemeToggle />
@@ -32,11 +34,10 @@ export default function Header({ user }: { user: User }) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="relative h-8 w-8 rounded-full"
+            className="relative h-8 w-8 rounded-full border-2 border-background shadow-sm"
           >
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="FlatAvatar DarkSkin" />
-              <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -58,7 +59,7 @@ export default function Header({ user }: { user: User }) {
           </DropdownMenuItem>
           {user.role === 'admin' && (
             <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/settings">
+                <Link href="/dashboard">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                 </Link>

@@ -13,8 +13,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
-
 const ViewActivationButton = ({ registration }: { registration: Registration }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
@@ -93,13 +91,12 @@ export const columns: ColumnDef<Registration>[] = [
     cell: ({ row }) => {
       const reg = row.original
       const name = `${reg.first_name} ${reg.surname || ''}`
-      const fallback = reg.first_name[0]
+      const fallback = `${reg.first_name[0]}${reg.surname ? reg.surname[0] : ''}`
 
       return (
         <div className="flex items-center gap-4">
-            <Avatar className="hidden h-10 w-10 sm:flex rounded-full border">
-                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
-                <AvatarFallback className="bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
+            <Avatar className="hidden h-10 w-10 sm:flex rounded-full border-2 border-background shadow-sm">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">{fallback}</AvatarFallback>
             </Avatar>
             <div className="grid gap-1">
                 <Link href={`/dashboard/patient/${reg.id}`} className="font-medium leading-none hover:underline">{name}</Link>

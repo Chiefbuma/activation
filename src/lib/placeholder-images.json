@@ -2,21 +2,21 @@
   "placeholderImages": [
     {
       "id": "login-hero",
-      "description": "Abstract flat vector illustration of a modern medical facility with dark-skinned healthcare professionals.",
-      "imageUrl": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-      "imageHint": "medical illustration"
+      "description": "Abstract stylized vector illustration of health and wellness metrics, non-photographic.",
+      "imageUrl": "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=1000",
+      "imageHint": "abstract healthcare"
     },
     {
       "id": "user-avatar",
-      "description": "Flat minimalist vector avatar of a professional with dark black skin tone and professional attire.",
-      "imageUrl": "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?w=400&h=400&fit=crop",
-      "imageHint": "DarkSkin Avatar"
+      "description": "Generic minimalist user icon silhouette.",
+      "imageUrl": "https://placehold.co/400x400/0d9488/ffffff?text=User",
+      "imageHint": "user silhouette"
     },
     {
       "id": "patient-avatar",
-      "description": "Flat stylized character avatar of a person with dark black skin tone, minimalist design.",
-      "imageUrl": "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?w=400&h=400&fit=crop",
-      "imageHint": "DarkSkin Avatar"
+      "description": "Generic minimalist patient icon silhouette.",
+      "imageUrl": "https://placehold.co/400x400/0d9488/ffffff?text=Patient",
+      "imageHint": "user silhouette"
     }
   ]
 }
