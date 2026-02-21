@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,21 +15,31 @@ import {
 } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { fetchCorporates } from '@/lib/data';
+import type { Corporate } from '@/lib/types';
 
-export default function StaffRegisterPatientPage() {
+export default function RegisterParticipantPage() {
   const [formData, setFormData] = useState({
     first_name: '',
+    middle_name: '',
     surname: '',
     email: '',
-    password: '',
+    phone: '',
     age: '',
     sex: '',
-    diagnosis: '',
+    dob: '',
+    corporate_id: '',
+    wellness_date: '',
   });
+  const [corporates, setCorporates] = useState<Corporate[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    fetchCorporates().then(setCorporates);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -44,86 +54,103 @@ export default function StaffRegisterPatientPage() {
     setLoading(true);
 
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // In a real app, you would:
-    // 1. Call an API to create the patient record.
-    // 2. Call an API to create the user record for patient login.
-    
     toast({
-        title: 'Patient Registered (Simulation)',
-        description: 'The patient record has been created. You will now be redirected to the dashboard.',
+        title: 'Registration Successful',
+        description: 'The participant has been registered successfully.',
     });
     
-    // In a real app, you might redirect to the new patient's onboarding page:
-    // router.push(`/patient/${newPatientId}`);
     router.push('/dashboard');
     setLoading(false);
   }
 
   return (
-    <div className="container mx-auto flex justify-center items-start py-8 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-3xl">
-        <CardHeader>
-          <CardTitle>New Patient Registration</CardTitle>
+    <div className="container mx-auto flex justify-center items-start py-8">
+      <Card className="w-full max-w-4xl border-primary/20 shadow-lg">
+        <CardHeader className="text-center bg-muted/30 pb-8">
+          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-xl mb-4">
+            <CardTitle className="text-2xl text-primary">New Participant Registration</CardTitle>
+          </div>
           <CardDescription>
-            Enter the patient's basic information to create their profile and login.
+            Enter participant details to create a new activation record.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="first_name">First Name</Label>
-                  <Input id="first_name" required onChange={handleInputChange} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="surname">Surname</Label>
-                  <Input id="surname" required onChange={handleInputChange} />
-                </div>
+        <CardContent className="pt-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name *</Label>
+                <Input id="first_name" required value={formData.first_name} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
               </div>
-
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" required onChange={handleInputChange} placeholder="For patient login" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" required onChange={handleInputChange} placeholder="Create a password" />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="middle_name">Middle Name</Label>
+                <Input id="middle_name" value={formData.middle_name} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="grid gap-2">
-                    <Label htmlFor="age">Age</Label>
-                    <Input id="age" type="number" required onChange={handleInputChange} />
-                </div>
-                 <div className="grid gap-2">
-                    <Label htmlFor="sex">Sex</Label>
-                    <Select name="sex" onValueChange={(value) => handleSelectChange('sex', value)} required>
-                        <SelectTrigger id="sex"><SelectValue placeholder="Select sex" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
-                 </div>
-                 <div className="grid gap-2">
-                    <Label htmlFor="diagnosis">Primary Diagnosis</Label>
-                    <Input id="diagnosis" required onChange={handleInputChange} />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="surname">Surname *</Label>
+                <Input id="surname" required value={formData.surname} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sex">Sex *</Label>
+                <Select value={formData.sex} onValueChange={(v) => handleSelectChange('sex', v)} required>
+                  <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Male">Male</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="mt-8 flex justify-end gap-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="dob">Date of Birth (Optional)</Label>
+                <Input id="dob" type="date" value={formData.dob} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age">Age (Optional)</Label>
+                <Input id="age" type="number" value={formData.age} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" value={formData.phone} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="corporate_id">Corporate Partner</Label>
+                <Select value={formData.corporate_id} onValueChange={(v) => handleSelectChange('corporate_id', v)}>
+                  <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Assign corporate" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {corporates.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wellness_date">Wellness Date</Label>
+                <Input id="wellness_date" type="date" value={formData.wellness_date} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-between gap-4">
               <Button variant="outline" asChild>
-                <Link href="/dashboard">Cancel</Link>
+                <Link href="/dashboard">
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+                </Link>
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading ? 'Saving...' : 'Register Patient'}
+              <Button type="submit" disabled={loading} className="px-8">
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Register Participant'}
               </Button>
             </div>
           </form>

@@ -15,10 +15,10 @@ export async function fetchPatients(): Promise<Registration[]> {
     
     const enriched = mockRegistrations.map(reg => {
         const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
-        const regVitals = mockVitals.filter(v => v.registration_id === reg.id);
-        const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id);
-        const regGoals = mockGoals.filter(g => g.registration_id === reg.id);
-        const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id);
+        const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const regGoals = mockGoals.filter(g => g.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
         return {
             ...reg,
@@ -27,7 +27,7 @@ export async function fetchPatients(): Promise<Registration[]> {
             nutritions: regNutritions,
             goals: regGoals,
             clinicals: regClinicals,
-            status: regClinicals.length > 0 ? 'Active' : 'Pending'
+            status: 'Active' // Participants are active once registered
         } as Registration;
     });
 
@@ -44,10 +44,10 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
     }
 
     const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
-    const regVitals = mockVitals.filter(v => v.registration_id === reg.id);
-    const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id);
-    const regGoals = mockGoals.filter(g => g.registration_id === reg.id);
-    const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id);
+    const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const regGoals = mockGoals.filter(g => g.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return {
         ...reg,
@@ -56,7 +56,7 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
         nutritions: regNutritions,
         goals: regGoals,
         clinicals: regClinicals,
-        status: regClinicals.length > 0 ? 'Active' : 'Pending'
+        status: 'Active'
     } as Registration;
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Registration, User, Corporate, Vital, Nutrition, Goal, Clinical } from '@/lib/types';
+import type { Registration, User, Vital, Nutrition, Goal, Clinical } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -33,20 +34,13 @@ import {
   Building2,
   Binary,
   PlusCircle,
-  Save,
-  XCircle,
   FileText,
-  Loader2,
-  CalendarDays,
-  Trash2,
-  Edit,
   History,
-  CheckCircle,
   Stethoscope,
   Activity,
-  Clock,
+  Trash2,
+  CalendarDays,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -69,7 +63,7 @@ const DetailItem = ({
   <div className="flex items-start gap-4">
     {Icon && (
       <div className="bg-muted/50 rounded-full p-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className="h-4 w-4 text-primary" />
       </div>
     )}
     <div className="grid gap-0.5">
@@ -82,14 +76,10 @@ const DetailItem = ({
 );
 
 export default function PatientDetailsPage({ initialPatient }: { initialPatient: Registration }) {
-  const router = useRouter();
   const { toast } = useToast();
-
   const [patient, setPatient] = useState<Registration>(initialPatient);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -100,17 +90,11 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
   const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 
-  // Vitals State
-  const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({ bp_systolic: 0, bp_diastolic: 0, pulse: 0, temp: 0, rbs: '' });
-  
-  // Nutrition State
+  // Form States
+  const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({ bp_systolic: 0, bp_diastolic: 0, pulse: 0, temp: undefined, rbs: '' });
   const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({ height: 0, weight: 0, bmi: 0, visceral_fat: 0, body_fat_percent: 0, notes_nutritionist: '' });
-
-  // Goals State
   const [goalForm, setGoalForm] = useState<Partial<Goal>>({ discussion: '', goal: '' });
-
-  // Clinical Review State
-  const [clinicalForm, setClinicalReviewForm] = useState<Partial<Clinical>>({ notes_doctor: '', notes_psychologist: '' });
+  const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({ notes_doctor: '', notes_psychologist: '' });
 
   const handleSaveVitals = () => {
     const newVital: Vital = {
@@ -134,7 +118,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         user_id: currentUser?.id || null
     } as Nutrition;
     setPatient(prev => ({ ...prev, nutritions: [newNutri, ...prev.nutritions] }));
-    toast({ title: 'Success', description: 'Nutrition recorded.' });
+    toast({ title: 'Success', description: 'Nutrition record saved.' });
   }
 
   const handleSaveGoal = () => {
@@ -146,7 +130,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         user_id: currentUser?.id || null
     } as Goal;
     setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
-    toast({ title: 'Success', description: 'Goal recorded.' });
+    toast({ title: 'Success', description: 'Goal set successfully.' });
   }
 
   const handleSaveClinical = () => {
@@ -162,37 +146,34 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   }
 
   return (
-    <div className="container mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-7xl py-6 px-4">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button asChild variant="outline" size="icon">
               <Link href="/dashboard">
                 <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back to Dashboard</span>
               </Link>
             </Button>
             <div>
-              <h1 className="text-3xl font-bold font-headline tracking-tight">{`${
-                patient.first_name
-              } ${patient.surname || ''}`}</h1>
-              <p className="text-muted-foreground">
-                Participant Activation Details
-              </p>
+              <h1 className="text-3xl font-bold tracking-tight text-primary">
+                {`${patient.first_name} ${patient.surname || ''}`}
+              </h1>
+              <p className="text-muted-foreground">Activation Details</p>
             </div>
           </div>
-          <Badge className={patient.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-amber-500/20 text-amber-700'}>
-            {patient.status}
+          <Badge variant="outline" className="text-base px-4 py-1 border-primary/30 text-primary bg-primary/5">
+            Active Participant
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-6">
-            <Card>
+            <Card className="border-primary/10">
               <CardHeader className="flex flex-col items-center text-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-background shadow-md">
+                <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
                    {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} />}
-                  <AvatarFallback className="text-3xl">{patient.first_name[0]}</AvatarFallback>
+                  <AvatarFallback className="text-3xl bg-primary/10 text-primary">{patient.first_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
                   <CardTitle className="text-2xl">{`${patient.first_name} ${patient.surname || ''}`}</CardTitle>
@@ -203,8 +184,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                  <Separator />
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <DetailItem icon={UserIcon} label="Full Name" value={`${patient.first_name} ${patient.middle_name || ''} ${patient.surname || ''}`} />
-                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : '-'} />
-                  <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
+                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : 'N/A'} />
+                  <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age || 'N/A'} / ${patient.sex}`} />
                   <DetailItem icon={Phone} label="Phone" value={patient.phone} />
                   <DetailItem icon={Mail} label="Email" value={patient.email} />
                   <DetailItem icon={Building2} label="Corporate" value={patient.corporate_name} />
@@ -212,9 +193,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-primary/10">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><History className="h-5 w-5"/> Activity Timeline</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-lg"><History className="h-5 w-5 text-primary"/> Activity Timeline</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex gap-3">
@@ -224,30 +205,30 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <p className="text-xs text-muted-foreground">{new Date(patient.created_at).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    {patient.clinicals.length > 0 && (
-                        <div className="flex gap-3">
-                            <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                    {patient.clinicals.map((c, idx) => (
+                        <div key={idx} className="flex gap-3">
+                            <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
                             <div>
                                 <p className="text-sm font-medium">Clinical Review Conducted</p>
-                                <p className="text-xs text-muted-foreground">{new Date(patient.clinicals[0].created_at).toLocaleDateString()}</p>
+                                <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</p>
                             </div>
                         </div>
-                    )}
+                    ))}
                 </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader><CardTitle>Actions</CardTitle></CardHeader>
+            <Card className="border-primary/10 bg-primary/5">
+              <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Button variant="outline" onClick={() => setIsEditModalOpen(true)}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
-                <Button onClick={() => setIsReportModalOpen(true)}><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
+                <Button variant="outline" className="justify-start"><Binary className="mr-2 h-4 w-4" /> Edit Profile</Button>
+                <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Activation Report</Button>
               </CardContent>
             </Card>
           </div>
 
           <div className="lg:col-span-2 space-y-6">
             {/* Vitals */}
-            <Card>
+            <Card className="border-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                     <HeartPulse className="w-6 h-6 text-primary" />
@@ -258,14 +239,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
                 <Dialog>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Record Vitals</Button></DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-md">
                         <DialogHeader><DialogTitle>New Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
                             <div className="space-y-2"><Label>Systolic</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})}/></div>
                             <div className="space-y-2"><Label>Diastolic</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})}/></div>
                             <div className="space-y-2"><Label>Pulse</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Temp</Label><Input type="number" step="0.1" onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})}/></div>
-                            <div className="col-span-2 space-y-2"><Label>RBS</Label><Input onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Temp (Optional)</Label><Input type="number" step="0.1" onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})}/></div>
+                            <div className="col-span-2 space-y-2"><Label>RBS (mmol/L)</Label><Input onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
                         </div>
                         <DialogFooter><DialogClose asChild><Button onClick={handleSaveVitals}>Save Record</Button></DialogClose></DialogFooter>
                     </DialogContent>
@@ -274,17 +255,17 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               <CardContent>
                 {patient.vitals.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-xl">
-                        <DetailItem label="BP" value={`${patient.vitals[0].bp_systolic}/${patient.vitals[0].bp_diastolic}`} />
+                        <DetailItem label="BP" value={`${patient.vitals[0].bp_systolic}/${patient.vitals[0].bp_diastolic} mmHg`} />
                         <DetailItem label="Pulse" value={`${patient.vitals[0].pulse} bpm`} />
-                        <DetailItem label="Temp" value={`${patient.vitals[0].temp}°C`} />
-                        <DetailItem label="RBS" value={patient.vitals[0].rbs} />
+                        <DetailItem label="Temp" value={patient.vitals[0].temp ? `${patient.vitals[0].temp}°C` : '-'} />
+                        <DetailItem label="RBS" value={patient.vitals[0].rbs || '-'} />
                     </div>
                 ) : <p className="text-center text-muted-foreground py-4">No vitals recorded.</p>}
               </CardContent>
             </Card>
 
             {/* Nutrition */}
-            <Card>
+            <Card className="border-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Scale className="w-6 h-6 text-primary" />
@@ -295,7 +276,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
                 <Dialog>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition</Button></DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-md">
                         <DialogHeader><DialogTitle>Nutrition Record</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
                             <div className="space-y-2"><Label>Height (cm)</Label><Input type="number" onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})}/></div>
@@ -318,29 +299,29 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <DetailItem label="V. Fat" value={patient.nutritions[0].visceral_fat} />
                             <DetailItem label="B. Fat %" value={`${patient.nutritions[0].body_fat_percent}%`} />
                         </div>
-                        {patient.nutritions[0].notes_nutritionist && <p className="text-sm italic">"{patient.nutritions[0].notes_nutritionist}"</p>}
+                        {patient.nutritions[0].notes_nutritionist && <p className="text-sm italic p-3 border-l-2 border-primary bg-primary/5">"{patient.nutritions[0].notes_nutritionist}"</p>}
                     </div>
                 ) : <p className="text-center text-muted-foreground py-4">No nutrition data recorded.</p>}
               </CardContent>
             </Card>
 
             {/* Goals */}
-            <Card>
+            <Card className="border-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Target className="w-6 h-6 text-primary" />
                     <div>
-                        <CardTitle>Personalized Goals</CardTitle>
-                        <CardDescription>Target outcomes and discussions</CardDescription>
+                        <CardTitle>Activation Goals</CardTitle>
+                        <CardDescription>Target outcomes and participant discussion</CardDescription>
                     </div>
                 </div>
                 <Dialog>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Set Goal</Button></DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader><DialogTitle>New Goal</DialogTitle></DialogHeader>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader><DialogTitle>Set Health Goal</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
-                            <div className="space-y-2"><Label>Discussion</Label><Textarea onChange={e => setGoalForm({...goalForm, discussion: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Goal</Label><Textarea onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Discussion Findings</Label><Textarea onChange={e => setGoalForm({...goalForm, discussion: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Target Goal</Label><Textarea onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
                         </div>
                         <DialogFooter><DialogClose asChild><Button onClick={handleSaveGoal}>Save Goal</Button></DialogClose></DialogFooter>
                     </DialogContent>
@@ -350,10 +331,17 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.goals.length > 0 ? (
                     <div className="space-y-4">
                         {patient.goals.map(g => (
-                            <div key={g.id} className="p-4 border rounded-xl bg-background/50 space-y-2">
-                                <p className="text-sm font-semibold text-primary">Goal: {g.goal}</p>
-                                <p className="text-sm text-muted-foreground">Discussion: {g.discussion}</p>
-                                <p className="text-xs text-muted-foreground pt-2">Created: {new Date(g.created_at).toLocaleDateString()}</p>
+                            <div key={g.id} className="p-4 border border-primary/10 rounded-xl bg-primary/5 space-y-3">
+                                <div>
+                                    <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Target Goal</p>
+                                    <p className="text-sm font-semibold">{g.goal}</p>
+                                </div>
+                                <Separator className="bg-primary/10" />
+                                <div>
+                                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Discussion</p>
+                                    <p className="text-sm text-muted-foreground">{g.discussion}</p>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground pt-2 italic">Set on {new Date(g.created_at).toLocaleDateString()}</p>
                             </div>
                         ))}
                     </div>
@@ -362,7 +350,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             </Card>
 
             {/* Clinical Reviews */}
-            <Card>
+            <Card className="border-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Stethoscope className="w-6 h-6 text-primary" />
@@ -373,11 +361,17 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
                 <Dialog>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-xl">
                         <DialogHeader><DialogTitle>New Clinical Review</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
-                            <div className="space-y-2"><Label>Doctor's Notes</Label><Textarea onChange={e => setClinicalReviewForm({...clinicalForm, notes_doctor: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Psychologist's Notes</Label><Textarea onChange={e => setClinicalReviewForm({...clinicalForm, notes_psychologist: e.target.value})}/></div>
+                            <div className="space-y-2">
+                                <Label>Doctor's Plan</Label>
+                                <Textarea className="min-h-[100px]" placeholder="Enter doctor's observations and plan..." onChange={e => setClinicalForm({...clinicalForm, notes_doctor: e.target.value})}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Psychological Notes</Label>
+                                <Textarea className="min-h-[100px]" placeholder="Enter psychological assessment notes..." onChange={e => setClinicalForm({...clinicalForm, notes_psychologist: e.target.value})}/>
+                            </div>
                         </div>
                         <DialogFooter><DialogClose asChild><Button onClick={handleSaveClinical}>Submit Review</Button></DialogClose></DialogFooter>
                     </DialogContent>
@@ -387,17 +381,26 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.clinicals.length > 0 ? (
                     <div className="space-y-6">
                         {patient.clinicals.map(c => (
-                            <div key={c.id} className="space-y-4">
-                                <div className="p-4 border rounded-xl bg-background/50">
-                                    <h4 className="font-semibold text-primary mb-2">Doctor's Plan</h4>
-                                    <p className="text-sm text-foreground">{c.notes_doctor || '-'}</p>
+                            <div key={c.id} className="space-y-4 p-4 border rounded-xl bg-muted/20 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <Activity className="h-3 w-3" /> Doctor's Plan
+                                        </h4>
+                                        <p className="text-sm text-foreground leading-relaxed">{c.notes_doctor || '-'}</p>
+                                    </div>
+                                    <Separator className="opacity-50" />
+                                    <div>
+                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <Binary className="h-3 w-3" /> Psychological Notes
+                                        </h4>
+                                        <p className="text-sm text-foreground leading-relaxed">{c.notes_psychologist || '-'}</p>
+                                    </div>
                                 </div>
-                                <div className="p-4 border rounded-xl bg-background/50">
-                                    <h4 className="font-semibold text-primary mb-2">Psychological Notes</h4>
-                                    <p className="text-sm text-foreground">{c.notes_psychologist || '-'}</p>
+                                <div className="pt-4 flex justify-end">
+                                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Reviewed on: {new Date(c.created_at).toLocaleDateString()}</p>
                                 </div>
-                                <p className="text-xs text-muted-foreground text-right">Reviewed on: {new Date(c.created_at).toLocaleDateString()}</p>
-                                <Separator />
                             </div>
                         ))}
                     </div>
