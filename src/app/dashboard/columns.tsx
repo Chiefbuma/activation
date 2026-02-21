@@ -5,11 +5,9 @@ import { ArrowUpDown, Eye, UserPlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { placeholderImages } from "@/lib/placeholder-images"
 import type { Registration } from "@/lib/types"
 import Link from "next/link"
-import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -36,15 +34,16 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
+                        className="h-9 w-9 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors"
                         onClick={handleClick}
                         disabled={isLoading}
                     >
                         {isLoading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            <ActionIcon className="h-4 w-4" />
+                            <ActionIcon className="h-4 w-4 text-primary" />
                         )}
                         <span className="sr-only">{actionLabel}</span>
                     </Button>
@@ -135,19 +134,10 @@ export const columns: ColumnDef<Registration>[] = [
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      const variant = status === 'Active' ? 'default' : 'secondary';
-      return <Badge variant={variant} className={cn(status === 'Active' && 'bg-green-500/20 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-500/30')}>{status}</Badge>
-    },
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
       return (
-        <div className="flex justify-end">
+        <div className="flex justify-end pr-4">
           <ViewActivationButton registration={row.original} />
         </div>
       )
