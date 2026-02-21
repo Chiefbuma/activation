@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -132,9 +131,9 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
             users.map(user => (
               <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10 ring-2 ring-background rounded-full border shadow-sm">
-                        <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
+                    <div className="h-10 w-10 flex items-center justify-center bg-primary/10 text-primary font-bold rounded-full border shadow-sm">
+                        {user.name.split(' ').map(n => n[0]).join('')}
+                    </div>
                     <div>
                       <p className="font-bold text-foreground">{user.name}</p>
                       <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
@@ -203,7 +202,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="password" senior-className="text-primary font-bold">Account Password {currentUser?.id && '(Leave blank to keep current)'}</Label>
+                <Label htmlFor="password" className="text-primary font-bold">Account Password {currentUser?.id && '(Leave blank to keep current)'}</Label>
                 <div className="relative">
                     <Input id="password" name="password" type="password" value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} className="pr-10 dark:border-teal-500/40" />
                     <Key className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
