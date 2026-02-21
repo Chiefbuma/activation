@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -131,7 +132,7 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="dark:text-foreground">Cancel</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(corp.id)} className="bg-destructive hover:bg-destructive/90">
                                 Remove
                             </AlertDialogAction>
@@ -155,17 +156,17 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Partner Name</Label>
+                <Label htmlFor="name" className="text-primary font-bold">Partner Name</Label>
                 <Input id="name" name="name" value={currentCorporate?.name || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="wellness_date">Wellness Date</Label>
+                <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
                 <Input id="wellness_date" name="wellness_date" type="date" value={currentCorporate?.wellness_date || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
               </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" className="dark:text-foreground">Cancel</Button>
               </DialogClose>
               <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -158,7 +158,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="dark:text-foreground">Cancel</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive hover:bg-destructive/90">
                                 Delete
                             </AlertDialogAction>
@@ -182,15 +182,15 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="text-primary font-bold">Full Name</Label>
                 <Input id="name" name="name" value={currentUser?.name || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
                 <Input id="email" name="email" type="email" value={currentUser?.email || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">System Role</Label>
+                <Label htmlFor="role" className="text-primary font-bold">System Role</Label>
                 <Select name="role" value={currentUser?.role || ''} onValueChange={(value) => handleSelectChange('role', value)}>
                     <SelectTrigger className="dark:border-teal-500/40"><SelectValue placeholder="Select role" /></SelectTrigger>
                     <SelectContent>
@@ -203,7 +203,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="password">Account Password {currentUser?.id && '(Leave blank to keep current)'}</Label>
+                <Label htmlFor="password" senior-className="text-primary font-bold">Account Password {currentUser?.id && '(Leave blank to keep current)'}</Label>
                 <div className="relative">
                     <Input id="password" name="password" type="password" value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} className="pr-10 dark:border-teal-500/40" />
                     <Key className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -212,7 +212,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" className="dark:text-foreground">Cancel</Button>
               </DialogClose>
               <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

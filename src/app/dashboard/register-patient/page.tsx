@@ -145,7 +145,7 @@ export default function RegisterParticipantPage() {
             </div>
 
             <div className="pt-4 flex justify-between gap-4">
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="dark:text-foreground">
                 <Link href="/dashboard">
                   <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
                 </Link>

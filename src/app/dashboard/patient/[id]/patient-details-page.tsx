@@ -338,7 +338,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10 bg-primary/5">
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Button variant="outline" className="justify-start" onClick={handleOpenEditModal}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
+                <Button variant="outline" className="justify-start dark:text-foreground" onClick={handleOpenEditModal}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
                 <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
               </CardContent>
             </Card>
@@ -367,7 +367,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="col-span-2 space-y-2"><Label className="text-primary font-bold">RBS (mmol/L)</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveVitals} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Record
@@ -435,7 +435,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="col-span-2 space-y-2"><Label className="text-primary font-bold">Notes</Label><Textarea value={nutritionForm.notes_nutritionist || ''} onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveNutrition} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Record
@@ -502,7 +502,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2"><Label className="text-primary font-bold">Target Goal</Label><Textarea value={goalForm.goal || ''} onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsGoalDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsGoalDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveGoal} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Goal
@@ -568,7 +568,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveClinical} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Submit Review
@@ -694,7 +694,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">Cancel</Button>
+                        <Button type="button" variant="outline" className="dark:text-foreground">Cancel</Button>
                     </DialogClose>
                     <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
