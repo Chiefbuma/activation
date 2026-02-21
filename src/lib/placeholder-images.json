@@ -2,21 +2,21 @@
   "placeholderImages": [
     {
       "id": "login-hero",
-      "description": "Safe stylized illustration representing a modern healthcare facility in Kenya.",
+      "description": "Abstract flat vector illustration of a modern medical facility with dark-skinned healthcare professionals.",
       "imageUrl": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
       "imageHint": "medical illustration"
     },
     {
       "id": "user-avatar",
-      "description": "Safe 3D stylized avatar of a professional Kenyan individual with a darker skin tone.",
+      "description": "Flat minimalist vector avatar of a professional with dark black skin tone and professional attire.",
       "imageUrl": "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?w=400&h=400&fit=crop",
-      "imageHint": "Kenyan professional"
+      "imageHint": "DarkSkin Avatar"
     },
     {
       "id": "patient-avatar",
-      "description": "Safe illustrative avatar of a Kenyan participant with a darker skin tone.",
+      "description": "Flat stylized character avatar of a person with dark black skin tone, minimalist design.",
       "imageUrl": "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?w=400&h=400&fit=crop",
-      "imageHint": "African avatar"
+      "imageHint": "African Avatar"
     }
   ]
 }

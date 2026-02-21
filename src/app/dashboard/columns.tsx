@@ -97,8 +97,8 @@ export const columns: ColumnDef<Registration>[] = [
 
       return (
         <div className="flex items-center gap-4">
-            <Avatar className="hidden h-10 w-10 sm:flex">
-                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="African avatar" />}
+            <Avatar className="hidden h-10 w-10 sm:flex rounded-full border">
+                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
             </Avatar>
             <div className="grid gap-1">

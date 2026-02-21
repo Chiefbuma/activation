@@ -28,8 +28,8 @@ export default function CriticalPatients({ patients }: { patients: Registration[
                         return (
                             <div key={patient.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-9 w-9">
-                                        {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="African avatar" />}
+                                    <Avatar className="h-9 w-9 border rounded-full overflow-hidden">
+                                        {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
                                         <AvatarFallback className="bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
                                     </Avatar>
                                     <div>

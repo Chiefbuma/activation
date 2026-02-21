@@ -233,8 +233,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
           <div className="lg:col-span-1 space-y-6">
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col items-center text-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} data-ai-hint="African avatar" />}
+                <Avatar className="w-24 h-24 border-4 border-background shadow-lg rounded-full">
+                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} data-ai-hint="FlatAvatar DarkSkin" />}
                   <AvatarFallback className="text-3xl bg-primary/10 text-primary">{patient.first_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">

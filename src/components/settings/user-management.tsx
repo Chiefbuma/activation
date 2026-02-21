@@ -134,8 +134,8 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
             users.map(user => (
               <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10 ring-2 ring-background">
-                        <AvatarImage src={user.avatarUrl || userAvatar?.imageUrl} alt={user.name} data-ai-hint="Kenyan professional" />
+                    <Avatar className="h-10 w-10 ring-2 ring-background rounded-full border">
+                        <AvatarImage src={user.avatarUrl || userAvatar?.imageUrl} alt={user.name} data-ai-hint="FlatAvatar DarkSkin" />
                         <AvatarFallback className="bg-teal-100 text-teal-700 font-bold">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div>
