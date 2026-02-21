@@ -39,12 +39,8 @@ import {
   History,
   Stethoscope,
   Activity,
-  Plus,
   Trash2,
   Edit,
-  Save,
-  XCircle,
-  Clock,
   Loader2
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -96,6 +92,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [corporates] = useState(mockCorporates);
 
+  // Modal States
+  const [isVitalsDialogOpen, setIsVitalsDialogOpen] = useState(false);
+  const [isNutritionDialogOpen, setIsNutritionDialogOpen] = useState(false);
+  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [isClinicalDialogOpen, setIsClinicalDialogOpen] = useState(false);
+
+  // Form States
+  const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({});
+  const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({});
+  const [goalForm, setGoalForm] = useState<Partial<Goal>>({});
+  const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({});
+  const [editFormData, setEditFormData] = useState<Partial<Registration>>({});
+
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
@@ -105,77 +114,127 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
   const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`;
 
-  // Form States
-  const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({ bp_systolic: 0, bp_diastolic: 0, pulse: 0, temp: undefined, rbs: '' });
-  const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({ height: 0, weight: 0, bmi: 0, visceral_fat: 0, body_fat_percent: 0, notes_nutritionist: '' });
-  const [goalForm, setGoalForm] = useState<Partial<Goal>>({ discussion: '', goal: '' });
-  const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({ notes_doctor: '', notes_psychologist: '' });
-  const [editFormData, setEditFormData] = useState<Partial<Registration>>({});
-
+  // CRUD Handlers
   const handleSaveVitals = () => {
     setIsSubmitting(true);
-    const newVital: Vital = {
-        id: Date.now(),
-        registration_id: patient.id,
-        ...vitalsForm,
-        measured_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        user_id: currentUser?.id || null
-    } as Vital;
     setTimeout(() => {
-        setPatient(prev => ({ ...prev, vitals: [newVital, ...prev.vitals] }));
-        toast({ title: 'Success', description: 'Vitals recorded.' });
+        if (vitalsForm.id) {
+            setPatient(prev => ({
+                ...prev,
+                vitals: prev.vitals.map(v => v.id === vitalsForm.id ? { ...v, ...vitalsForm } as Vital : v)
+            }));
+            toast({ title: 'Updated', description: 'Vitals record updated.' });
+        } else {
+            const newVital: Vital = {
+                id: Date.now(),
+                registration_id: patient.id,
+                ...vitalsForm,
+                measured_at: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                user_id: currentUser?.id || null
+            } as Vital;
+            setPatient(prev => ({ ...prev, vitals: [newVital, ...prev.vitals] }));
+            toast({ title: 'Success', description: 'Vitals recorded.' });
+        }
         setIsSubmitting(false);
+        setIsVitalsDialogOpen(false);
     }, 500);
-  }
+  };
+
+  const handleDeleteVital = (id: number) => {
+    setPatient(prev => ({ ...prev, vitals: prev.vitals.filter(v => v.id !== id) }));
+    toast({ title: 'Deleted', description: 'Vitals record removed.' });
+  };
 
   const handleSaveNutrition = () => {
     setIsSubmitting(true);
-    const newNutri: Nutrition = {
-        id: Date.now(),
-        registration_id: patient.id,
-        ...nutritionForm,
-        created_at: new Date().toISOString(),
-        user_id: currentUser?.id || null
-    } as Nutrition;
     setTimeout(() => {
-        setPatient(prev => ({ ...prev, nutritions: [newNutri, ...prev.nutritions] }));
-        toast({ title: 'Success', description: 'Nutrition record saved.' });
+        if (nutritionForm.id) {
+            setPatient(prev => ({
+                ...prev,
+                nutritions: prev.nutritions.map(n => n.id === nutritionForm.id ? { ...n, ...nutritionForm } as Nutrition : n)
+            }));
+            toast({ title: 'Updated', description: 'Nutrition record updated.' });
+        } else {
+            const newNutri: Nutrition = {
+                id: Date.now(),
+                registration_id: patient.id,
+                ...nutritionForm,
+                created_at: new Date().toISOString(),
+                user_id: currentUser?.id || null
+            } as Nutrition;
+            setPatient(prev => ({ ...prev, nutritions: [newNutri, ...prev.nutritions] }));
+            toast({ title: 'Success', description: 'Nutrition record saved.' });
+        }
         setIsSubmitting(false);
+        setIsNutritionDialogOpen(false);
     }, 500);
-  }
+  };
+
+  const handleDeleteNutrition = (id: number) => {
+    setPatient(prev => ({ ...prev, nutritions: prev.nutritions.filter(n => n.id !== id) }));
+    toast({ title: 'Deleted', description: 'Nutrition record removed.' });
+  };
 
   const handleSaveGoal = () => {
     setIsSubmitting(true);
-    const newGoal: Goal = {
-        id: Date.now(),
-        registration_id: patient.id,
-        ...goalForm,
-        created_at: new Date().toISOString(),
-        user_id: currentUser?.id || null
-    } as Goal;
     setTimeout(() => {
-        setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
-        toast({ title: 'Success', description: 'Goal set successfully.' });
+        if (goalForm.id) {
+            setPatient(prev => ({
+                ...prev,
+                goals: prev.goals.map(g => g.id === goalForm.id ? { ...g, ...goalForm } as Goal : g)
+            }));
+            toast({ title: 'Updated', description: 'Goal updated.' });
+        } else {
+            const newGoal: Goal = {
+                id: Date.now(),
+                registration_id: patient.id,
+                ...goalForm,
+                created_at: new Date().toISOString(),
+                user_id: currentUser?.id || null
+            } as Goal;
+            setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
+            toast({ title: 'Success', description: 'Goal set successfully.' });
+        }
         setIsSubmitting(false);
+        setIsGoalDialogOpen(false);
     }, 500);
-  }
+  };
+
+  const handleDeleteGoal = (id: number) => {
+    setPatient(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
+    toast({ title: 'Deleted', description: 'Goal removed.' });
+  };
 
   const handleSaveClinical = () => {
     setIsSubmitting(true);
-    const newClinical: Clinical = {
-        id: Date.now(),
-        registration_id: patient.id,
-        ...clinicalForm,
-        created_at: new Date().toISOString(),
-        user_id: currentUser?.id || null
-    } as Clinical;
     setTimeout(() => {
-        setPatient(prev => ({ ...prev, clinicals: [newClinical, ...prev.clinicals] }));
-        toast({ title: 'Success', description: 'Clinical review recorded.' });
+        if (clinicalForm.id) {
+            setPatient(prev => ({
+                ...prev,
+                clinicals: prev.clinicals.map(c => c.id === clinicalForm.id ? { ...c, ...clinicalForm } as Clinical : c)
+            }));
+            toast({ title: 'Updated', description: 'Clinical review updated.' });
+        } else {
+            const newClinical: Clinical = {
+                id: Date.now(),
+                registration_id: patient.id,
+                ...clinicalForm,
+                created_at: new Date().toISOString(),
+                user_id: currentUser?.id || null
+            } as Clinical;
+            setPatient(prev => ({ ...prev, clinicals: [newClinical, ...prev.clinicals] }));
+            toast({ title: 'Success', description: 'Clinical review recorded.' });
+        }
         setIsSubmitting(false);
+        setIsClinicalDialogOpen(false);
     }, 500);
-  }
+  };
+
+  const handleDeleteClinical = (id: number) => {
+    setPatient(prev => ({ ...prev, clinicals: prev.clinicals.filter(c => c.id !== id) }));
+    toast({ title: 'Deleted', description: 'Clinical review removed.' });
+  };
 
   const handleOpenEditModal = () => {
     setEditFormData({
@@ -196,7 +255,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         setIsEditModalOpen(false);
         setIsSubmitting(false);
     }, 500);
-  }
+  };
 
   const calculateAssessmentWeek = (date: string) => {
     const start = new Date(patient.created_at);
@@ -296,18 +355,24 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Physiological measurements tracking</CardDescription>
                     </div>
                 </div>
-                <Dialog>
+                <Dialog open={isVitalsDialogOpen} onOpenChange={(open) => { setIsVitalsDialogOpen(open); if (!open) setVitalsForm({}); }}>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Record Vitals</Button></DialogTrigger>
                     <DialogContent className="max-w-md">
-                        <DialogHeader><DialogTitle>New Vital Signs</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle>{vitalsForm.id ? 'Edit' : 'New'} Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label>Systolic</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Diastolic</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Pulse</Label><Input type="number" onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Temp (Optional)</Label><Input type="number" step="0.1" onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})}/></div>
-                            <div className="col-span-2 space-y-2"><Label>RBS (mmol/L)</Label><Input onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Systolic</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Diastolic</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Pulse</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Temp (Optional)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})}/></div>
+                            <div className="col-span-2 space-y-2"><Label>RBS (mmol/L)</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
                         </div>
-                        <DialogFooter><DialogClose asChild><Button onClick={handleSaveVitals}>Save Record</Button></DialogClose></DialogFooter>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSaveVitals} disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Record
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
               </CardHeader>
@@ -321,16 +386,23 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Date</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Week</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Value</th>
-                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Status</th>
+                                        <th className="text-right py-3 px-4 font-medium text-muted-foreground border-b">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {patient.vitals.map((v) => (
-                                        <tr key={v.id} className="hover:bg-muted/30">
+                                        <tr key={v.id} className="hover:bg-muted/30 group">
                                             <td className="py-3 px-4 border-b">{new Date(v.measured_at).toLocaleDateString()}</td>
                                             <td className="py-3 px-4 border-b">Week {calculateAssessmentWeek(v.measured_at)}</td>
                                             <td className="py-3 px-4 border-b font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
-                                            <td className="py-3 px-4 border-b"><Badge variant="outline">Recorded</Badge></td>
+                                            <td className="py-3 px-4 border-b text-right space-x-2">
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }}>
+                                                    <Edit className="h-3 w-3" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={() => handleDeleteVital(v.id)}>
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -351,18 +423,24 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Body composition tracking</CardDescription>
                     </div>
                 </div>
-                <Dialog>
+                <Dialog open={isNutritionDialogOpen} onOpenChange={(open) => { setIsNutritionDialogOpen(open); if (!open) setNutritionForm({}); }}>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition</Button></DialogTrigger>
                     <DialogContent className="max-w-md">
-                        <DialogHeader><DialogTitle>Nutrition Record</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle>{nutritionForm.id ? 'Edit' : 'New'} Nutrition Record</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label>Height (cm)</Label><Input type="number" onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Weight (kg)</Label><Input type="number" step="0.1" onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Visceral Fat</Label><Input type="number" onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label>Body Fat %</Label><Input type="number" step="0.1" onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})}/></div>
-                            <div className="col-span-2 space-y-2"><Label>Notes</Label><Textarea onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label>Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})}/></div>
+                            <div className="col-span-2 space-y-2"><Label>Notes</Label><Textarea value={nutritionForm.notes_nutritionist || ''} onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
                         </div>
-                        <DialogFooter><DialogClose asChild><Button onClick={handleSaveNutrition}>Save Record</Button></DialogClose></DialogFooter>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSaveNutrition} disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Record
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
               </CardHeader>
@@ -377,15 +455,24 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Week</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Value</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">BMI</th>
+                                        <th className="text-right py-3 px-4 font-medium text-muted-foreground border-b">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {patient.nutritions.map((n) => (
-                                        <tr key={n.id} className="hover:bg-muted/30">
+                                        <tr key={n.id} className="hover:bg-muted/30 group">
                                             <td className="py-3 px-4 border-b">{new Date(n.created_at).toLocaleDateString()}</td>
                                             <td className="py-3 px-4 border-b">Week {calculateAssessmentWeek(n.created_at)}</td>
                                             <td className="py-3 px-4 border-b font-medium">{n.weight}kg, {n.height}cm</td>
                                             <td className="py-3 px-4 border-b">{n.bmi || '-'}</td>
+                                            <td className="py-3 px-4 border-b text-right space-x-2">
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setNutritionForm(n); setIsNutritionDialogOpen(true); }}>
+                                                    <Edit className="h-3 w-3" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={() => handleDeleteNutrition(n.id)}>
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -406,15 +493,21 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Target outcomes and discussion</CardDescription>
                     </div>
                 </div>
-                <Dialog>
+                <Dialog open={isGoalDialogOpen} onOpenChange={(open) => { setIsGoalDialogOpen(open); if (!open) setGoalForm({}); }}>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Set Goal</Button></DialogTrigger>
                     <DialogContent className="max-w-md">
-                        <DialogHeader><DialogTitle>Set Health Goal</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle>{goalForm.id ? 'Edit' : 'New'} Health Goal</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
-                            <div className="space-y-2"><Label>Discussion Findings</Label><Textarea onChange={e => setGoalForm({...goalForm, discussion: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Target Goal</Label><Textarea onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Discussion Findings</Label><Textarea value={goalForm.discussion || ''} onChange={e => setGoalForm({...goalForm, discussion: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Target Goal</Label><Textarea value={goalForm.goal || ''} onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
                         </div>
-                        <DialogFooter><DialogClose asChild><Button onClick={handleSaveGoal}>Save Goal</Button></DialogClose></DialogFooter>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsGoalDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSaveGoal} disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Goal
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
               </CardHeader>
@@ -422,15 +515,20 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.goals.length > 0 ? (
                     <div className="space-y-4">
                         {patient.goals.map(g => (
-                            <div key={g.id} className="p-4 border border-primary/10 rounded-xl bg-primary/5 space-y-3">
+                            <div key={g.id} className="p-4 border border-primary/10 rounded-xl bg-primary/5 space-y-3 group relative">
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setGoalForm(g); setIsGoalDialogOpen(true); }}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteGoal(g.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Target Goal</p>
-                                        <p className="text-sm font-semibold">{g.goal}</p>
+                                        <p className="text-sm font-semibold pr-16">{g.goal}</p>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50">
-                                        <Plus className="h-4 w-4" />
-                                    </Button>
                                 </div>
                                 <Separator className="bg-primary/10" />
                                 <div>
@@ -455,21 +553,27 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Professional observations and plans</CardDescription>
                     </div>
                 </div>
-                <Dialog>
+                <Dialog open={isClinicalDialogOpen} onOpenChange={(open) => { setIsClinicalDialogOpen(open); if (!open) setClinicalForm({}); }}>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
                     <DialogContent className="max-w-xl">
-                        <DialogHeader><DialogTitle>New Clinical Review</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle>{clinicalForm.id ? 'Edit' : 'New'} Clinical Review</DialogTitle></DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <Label>Doctor's Plan</Label>
-                                <Textarea className="min-h-[100px]" placeholder="Enter doctor's observations and plan..." onChange={e => setClinicalForm({...clinicalForm, notes_doctor: e.target.value})}/>
+                                <Textarea className="min-h-[100px]" value={clinicalForm.notes_doctor || ''} placeholder="Enter doctor's observations and plan..." onChange={e => setClinicalForm({...clinicalForm, notes_doctor: e.target.value})}/>
                             </div>
                             <div className="space-y-2">
                                 <Label>Psychological Notes</Label>
-                                <Textarea className="min-h-[100px]" placeholder="Enter psychological assessment notes..." onChange={e => setClinicalForm({...clinicalForm, notes_psychologist: e.target.value})}/>
+                                <Textarea className="min-h-[100px]" value={clinicalForm.notes_psychologist || ''} placeholder="Enter psychological assessment notes..." onChange={e => setClinicalForm({...clinicalForm, notes_psychologist: e.target.value})}/>
                             </div>
                         </div>
-                        <DialogFooter><DialogClose asChild><Button onClick={handleSaveClinical}>Submit Review</Button></DialogClose></DialogFooter>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSaveClinical} disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Submit Review
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
               </CardHeader>
@@ -477,21 +581,29 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.clinicals.length > 0 ? (
                     <div className="space-y-6">
                         {patient.clinicals.map(c => (
-                            <div key={c.id} className="space-y-4 p-4 border rounded-xl bg-muted/20 relative overflow-hidden">
+                            <div key={c.id} className="space-y-4 p-4 border rounded-xl bg-muted/20 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteClinical(c.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                                 <div className="space-y-4">
                                     <div>
                                         <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
                                             <Activity className="h-3 w-3" /> Doctor's Plan
                                         </h4>
-                                        <p className="text-sm text-foreground leading-relaxed">{c.notes_doctor || '-'}</p>
+                                        <p className="text-sm text-foreground leading-relaxed pr-16">{c.notes_doctor || '-'}</p>
                                     </div>
                                     <Separator className="opacity-50" />
                                     <div>
                                         <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
                                             <Binary className="h-3 w-3" /> Psychological Notes
                                         </h4>
-                                        <p className="text-sm text-foreground leading-relaxed">{c.notes_psychologist || '-'}</p>
+                                        <p className="text-sm text-foreground leading-relaxed pr-16">{c.notes_psychologist || '-'}</p>
                                     </div>
                                 </div>
                                 <div className="pt-4 flex justify-end">
