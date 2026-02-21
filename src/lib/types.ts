@@ -5,12 +5,16 @@ export type User = {
   role: 'admin' | 'staff' | 'navigator' | 'payer' | 'physician';
   avatarUrl?: string;
   password?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Corporate = {
   id: number;
   name: string;
   wellness_date: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Vital = {
@@ -72,7 +76,7 @@ export type Registration = {
   user_id: number | null;
   created_at: string;
   
-  // Joined/related data (computed in data.ts)
+  // Joined/related data
   corporate_name?: string;
   vitals: Vital[];
   nutritions: Nutrition[];

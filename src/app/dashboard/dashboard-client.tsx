@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Registration, User } from '@/lib/types';
+import type { Registration, User, Corporate } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
@@ -11,20 +11,20 @@ type View = 'activations' | 'settings';
 
 export default function DashboardClient({ 
   initialPatients, 
-  initialClinicalParameters,
+  initialCorporates,
   initialUsers,
 }: { 
   initialPatients: Registration[],
-  initialClinicalParameters: any[],
+  initialCorporates: Corporate[],
   initialUsers: User[],
 }) {
   const [patients, setPatients] = useState(initialPatients);
-  const [clinicalParameters, setClinicalParameters] = useState(initialClinicalParameters);
+  const [corporates, setCorporates] = useState(initialCorporates);
   const [users, setUsers] = useState(initialUsers);
   const [activeView, setActiveView] = useState<View>('activations');
 
-  const handleUpdateParameters = (updatedParameters: any[]) => {
-    setClinicalParameters(updatedParameters);
+  const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
+    setCorporates(updatedCorporates);
   };
   
   const handleUpdateUsers = (updatedUsers: User[]) => {
@@ -73,8 +73,8 @@ export default function DashboardClient({
             </div>
           )}
           {activeView === 'settings' && <SettingsView 
-              clinicalParameters={clinicalParameters as any} 
-              onParametersUpdate={handleUpdateParameters}
+              corporates={corporates} 
+              onCorporatesUpdate={handleUpdateCorporates}
               users={users}
               onUsersUpdate={handleUpdateUsers}
            />}

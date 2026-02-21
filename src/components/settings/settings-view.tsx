@@ -1,46 +1,45 @@
-// This is a new component to encapsulate the settings UI
 'use client';
 
 import React from 'react';
-import type { ClinicalParameter, User } from '@/lib/types';
+import type { Corporate, User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import ClinicalParameters from './clinical-parameters';
+import CorporateManagement from './corporate-management';
 import UserManagement from './user-management';
 
 interface SettingsViewProps {
-  clinicalParameters: ClinicalParameter[];
-  onParametersUpdate: (updatedParameters: ClinicalParameter[]) => void;
+  corporates: Corporate[];
+  onCorporatesUpdate: (updatedCorporates: Corporate[]) => void;
   users: User[];
   onUsersUpdate: (updatedUsers: User[]) => void;
 }
 
 export default function SettingsView({
-  clinicalParameters,
-  onParametersUpdate,
+  corporates,
+  onCorporatesUpdate,
   users,
   onUsersUpdate
 }: SettingsViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
+        <Card className="dark:border-teal-500/30">
             <CardHeader>
-            <CardTitle>Manage Clinical Parameters</CardTitle>
+            <CardTitle className="text-teal-600 dark:text-teal-400">Corporate Partners</CardTitle>
             <CardDescription>
-                Define the health metrics you want to track for patients.
+                Manage corporate entities and their scheduled wellness dates.
             </CardDescription>
             </CardHeader>
             <CardContent>
-            <ClinicalParameters 
-                initialParameters={clinicalParameters} 
-                onParametersUpdate={onParametersUpdate} 
+            <CorporateManagement 
+                initialCorporates={corporates} 
+                onCorporatesUpdate={onCorporatesUpdate} 
             />
             </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:border-teal-500/30">
             <CardHeader>
-            <CardTitle>Manage Users</CardTitle>
+            <CardTitle className="text-teal-600 dark:text-teal-400">User Accounts</CardTitle>
             <CardDescription>
-                Add, edit, or remove users from the system.
+                Manage system users, roles, and access credentials.
             </CardDescription>
             </CardHeader>
             <CardContent>
