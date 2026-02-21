@@ -18,7 +18,6 @@ const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 const ViewActivationButton = ({ registration }: { registration: Registration }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const isPending = registration.status === 'Pending';
 
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -26,9 +25,6 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
         setIsLoading(true);
         router.push(`/dashboard/patient/${registration.id}`);
     };
-
-    const actionLabel = isPending ? 'Complete Activation' : 'View Details';
-    const ActionIcon = isPending ? UserPlus : Square;
 
     return (
         <TooltipProvider>
@@ -44,13 +40,13 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
                         {isLoading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            <ActionIcon className="h-4 w-4 text-primary" />
+                            <Square className="h-4 w-4 text-primary" />
                         )}
-                        <span className="sr-only">{actionLabel}</span>
+                        <span className="sr-only">View Details</span>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>{actionLabel}</p>
+                    <p>View Details</p>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
@@ -102,8 +98,8 @@ export const columns: ColumnDef<Registration>[] = [
       return (
         <div className="flex items-center gap-4">
             <Avatar className="hidden h-10 w-10 sm:flex">
-                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} />}
-                <AvatarFallback>{fallback}</AvatarFallback>
+                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="African avatar" />}
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
             </Avatar>
             <div className="grid gap-1">
                 <Link href={`/dashboard/patient/${reg.id}`} className="font-medium leading-none hover:underline">{name}</Link>

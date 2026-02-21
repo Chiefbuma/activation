@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -38,21 +39,31 @@ import {
   History,
   Stethoscope,
   Activity,
+  Plus,
   Trash2,
-  CalendarDays,
-  Clock,
+  Edit,
   Save,
   XCircle,
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { corporates as mockCorporates } from '@/lib/mock-data';
 
 const DetailItem = ({
   label,
@@ -84,6 +95,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [corporates] = useState(mockCorporates);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -99,6 +112,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({ height: 0, weight: 0, bmi: 0, visceral_fat: 0, body_fat_percent: 0, notes_nutritionist: '' });
   const [goalForm, setGoalForm] = useState<Partial<Goal>>({ discussion: '', goal: '' });
   const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({ notes_doctor: '', notes_psychologist: '' });
+  const [editFormData, setEditFormData] = useState<Partial<Registration>>({});
 
   const handleSaveVitals = () => {
     setIsSubmitting(true);
@@ -165,6 +179,27 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     }, 500);
   }
 
+  const handleOpenEditModal = () => {
+    setEditFormData({
+        ...patient,
+        dob: patient.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
+        wellness_date: patient.wellness_date ? new Date(patient.wellness_date).toISOString().split('T')[0] : '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdatePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+        const updatedPatient = { ...patient, ...editFormData } as Registration;
+        setPatient(updatedPatient);
+        toast({ title: 'Success!', description: 'Participant details updated.' });
+        setIsEditModalOpen(false);
+        setIsSubmitting(false);
+    }, 500);
+  }
+
   const calculateAssessmentWeek = (date: string) => {
     const start = new Date(patient.created_at);
     const current = new Date(date);
@@ -199,7 +234,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col items-center text-center gap-4">
                 <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} />}
+                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={patient.first_name} data-ai-hint="African avatar" />}
                   <AvatarFallback className="text-3xl bg-primary/10 text-primary">{patient.first_name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
@@ -247,7 +282,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10 bg-primary/5">
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Button variant="outline" className="justify-start"><Binary className="mr-2 h-4 w-4" /> Edit Profile</Button>
+                <Button variant="outline" className="justify-start" onClick={handleOpenEditModal}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
                 <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
               </CardContent>
             </Card>
@@ -391,9 +426,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <div className="space-y-4">
                         {patient.goals.map(g => (
                             <div key={g.id} className="p-4 border border-primary/10 rounded-xl bg-primary/5 space-y-3">
-                                <div>
-                                    <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Target Goal</p>
-                                    <p className="text-sm font-semibold">{g.goal}</p>
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Target Goal</p>
+                                        <p className="text-sm font-semibold">{g.goal}</p>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50">
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
                                 </div>
                                 <Separator className="bg-primary/10" />
                                 <div>
@@ -477,6 +517,84 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
           corporate={patient.corporate_id ? { id: patient.corporate_id, name: patient.corporate_name!, wellness_date: patient.wellness_date! } : null}
         />
       )}
+
+      {/* Edit Participant Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>Edit Participant Details</DialogTitle>
+                <CardDescription>Update the registration information below.</CardDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdatePatient}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="first_name">First Name</Label>
+                        <Input id="first_name" value={editFormData.first_name || ''} onChange={(e) => setEditFormData({...editFormData, first_name: e.target.value})} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="middle_name">Middle Name</Label>
+                        <Input id="middle_name" value={editFormData.middle_name || ''} onChange={(e) => setEditFormData({...editFormData, middle_name: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="surname">Surname</Label>
+                        <Input id="surname" value={editFormData.surname || ''} onChange={(e) => setEditFormData({...editFormData, surname: e.target.value})} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="dob">Date of Birth</Label>
+                        <Input id="dob" type="date" value={editFormData.dob || ''} onChange={(e) => setEditFormData({...editFormData, dob: e.target.value})} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="age">Age</Label>
+                        <Input id="age" type="number" value={editFormData.age || ''} onChange={(e) => setEditFormData({...editFormData, age: parseInt(e.target.value)})} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="sex">Sex</Label>
+                        <Select value={editFormData.sex || ''} onValueChange={(value) => setEditFormData({...editFormData, sex: value as any})}>
+                            <SelectTrigger id="sex"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Male">Male</SelectItem>
+                                <SelectItem value="Female">Female</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input id="phone" type="tel" value={editFormData.phone || ''} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="wellness_date">Wellness Date</Label>
+                        <Input id="wellness_date" type="date" value={editFormData.wellness_date || ''} onChange={(e) => setEditFormData({...editFormData, wellness_date: e.target.value})} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="corporate_id">Corporate</Label>
+                        <Select value={String(editFormData.corporate_id || 'null')} onValueChange={(value) => setEditFormData({...editFormData, corporate_id: value === 'null' ? null : parseInt(value)})}>
+                            <SelectTrigger id="corporate_id"><SelectValue placeholder="Select corporate" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="null">None</SelectItem>
+                                {corporates.map((corporate) => (
+                                    <SelectItem key={corporate.id} value={String(corporate.id)}>{corporate.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Changes
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

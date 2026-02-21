@@ -2,21 +2,21 @@
   "placeholderImages": [
     {
       "id": "login-hero",
-      "description": "A professional black doctor in a modern clinical setting, representing expertise and care.",
-      "imageUrl": "https://images.unsplash.com/photo-1559839734-2b71f1736827?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
-      "imageHint": "black doctor"
+      "description": "Safe stylized illustration representing a modern healthcare facility in Kenya.",
+      "imageUrl": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "medical illustration"
     },
     {
       "id": "user-avatar",
-      "description": "A professional portrait of a black individual for a user profile.",
-      "imageUrl": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-      "imageHint": "black person"
+      "description": "Safe 3D stylized avatar of a professional Kenyan individual with a darker skin tone.",
+      "imageUrl": "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?w=400&h=400&fit=crop",
+      "imageHint": "Kenyan professional"
     },
     {
       "id": "patient-avatar",
-      "description": "A warm, friendly portrait of a black individual for a participant profile.",
-      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-      "imageHint": "black person"
+      "description": "Safe illustrative avatar of a Kenyan participant with a darker skin tone.",
+      "imageUrl": "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?w=400&h=400&fit=crop",
+      "imageHint": "African avatar"
     }
   ]
 }
