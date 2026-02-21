@@ -116,6 +116,23 @@ export const columns: ColumnDef<Registration>[] = [
   {
     accessorKey: "corporate_name",
     header: "Corporate",
+    cell: ({ row }) => {
+      const reg = row.original;
+      return (
+        <div className="grid gap-1">
+          <div className="font-medium leading-none">{reg.corporate_name || 'Individual'}</div>
+          {reg.wellness_date && (
+            <p className="text-sm text-muted-foreground">
+              {new Date(reg.wellness_date).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+              })}
+            </p>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",
