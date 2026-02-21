@@ -2,16 +2,14 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Square, UserPlus, Loader2 } from "lucide-react"
+import { ArrowUpDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { placeholderImages } from "@/lib/placeholder-images"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import type { Registration } from "@/lib/types"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const ViewActivationButton = ({ registration }: { registration: Registration }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -24,30 +22,27 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
         router.push(`/dashboard/patient/${registration.id}`);
     };
 
+    // Logic: newly registered if all assessment arrays are empty
+    const isNewlyRegistered = 
+        (!registration.vitals || registration.vitals.length === 0) && 
+        (!registration.nutritions || registration.nutritions.length === 0) && 
+        (!registration.goals || registration.goals.length === 0) && 
+        (!registration.clinicals || registration.clinicals.length === 0);
+
     return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-9 w-9 border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors"
-                        onClick={handleClick}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Square className="h-4 w-4 text-primary" />
-                        )}
-                        <span className="sr-only">View Details</span>
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>View Details</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        <Button
+            variant={isNewlyRegistered ? "default" : "outline"}
+            size="sm"
+            className="h-8 min-w-[85px] font-medium transition-all"
+            onClick={handleClick}
+            disabled={isLoading}
+        >
+            {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+                isNewlyRegistered ? 'Activate' : 'View'
+            )}
+        </Button>
     );
 };
 
@@ -82,6 +77,7 @@ export const columns: ColumnDef<Registration>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4 hover:bg-transparent"
         >
           Participant Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -95,12 +91,12 @@ export const columns: ColumnDef<Registration>[] = [
 
       return (
         <div className="flex items-center gap-4">
-            <Avatar className="hidden h-10 w-10 sm:flex rounded-full border-2 border-background shadow-sm">
+            <Avatar className="h-10 w-10 sm:flex rounded-full border-2 border-background shadow-sm">
                 <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">{fallback}</AvatarFallback>
             </Avatar>
             <div className="grid gap-1">
-                <Link href={`/dashboard/patient/${reg.id}`} className="font-medium leading-none hover:underline">{name}</Link>
-                <p className="text-sm text-muted-foreground">{reg.email || reg.phone}</p>
+                <Link href={`/dashboard/patient/${reg.id}`} className="font-semibold text-sm leading-none hover:underline text-foreground">{name}</Link>
+                <p className="text-xs text-muted-foreground">{reg.email || reg.phone}</p>
             </div>
         </div>
       )
@@ -113,9 +109,9 @@ export const columns: ColumnDef<Registration>[] = [
       const reg = row.original;
       return (
         <div className="grid gap-1">
-          <div className="font-medium leading-none">{reg.corporate_name || 'Individual'}</div>
+          <div className="font-medium text-sm leading-none">{reg.corporate_name || 'Individual'}</div>
           {reg.wellness_date && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {new Date(reg.wellness_date).toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: 'short',
