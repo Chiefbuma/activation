@@ -10,21 +10,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { format, startOfWeek, subWeeks, eachWeekOfInterval } from 'date-fns';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format, subWeeks, eachWeekOfInterval } from 'date-fns';
+import { Building2, CalendarDays, Users2 } from 'lucide-react';
 
 interface AnalyticsViewProps {
   patients: Registration[];
@@ -39,7 +34,9 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
       const name = p.corporate_name || 'Individual';
       counts[name] = (counts[name] || 0) + 1;
     });
-    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
   }, [patients]);
 
   // 2. Weekly Activations
@@ -58,10 +55,10 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
       }).length;
 
       return {
-        week: format(weekStart, 'MMM dd'),
+        week: `${format(weekStart, 'MMM dd')} - ${format(new Date(weekEnd.getTime() - 1), 'MMM dd')}`,
         count,
       };
-    });
+    }).reverse();
   }, [patients]);
 
   // 3. Gender Distribution
@@ -72,91 +69,118 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     });
     return Object.entries(counts)
       .filter(([_, count]) => count > 0)
-      .map(([name, value]) => ({ name, value }));
+      .map(([name, count]) => ({ name, count }));
   }, [patients]);
-
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'];
-
-  const chartConfig = {
-    count: {
-      label: 'Participants',
-      color: 'hsl(var(--primary))',
-    },
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>Activations by Corporate</CardTitle>
-          <CardDescription>Number of registered participants per corporate partner</CardDescription>
+      {/* Corporate Table */}
+      <Card className="lg:col-span-2 border-primary/10">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Corporate Activations
+            </CardTitle>
+            <CardDescription>Breakdown of participants by corporate partner</CardDescription>
+          </div>
+          <Badge variant="secondary" className="bg-primary/10 text-primary border-none">
+            {corporateData.length} Partners
+          </Badge>
         </CardHeader>
-        <CardContent className="h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <BarChart data={corporateData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Gender Distribution</CardTitle>
-          <CardDescription>Overall participant gender breakdown</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={genderData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {genderData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        <CardContent>
+          <div className="rounded-xl border border-primary/5 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="font-bold text-primary">Corporate Partner</TableHead>
+                  <TableHead className="text-right font-bold text-primary">Activated Patients</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {corporateData.map((item) => (
+                  <TableRow key={item.name} className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="text-right">
+                        <span className="inline-flex items-center justify-center bg-primary text-primary-foreground font-bold rounded-full h-6 min-w-[24px] px-1.5 text-xs">
+                            {item.count}
+                        </span>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-2xl font-bold">{patients.length}</span>
-            <span className="text-xs text-muted-foreground uppercase">Total</span>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="lg:col-span-3">
-        <CardHeader>
-          <CardTitle>Weekly Activation Trends</CardTitle>
-          <CardDescription>New registrations over the last 6 weeks</CardDescription>
+      {/* Gender Distribution Table */}
+      <Card className="border-primary/10">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <Users2 className="h-5 w-5 text-primary" />
+            Gender Breakdown
+          </CardTitle>
+          <CardDescription>Participant demographic split</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px]">
-          <ChartContainer config={chartConfig}>
-            <LineChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="week" axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Line
-                type="monotone"
-                dataKey="count"
-                stroke="hsl(var(--primary))"
-                strokeWidth={3}
-                dot={{ r: 4, fill: 'hsl(var(--primary))' }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
+        <CardContent>
+          <div className="rounded-xl border border-primary/5 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="font-bold text-primary">Gender</TableHead>
+                  <TableHead className="text-right font-bold text-primary">Count</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {genderData.map((item) => (
+                  <TableRow key={item.name} className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="text-right font-bold">{item.count}</TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="bg-muted/30 font-bold border-t-2">
+                    <TableCell>Total</TableCell>
+                    <TableCell className="text-right text-primary">{patients.length}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Weekly Trends Table */}
+      <Card className="lg:col-span-3 border-primary/10">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Weekly Activation Trends
+          </CardTitle>
+          <CardDescription>Registration momentum over the last 6 weeks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl border border-primary/5 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="font-bold text-primary">Week Period</TableHead>
+                  <TableHead className="text-right font-bold text-primary">New Activations</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {weeklyData.map((item) => (
+                  <TableRow key={item.week} className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-medium">{item.week}</TableCell>
+                    <TableCell className="text-right">
+                        <Badge variant={item.count > 0 ? "default" : "outline"} className={item.count > 0 ? "bg-primary text-white" : ""}>
+                            {item.count} Registered
+                        </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
