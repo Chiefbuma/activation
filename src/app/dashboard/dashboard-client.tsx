@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import type { Registration, ClinicalParameter, User } from '@/lib/types';
+import type { Registration, User } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
-import Notifications from '@/components/dashboard/notifications';
 
 type View = 'activations' | 'settings';
 
@@ -46,13 +45,13 @@ export default function DashboardClient({
             <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit">
                 <NavButton 
                     label="Activations" 
-                    icon={<Users />} 
+                    icon={<Users className="h-4 w-4" />} 
                     isActive={activeView === 'activations'}
                     onClick={() => setActiveView('activations')}
                 />
                 <NavButton 
                     label="Settings" 
-                    icon={<SlidersHorizontal />} 
+                    icon={<SlidersHorizontal className="h-4 w-4" />} 
                     isActive={activeView === 'settings'}
                     onClick={() => setActiveView('settings')}
                 />
@@ -69,13 +68,8 @@ export default function DashboardClient({
           transition={{ duration: 0.3 }}
         >
           {activeView === 'activations' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                <div className="lg:col-span-2 space-y-8">
-                    <PatientList patients={patients as any} />
-                </div>
-                <div className="lg:col-span-1 space-y-8">
-                    <Notifications />
-                </div>
+            <div className="max-w-full">
+                <PatientList patients={patients as any} />
             </div>
           )}
           {activeView === 'settings' && <SettingsView 

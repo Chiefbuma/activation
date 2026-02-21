@@ -40,6 +40,9 @@ import {
   Activity,
   Trash2,
   CalendarDays,
+  Clock,
+  Save,
+  XCircle,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -49,7 +52,7 @@ import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DetailItem = ({
   label,
@@ -80,6 +83,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [patient, setPatient] = useState<Registration>(initialPatient);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -97,6 +101,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({ notes_doctor: '', notes_psychologist: '' });
 
   const handleSaveVitals = () => {
+    setIsSubmitting(true);
     const newVital: Vital = {
         id: Date.now(),
         registration_id: patient.id,
@@ -105,11 +110,15 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         created_at: new Date().toISOString(),
         user_id: currentUser?.id || null
     } as Vital;
-    setPatient(prev => ({ ...prev, vitals: [newVital, ...prev.vitals] }));
-    toast({ title: 'Success', description: 'Vitals recorded.' });
+    setTimeout(() => {
+        setPatient(prev => ({ ...prev, vitals: [newVital, ...prev.vitals] }));
+        toast({ title: 'Success', description: 'Vitals recorded.' });
+        setIsSubmitting(false);
+    }, 500);
   }
 
   const handleSaveNutrition = () => {
+    setIsSubmitting(true);
     const newNutri: Nutrition = {
         id: Date.now(),
         registration_id: patient.id,
@@ -117,11 +126,15 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         created_at: new Date().toISOString(),
         user_id: currentUser?.id || null
     } as Nutrition;
-    setPatient(prev => ({ ...prev, nutritions: [newNutri, ...prev.nutritions] }));
-    toast({ title: 'Success', description: 'Nutrition record saved.' });
+    setTimeout(() => {
+        setPatient(prev => ({ ...prev, nutritions: [newNutri, ...prev.nutritions] }));
+        toast({ title: 'Success', description: 'Nutrition record saved.' });
+        setIsSubmitting(false);
+    }, 500);
   }
 
   const handleSaveGoal = () => {
+    setIsSubmitting(true);
     const newGoal: Goal = {
         id: Date.now(),
         registration_id: patient.id,
@@ -129,11 +142,15 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         created_at: new Date().toISOString(),
         user_id: currentUser?.id || null
     } as Goal;
-    setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
-    toast({ title: 'Success', description: 'Goal set successfully.' });
+    setTimeout(() => {
+        setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
+        toast({ title: 'Success', description: 'Goal set successfully.' });
+        setIsSubmitting(false);
+    }, 500);
   }
 
   const handleSaveClinical = () => {
+    setIsSubmitting(true);
     const newClinical: Clinical = {
         id: Date.now(),
         registration_id: patient.id,
@@ -141,9 +158,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
         created_at: new Date().toISOString(),
         user_id: currentUser?.id || null
     } as Clinical;
-    setPatient(prev => ({ ...prev, clinicals: [newClinical, ...prev.clinicals] }));
-    toast({ title: 'Success', description: 'Clinical review recorded.' });
+    setTimeout(() => {
+        setPatient(prev => ({ ...prev, clinicals: [newClinical, ...prev.clinicals] }));
+        toast({ title: 'Success', description: 'Clinical review recorded.' });
+        setIsSubmitting(false);
+    }, 500);
   }
+
+  const calculateAssessmentWeek = (date: string) => {
+    const start = new Date(patient.created_at);
+    const current = new Date(date);
+    const diff = current.getTime() - start.getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24 * 7)) + 1;
+  };
 
   return (
     <div className="container mx-auto max-w-7xl py-6 px-4">
@@ -195,7 +222,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
             <Card className="border-primary/10">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg"><History className="h-5 w-5 text-primary"/> Activity Timeline</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-lg"><History className="h-5 w-5 text-primary"/> Timeline</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex gap-3">
@@ -221,7 +248,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
                 <Button variant="outline" className="justify-start"><Binary className="mr-2 h-4 w-4" /> Edit Profile</Button>
-                <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Activation Report</Button>
+                <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
               </CardContent>
             </Card>
           </div>
@@ -234,7 +261,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <HeartPulse className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Vital Signs</CardTitle>
-                        <CardDescription>Latest physiological measurements</CardDescription>
+                        <CardDescription>Physiological measurements tracking</CardDescription>
                     </div>
                 </div>
                 <Dialog>
@@ -254,11 +281,29 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardHeader>
               <CardContent>
                 {patient.vitals.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-xl">
-                        <DetailItem label="BP" value={`${patient.vitals[0].bp_systolic}/${patient.vitals[0].bp_diastolic} mmHg`} />
-                        <DetailItem label="Pulse" value={`${patient.vitals[0].pulse} bpm`} />
-                        <DetailItem label="Temp" value={patient.vitals[0].temp ? `${patient.vitals[0].temp}°C` : '-'} />
-                        <DetailItem label="RBS" value={patient.vitals[0].rbs || '-'} />
+                    <div className="space-y-4">
+                        <div className="overflow-x-auto rounded-xl border">
+                            <table className="min-w-full text-xs">
+                                <thead className="bg-muted/50">
+                                    <tr>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Date</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Week</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Value</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {patient.vitals.map((v) => (
+                                        <tr key={v.id} className="hover:bg-muted/30">
+                                            <td className="py-3 px-4 border-b">{new Date(v.measured_at).toLocaleDateString()}</td>
+                                            <td className="py-3 px-4 border-b">Week {calculateAssessmentWeek(v.measured_at)}</td>
+                                            <td className="py-3 px-4 border-b font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
+                                            <td className="py-3 px-4 border-b"><Badge variant="outline">Recorded</Badge></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 ) : <p className="text-center text-muted-foreground py-4">No vitals recorded.</p>}
               </CardContent>
@@ -271,7 +316,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <Scale className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Nutrition Assessment</CardTitle>
-                        <CardDescription>Body composition and metrics</CardDescription>
+                        <CardDescription>Body composition tracking</CardDescription>
                     </div>
                 </div>
                 <Dialog>
@@ -292,14 +337,28 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               <CardContent>
                 {patient.nutritions.length > 0 ? (
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-xl">
-                            <DetailItem label="Height" value={`${patient.nutritions[0].height} cm`} />
-                            <DetailItem label="Weight" value={`${patient.nutritions[0].weight} kg`} />
-                            <DetailItem label="BMI" value={patient.nutritions[0].bmi} />
-                            <DetailItem label="V. Fat" value={patient.nutritions[0].visceral_fat} />
-                            <DetailItem label="B. Fat %" value={`${patient.nutritions[0].body_fat_percent}%`} />
+                        <div className="overflow-x-auto rounded-xl border">
+                            <table className="min-w-full text-xs">
+                                <thead className="bg-muted/50">
+                                    <tr>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Date</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Week</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Value</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">BMI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {patient.nutritions.map((n) => (
+                                        <tr key={n.id} className="hover:bg-muted/30">
+                                            <td className="py-3 px-4 border-b">{new Date(n.created_at).toLocaleDateString()}</td>
+                                            <td className="py-3 px-4 border-b">Week {calculateAssessmentWeek(n.created_at)}</td>
+                                            <td className="py-3 px-4 border-b font-medium">{n.weight}kg, {n.height}cm</td>
+                                            <td className="py-3 px-4 border-b">{n.bmi || '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        {patient.nutritions[0].notes_nutritionist && <p className="text-sm italic p-3 border-l-2 border-primary bg-primary/5">"{patient.nutritions[0].notes_nutritionist}"</p>}
                     </div>
                 ) : <p className="text-center text-muted-foreground py-4">No nutrition data recorded.</p>}
               </CardContent>
@@ -312,7 +371,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <Target className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Activation Goals</CardTitle>
-                        <CardDescription>Target outcomes and participant discussion</CardDescription>
+                        <CardDescription>Target outcomes and discussion</CardDescription>
                     </div>
                 </div>
                 <Dialog>
