@@ -311,30 +311,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
-            <Card className="border-primary/10">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg"><History className="h-5 w-5 text-primary"/> Timeline</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex gap-3">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                        <div>
-                            <p className="text-sm font-medium">Registered</p>
-                            <p className="text-xs text-muted-foreground">{new Date(patient.created_at).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    {patient.clinicals.map((c, idx) => (
-                        <div key={idx} className="flex gap-3">
-                            <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
-                            <div>
-                                <p className="text-sm font-medium">Clinical Review Conducted</p>
-                                <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-
             <Card className="border-primary/10 bg-primary/5">
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
