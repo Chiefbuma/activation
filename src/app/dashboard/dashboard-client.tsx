@@ -1,31 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import type { Patient, ClinicalParameter, User } from '@/lib/types';
+import type { Registration, ClinicalParameter, User } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
-import CriticalPatients from '@/components/dashboard/critical-patients';
 import Notifications from '@/components/dashboard/notifications';
 
-type View = 'patients' | 'settings';
+type View = 'activations' | 'settings';
 
 export default function DashboardClient({ 
   initialPatients, 
   initialClinicalParameters,
   initialUsers,
 }: { 
-  initialPatients: Patient[],
-  initialClinicalParameters: ClinicalParameter[],
+  initialPatients: Registration[],
+  initialClinicalParameters: any[],
   initialUsers: User[],
 }) {
   const [patients, setPatients] = useState(initialPatients);
   const [clinicalParameters, setClinicalParameters] = useState(initialClinicalParameters);
   const [users, setUsers] = useState(initialUsers);
-  const [activeView, setActiveView] = useState<View>('patients');
+  const [activeView, setActiveView] = useState<View>('activations');
 
-  const handleUpdateParameters = (updatedParameters: ClinicalParameter[]) => {
+  const handleUpdateParameters = (updatedParameters: any[]) => {
     setClinicalParameters(updatedParameters);
   };
   
@@ -38,18 +37,18 @@ export default function DashboardClient({
        <div className="flex justify-between items-start">
             <div>
                 <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                {activeView === 'patients' ? 'Patient Dashboard' : 'Settings'}
+                {activeView === 'activations' ? 'Activations' : 'Settings'}
                 </h1>
                 <p className="text-muted-foreground">
-                {activeView === 'patients' ? 'View and manage patient records' : 'Configure application settings'}
+                {activeView === 'activations' ? 'Manage participant registration and assessment' : 'Configure application settings'}
                 </p>
             </div>
             <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit">
                 <NavButton 
-                    label="Patients" 
+                    label="Activations" 
                     icon={<Users />} 
-                    isActive={activeView === 'patients'}
-                    onClick={() => setActiveView('patients')}
+                    isActive={activeView === 'activations'}
+                    onClick={() => setActiveView('activations')}
                 />
                 <NavButton 
                     label="Settings" 
@@ -69,19 +68,18 @@ export default function DashboardClient({
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          {activeView === 'patients' && (
+          {activeView === 'activations' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <div className="lg:col-span-2 space-y-8">
-                    <PatientList patients={patients} />
+                    <PatientList patients={patients as any} />
                 </div>
                 <div className="lg:col-span-1 space-y-8">
                     <Notifications />
-                    <CriticalPatients patients={patients} />
                 </div>
             </div>
           )}
           {activeView === 'settings' && <SettingsView 
-              clinicalParameters={clinicalParameters} 
+              clinicalParameters={clinicalParameters as any} 
               onParametersUpdate={handleUpdateParameters}
               users={users}
               onUsersUpdate={handleUpdateUsers}

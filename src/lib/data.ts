@@ -1,67 +1,63 @@
-import type { Patient, User, Corporate, ClinicalParameter, Assessment, Goal, Diagnosis, Medication, Prescription, Appointment, Review, Payer } from './types';
+import type { Registration, User, Corporate, Vital, Nutrition, Goal, Clinical } from './types';
 import { unstable_noStore as noStore } from 'next/cache';
 import { 
-    patients as mockPatients, 
+    registrations as mockRegistrations, 
     users as mockUsers,
     corporates as mockCorporates,
-    payers as mockPayers,
-    clinicalParameters as mockClinicalParameters,
-    assessments as mockAssessments,
+    vitals as mockVitals,
+    nutritions as mockNutritions,
     goals as mockGoals,
-    diagnoses as mockDiagnoses,
-    medications as mockMedications,
-    prescriptions as mockPrescriptions,
-    appointments as mockAppointments,
-    reviews as mockReviews,
+    clinicals as mockClinicals
 } from './mock-data';
 
-export async function fetchPatients(): Promise<Patient[]> {
+export async function fetchPatients(): Promise<Registration[]> {
     noStore();
     
-    const enrichedPatients = mockPatients.map(patient => {
-        const navigator = mockUsers.find(u => u.id === patient.navigator_id);
-        const corporate = mockCorporates.find(c => c.id === patient.corporate_id);
-        const payer = mockPayers.find(p => p.id === patient.payer_id);
+    const enriched = mockRegistrations.map(reg => {
+        const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
+        const regVitals = mockVitals.filter(v => v.registration_id === reg.id);
+        const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id);
+        const regGoals = mockGoals.filter(g => g.registration_id === reg.id);
+        const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id);
+
         return {
-            ...patient,
-            navigator_name: navigator?.name,
+            ...reg,
             corporate_name: corporate?.name,
-            payer_name: payer?.name,
-            assessments: mockAssessments.filter(a => a.patient_id === patient.id),
-            goals: mockGoals.filter(g => g.patient_id === patient.id),
-            prescriptions: mockPrescriptions.filter(p => p.patient_id === patient.id).map(p => ({...p, medication: mockMedications.find(m => m.id === p.medication_id)})),
-            appointments: mockAppointments.filter(a => a.patient_id === patient.id).map(a => ({...a, clinician: mockUsers.find(u => u.id === a.clinician_id)})),
-            reviews: mockReviews.filter(r => r.patient_id === patient.id).map(r => ({...r, reviewed_by: mockUsers.find(u => u.id === r.reviewed_by_id)?.name})),
-        };
+            vitals: regVitals,
+            nutritions: regNutritions,
+            goals: regGoals,
+            clinicals: regClinicals,
+            status: regClinicals.length > 0 ? 'Active' : 'Pending'
+        } as Registration;
     });
 
-    return enrichedPatients.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return enriched.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
-export async function fetchPatientById(id: string): Promise<Patient | null> {
+export async function fetchPatientById(id: string): Promise<Registration | null> {
     noStore();
     
-    const patient = mockPatients.find(p => p.id === parseInt(id));
+    const reg = mockRegistrations.find(r => r.id === parseInt(id));
 
-    if (!patient) {
+    if (!reg) {
         return null;
     }
 
-    const navigator = mockUsers.find(u => u.id === patient.navigator_id);
-    const corporate = mockCorporates.find(c => c.id === patient.corporate_id);
-    const payer = mockPayers.find(p => p.id === patient.payer_id);
+    const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
+    const regVitals = mockVitals.filter(v => v.registration_id === reg.id);
+    const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id);
+    const regGoals = mockGoals.filter(g => g.registration_id === reg.id);
+    const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id);
 
     return {
-        ...patient,
-        navigator_name: navigator?.name,
+        ...reg,
         corporate_name: corporate?.name,
-        payer_name: payer?.name,
-        assessments: mockAssessments.filter(a => a.patient_id === patient.id),
-        goals: mockGoals.filter(g => g.patient_id === patient.id),
-        prescriptions: mockPrescriptions.filter(p => p.patient_id === patient.id).map(p => ({...p, medication: mockMedications.find(m => m.id === p.medication_id)})),
-        appointments: mockAppointments.filter(a => a.patient_id === patient.id).map(a => ({...a, clinician: mockUsers.find(u => u.id === a.clinician_id)})),
-        reviews: mockReviews.filter(r => r.patient_id === patient.id).map(r => ({...r, reviewed_by: mockUsers.find(u => u.id === r.reviewed_by_id)?.name})),
-    };
+        vitals: regVitals,
+        nutritions: regNutritions,
+        goals: regGoals,
+        clinicals: regClinicals,
+        status: regClinicals.length > 0 ? 'Active' : 'Pending'
+    } as Registration;
 }
 
 export async function fetchUsers(): Promise<User[]> {
@@ -69,27 +65,17 @@ export async function fetchUsers(): Promise<User[]> {
     return mockUsers;
 }
 
-export async function fetchClinicalParameters(): Promise<ClinicalParameter[]> {
-    noStore();
-    return mockClinicalParameters;
-}
-
 export async function fetchCorporates(): Promise<Corporate[]> {
     noStore();
     return mockCorporates.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function fetchPayers(): Promise<Payer[]> {
-    noStore();
-    return mockPayers;
-}
-
-export async function fetchDiagnoses(): Promise<Diagnosis[]> {
-    noStore();
-    return mockDiagnoses;
-}
-
-export async function fetchMedications(): Promise<Medication[]> {
-    noStore();
-    return mockMedications;
+// Keeping dummy clinical parameters for UI consistency
+export async function fetchClinicalParameters() {
+    return [
+        { id: 1, name: 'Blood Pressure', type: 'numeric', unit: 'mmHg' },
+        { id: 2, name: 'Heart Rate', type: 'numeric', unit: 'bpm' },
+        { id: 3, name: 'Weight', type: 'numeric', unit: 'kg' },
+        { id: 4, name: 'Height', type: 'numeric', unit: 'cm' },
+    ];
 }
