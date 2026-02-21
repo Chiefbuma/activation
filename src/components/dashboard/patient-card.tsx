@@ -29,7 +29,7 @@ export default function PatientCard({ patient, index }: { patient: Registration,
         >
         <div className="flex items-start p-5 gap-5">
             <Avatar className="h-16 w-16 sm:flex rounded-lg shadow-lg">
-                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="African avatar" />}
+                {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={name} data-ai-hint="FlatAvatar DarkSkin" />}
                 <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">{fallback}</AvatarFallback>
             </Avatar>
 
