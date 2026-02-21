@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import type { Registration, User, Corporate } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, SlidersHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
+import AnalyticsView from '@/components/dashboard/analytics-view';
 
-type View = 'activations' | 'settings';
+type View = 'dashboard' | 'activations' | 'settings';
 
 export default function DashboardClient({ 
   initialPatients, 
@@ -21,7 +22,7 @@ export default function DashboardClient({
   const [patients, setPatients] = useState(initialPatients);
   const [corporates, setCorporates] = useState(initialCorporates);
   const [users, setUsers] = useState(initialUsers);
-  const [activeView, setActiveView] = useState<View>('activations');
+  const [activeView, setActiveView] = useState<View>('dashboard');
 
   const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
     setCorporates(updatedCorporates);
@@ -31,18 +32,40 @@ export default function DashboardClient({
     setUsers(updatedUsers);
   };
 
+  const getViewTitle = () => {
+    switch(activeView) {
+        case 'dashboard': return 'Dashboard';
+        case 'activations': return 'Activations';
+        case 'settings': return 'Settings';
+    }
+  };
+
+  const getViewSubtitle = () => {
+    switch(activeView) {
+        case 'dashboard': return 'Overview of health program performance and corporate metrics';
+        case 'activations': return 'Manage participant registration and assessment history';
+        case 'settings': return 'Configure application users and corporate partners';
+    }
+  };
+
   return (
     <div className="space-y-8">
-       <div className="flex justify-between items-start">
+       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                {activeView === 'activations' ? 'Activations' : 'Settings'}
+                    {getViewTitle()}
                 </h1>
                 <p className="text-muted-foreground">
-                {activeView === 'activations' ? 'Manage participant registration and assessment' : 'Configure application settings'}
+                    {getViewSubtitle()}
                 </p>
             </div>
-            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit">
+            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit shadow-sm">
+                <NavButton 
+                    label="Dashboard" 
+                    icon={<LayoutDashboard className="h-4 w-4" />} 
+                    isActive={activeView === 'dashboard'}
+                    onClick={() => setActiveView('dashboard')}
+                />
                 <NavButton 
                     label="Activations" 
                     icon={<Users className="h-4 w-4" />} 
@@ -62,22 +85,27 @@ export default function DashboardClient({
       <AnimatePresence mode="wait">
         <motion.div
           key={activeView}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
         >
+          {activeView === 'dashboard' && (
+            <AnalyticsView patients={patients} corporates={corporates} />
+          )}
           {activeView === 'activations' && (
             <div className="max-w-full">
                 <PatientList patients={patients as any} />
             </div>
           )}
-          {activeView === 'settings' && <SettingsView 
-              corporates={corporates} 
-              onCorporatesUpdate={handleUpdateCorporates}
-              users={users}
-              onUsersUpdate={handleUpdateUsers}
-           />}
+          {activeView === 'settings' && (
+            <SettingsView 
+                corporates={corporates} 
+                onCorporatesUpdate={handleUpdateCorporates}
+                users={users}
+                onUsersUpdate={handleUpdateUsers}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -91,8 +119,8 @@ const NavButton = ({ label, icon, isActive, onClick }: { label: string, icon: Re
       className={`relative flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
         isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
       }`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       {isActive && (
         <motion.div
