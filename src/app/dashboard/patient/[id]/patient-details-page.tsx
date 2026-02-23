@@ -553,10 +553,20 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
                 <Dialog open={isClinicalDialogOpen} onOpenChange={(open) => { setIsClinicalDialogOpen(open); if (!open) setClinicalForm({}); }}>
                     <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
-                    <DialogContent className="max-w-2xl border-primary/20">
+                    <DialogContent className="max-w-lg border-primary/20">
                         <DialogHeader><DialogTitle className="text-primary">{clinicalForm.id ? 'Edit' : 'New'} Clinical Review</DialogTitle></DialogHeader>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2 col-span-2">
+                        <div className="flex flex-col gap-6 py-4">
+                            <div className="space-y-2">
+                                <Label className="text-primary font-bold">Counselling Sessions</Label>
+                                <Select value={clinicalForm.counselling_sessions || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, counselling_sessions: v as any})}>
+                                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Recommended">Recommended</SelectItem>
+                                        <SelectItem value="Not Recommended">Not Recommended</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
                                 <Select value={clinicalForm.conclusion || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
                                     <SelectTrigger><SelectValue placeholder="Select conclusion" /></SelectTrigger>
@@ -570,29 +580,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-primary font-bold">Counselling Sessions</Label>
-                                <Select value={clinicalForm.counselling_sessions || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, counselling_sessions: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Recommended">Recommended</SelectItem>
-                                        <SelectItem value="Not Recommended">Not Recommended</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-primary font-bold">Comprehensive Wellness Check</Label>
-                                <Select value={clinicalForm.wellness_check_type || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, wellness_check_type: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select check type" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Hypertension">Hypertension</SelectItem>
-                                        <SelectItem value="Diabetes">Diabetes</SelectItem>
-                                        <SelectItem value="None">None</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2 col-span-2">
                                 <Label className="text-primary font-bold">Doctor's Notes</Label>
-                                <Textarea className="min-h-[100px]" value={clinicalForm.doctor_notes || ''} placeholder="Enter doctor's observations..." onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})}/>
+                                <Textarea className="min-h-[120px]" value={clinicalForm.doctor_notes || ''} placeholder="Enter observations and professional notes..." onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})}/>
                             </div>
                         </div>
                         <DialogFooter>
@@ -619,20 +608,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="flex flex-col gap-5">
                                     <div>
-                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <Activity className="h-3 w-3" /> Conclusion
-                                        </h4>
-                                        <p className="text-sm text-foreground font-semibold">{c.conclusion || '-'}</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <BriefcaseMedical className="h-3 w-3" /> Targeted Check
-                                        </h4>
-                                        <p className="text-sm text-foreground font-semibold">{c.wellness_check_type || 'None'}</p>
-                                    </div>
-                                    <div className="col-span-2">
                                         <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
                                             <UserIcon className="h-3 w-3" /> Counselling
                                         </h4>
@@ -640,7 +617,13 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                             {c.counselling_sessions || 'N/A'}
                                         </Badge>
                                     </div>
-                                    <div className="col-span-2">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <Activity className="h-3 w-3" /> Wellness Check Conclusion
+                                        </h4>
+                                        <p className="text-sm text-foreground font-semibold">{c.conclusion || '-'}</p>
+                                    </div>
+                                    <div>
                                         <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
                                             <Binary className="h-3 w-3" /> Doctor's Notes
                                         </h4>
