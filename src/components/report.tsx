@@ -39,81 +39,88 @@ export default function Report({ patient, corporate }: ReportProps) {
   ].filter(Boolean) as string[];
 
   return (
-    <div className="report-body-container bg-white text-gray-800">
-      <div className="header">
-          <img src="/images/taria-logo.png" alt="Taria Health Logo" className="logo" />
-      </div>
-      <div className="content-wrapper">
-        <div className="content-area">
-          <div className="title-container keep-together">
-            <div className="report-title">INDIVIDUAL ACTIVATION REPORT:</div>
-            <div className="report-date">{formattedDate}</div>
-          </div>
-
-          <div className="patient-info keep-together">
-            <span className="patient-name">
-              {`${patient.first_name} ${patient.surname || ''}`}
-              {patient.email && ` : ${patient.email}`}
-            </span>
-          </div>
-
-          <div className="section-heading min-space-before">Screening Results</div>
-
-          <div className="screening-grid force-together">
-            <div className="screening-left">
-              {latestVital?.bp_systolic && latestVital?.bp_diastolic && (
-                <div className="body-text screening-item">
-                  Blood Pressure: {latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg
-                </div>
-              )}
-              {latestVital?.pulse && (
-                <div className="body-text screening-item">Pulse: {latestVital.pulse} bpm</div>
-              )}
-              {latestVital?.temp && (
-                <div className="body-text screening-item">Temperature: {latestVital.temp}°C</div>
-              )}
-               {latestNutrition?.weight && (
-                <div className="body-text screening-item">Weight: {latestNutrition.weight} kgs</div>
-              )}
-              {latestNutrition?.height && (
-                <div className="body-text screening-item">Height: {latestNutrition.height} cm</div>
-              )}
-            </div>
-            <div className="screening-right">
-              {latestNutrition?.bmi && (
-                  <div className="body-text screening-item">BMI: {latestNutrition.bmi}</div>
-              )}
-              {latestVital?.rbs && (
-                  <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs}</div>
-              )}
-              {latestVital?.fbs && (
-                  <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs}</div>
-              )}
-              {latestNutrition?.body_fat_percent && (
-                  <div className="body-text screening-item">Body fat: {latestNutrition.body_fat_percent}%</div>
-              )}
-              {latestNutrition?.meal_plan && (
-                  <div className="body-text screening-item">Meal Plan: {latestNutrition.meal_plan}</div>
-              )}
-            </div>
-          </div>
-
-          {clinicalDetails.length > 0 && (
-              <>
-                  <div className="section-heading min-space-before">Clinical Summary</div>
-                  <div className="content-section">
-                      {clinicalDetails.map((detail, index) => (
-                          <div key={index} className="content-item">{detail}</div>
-                      ))}
-                  </div>
-              </>
-          )}
-        
-          <div className="doctor-signature keep-together min-space-before">
-              <span className="doctor-prefix">Assessed by Taria Clinical Team</span>
-          </div>
-          <div className="end-spacer"></div>
+    <div className="report-body-container bg-white text-gray-800 flex flex-col min-h-screen">
+      <div className="flex-grow">
+        <div className="header">
+            <img src="/images/taria-logo.png" alt="Taria Health Logo" className="logo" />
         </div>
+        <div className="content-wrapper">
+          <div className="content-area">
+            <div className="title-container keep-together">
+              <div className="report-title">INDIVIDUAL ACTIVATION REPORT:</div>
+              <div className="report-date">{formattedDate}</div>
+            </div>
+
+            <div className="patient-info keep-together">
+              <span className="patient-name">
+                {`${patient.first_name} ${patient.surname || ''}`}
+                {patient.email && ` : ${patient.email}`}
+              </span>
+            </div>
+
+            <div className="section-heading min-space-before">Screening Results</div>
+
+            <div className="screening-grid force-together">
+              <div className="screening-left">
+                {latestVital?.bp_systolic && latestVital?.bp_diastolic && (
+                  <div className="body-text screening-item">
+                    Blood Pressure: {latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg
+                  </div>
+                )}
+                {latestVital?.pulse && (
+                  <div className="body-text screening-item">Pulse: {latestVital.pulse} bpm</div>
+                )}
+                {latestVital?.temp && (
+                  <div className="body-text screening-item">Temperature: {latestVital.temp}°C</div>
+                )}
+                 {latestNutrition?.weight && (
+                  <div className="body-text screening-item">Weight: {latestNutrition.weight} kgs</div>
+                )}
+                {latestNutrition?.height && (
+                  <div className="body-text screening-item">Height: {latestNutrition.height} cm</div>
+                )}
+              </div>
+              <div className="screening-right">
+                {latestNutrition?.bmi && (
+                    <div className="body-text screening-item">BMI: {latestNutrition.bmi}</div>
+                )}
+                {latestVital?.rbs && (
+                    <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs}</div>
+                )}
+                {latestVital?.fbs && (
+                    <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs}</div>
+                )}
+                {latestNutrition?.body_fat_percent && (
+                    <div className="body-text screening-item">Body fat: {latestNutrition.body_fat_percent}%</div>
+                )}
+                {latestNutrition?.meal_plan && (
+                    <div className="body-text screening-item">Meal Plan: {latestNutrition.meal_plan}</div>
+                )}
+              </div>
+            </div>
+
+            {clinicalDetails.length > 0 && (
+                <>
+                    <div className="section-heading min-space-before">Clinical Summary</div>
+                    <div className="content-section">
+                        {clinicalDetails.map((detail, index) => (
+                            <div key={index} className="content-item">{detail}</div>
+                        ))}
+                    </div>
+                </>
+            )}
+          
+            <div className="doctor-signature keep-together min-space-before">
+                <span className="doctor-prefix">Assessed by Taria Clinical Team</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Footer with Logo */}
+      <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col items-center gap-2 pb-4">
+          <img src="/images/taria-logo.png" alt="Taria Health Logo" className="h-8 w-auto grayscale opacity-50" />
+          <p className="text-[9pt] text-gray-400 italic">Official Individual Activation Report - Taria Health</p>
       </div>
     </div>
   );

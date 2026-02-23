@@ -22,7 +22,8 @@ export default function DashboardClient({
   const [patients, setPatients] = useState(initialPatients);
   const [corporates, setCorporates] = useState(initialCorporates);
   const [users, setUsers] = useState(initialUsers);
-  const [activeView, setActiveView] = useState<View>('dashboard');
+  // Default to activations as requested
+  const [activeView, setActiveView] = useState<View>('activations');
 
   const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
     setCorporates(updatedCorporates);
