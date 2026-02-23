@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/logo';
 import { login } from '@/lib/serve';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -45,9 +46,9 @@ export default function LoginPage() {
             <div className="flex justify-center items-center mb-6">
                 <Logo className="h-8 w-auto" />
             </div>
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <Card className="dark:border-primary/40 shadow-xl">
+                <CardHeader className="text-center space-y-1">
+                    <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
                     <CardDescription>
                         Enter your credentials to access your dashboard.
                     </CardDescription>
@@ -56,7 +57,7 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit}>
                         <div className="grid gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email" className="font-bold text-primary">Email</Label>
                             <Input
                             id="email"
                             type="email"
@@ -65,29 +66,40 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={loading}
+                            className="dark:border-primary/40"
                             />
                         </div>
                         <div className="grid gap-2">
-                            <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
-                            <Link
-                                href="/forgot-password"
-                                className="ml-auto inline-block text-sm underline"
-                            >
-                                Forgot password?
-                            </Link>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password" capitalized className="font-bold text-primary">Password</Label>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-xs text-muted-foreground hover:text-primary underline"
+                                >
+                                    Forgot password?
+                                </Link>
                             </div>
-                            <Input 
-                            id="password" 
-                            type="password" 
-                            required 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={loading}
-                            />
+                            <div className="relative">
+                                <Input 
+                                    id="password" 
+                                    type={showPassword ? "text" : "password"} 
+                                    required 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    disabled={loading}
+                                    className="pr-10 dark:border-primary/40"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
-                        <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
+                        <Button type="submit" className="w-full mt-2 font-bold py-6 shadow-lg" disabled={loading}>
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login to Dashboard'}
                         </Button>
                         </div>
                     </form>

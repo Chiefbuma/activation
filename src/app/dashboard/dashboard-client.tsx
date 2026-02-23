@@ -8,7 +8,7 @@ import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
 import AnalyticsView from '@/components/dashboard/analytics-view';
 
-type View = 'dashboard' | 'activations' | 'settings';
+type View = 'activations' | 'dashboard' | 'settings';
 
 export default function DashboardClient({ 
   initialPatients, 
@@ -24,7 +24,7 @@ export default function DashboardClient({
   const [users, setUsers] = useState(initialUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   
-  // Set activations as default view
+  // Set activations as default view and ensure it is the first tab
   const [activeView, setActiveView] = useState<View>('activations');
 
   useEffect(() => {
@@ -44,16 +44,16 @@ export default function DashboardClient({
 
   const getViewTitle = () => {
     switch(activeView) {
-        case 'dashboard': return 'Dashboard';
         case 'activations': return 'Activations';
+        case 'dashboard': return 'Dashboard';
         case 'settings': return 'Settings';
     }
   };
 
   const getViewSubtitle = () => {
     switch(activeView) {
-        case 'dashboard': return 'Overview of health program performance and corporate metrics';
         case 'activations': return 'Manage participant registration and assessment history';
+        case 'dashboard': return 'Overview of health program performance and corporate metrics';
         case 'settings': return 'Configure application users and corporate partners';
     }
   };
@@ -73,16 +73,16 @@ export default function DashboardClient({
             </div>
             <div className="flex items-center gap-1 p-1 bg-muted rounded-xl border w-full md:w-fit shadow-sm dark:border-primary/20 overflow-x-auto">
                 <NavButton 
-                    label="Dashboard" 
-                    icon={<LayoutDashboard className="h-4 w-4" />} 
-                    isActive={activeView === 'dashboard'}
-                    onClick={() => setActiveView('dashboard')}
-                />
-                <NavButton 
                     label="Activations" 
                     icon={<Users className="h-4 w-4" />} 
                     isActive={activeView === 'activations'}
                     onClick={() => setActiveView('activations')}
+                />
+                <NavButton 
+                    label="Dashboard" 
+                    icon={<LayoutDashboard className="h-4 w-4" />} 
+                    isActive={activeView === 'dashboard'}
+                    onClick={() => setActiveView('dashboard')}
                 />
                 {isAdmin && (
                     <NavButton 
@@ -105,13 +105,13 @@ export default function DashboardClient({
           transition={{ duration: 0.2 }}
           className="w-full"
         >
-          {activeView === 'dashboard' && (
-            <AnalyticsView patients={patients} corporates={corporates} />
-          )}
           {activeView === 'activations' && (
             <div className="max-w-full overflow-hidden">
                 <PatientList patients={patients as any} />
             </div>
+          )}
+          {activeView === 'dashboard' && (
+            <AnalyticsView patients={patients} corporates={corporates} />
           )}
           {activeView === 'settings' && isAdmin && (
             <SettingsView 

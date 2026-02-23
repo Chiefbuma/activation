@@ -44,6 +44,7 @@ export type Nutrition = {
   body_fat_percent: number | null;
   meal_plan: 'Recommended' | 'Not Recommended' | null;
   weight_loss_period: string | null;
+  notes_nutritionist?: string | null;
   user_id: number | null;
   created_at: string;
 };
@@ -61,6 +62,7 @@ export type Clinical = {
     | 'Medical Review recommended for raised blood sugar' 
     | null;
   doctor_notes: string | null;
+  wellness_check_type?: string | null;
   user_id: number | null;
   created_at: string;
 };

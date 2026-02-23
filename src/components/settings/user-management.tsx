@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Trash2, Loader2, Key } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Loader2, Key, Eye, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,11 +51,13 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
   const { toast } = useToast();
 
   const handleOpenModal = (user?: User) => {
     setCurrentUser(user || { ...emptyUser });
+    setShowPassword(false);
     setIsModalOpen(true);
   };
 
@@ -106,12 +108,12 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => handleOpenModal()} className="bg-teal-600 hover:bg-teal-700 text-white">
-          <PlusCircle className="mr-2 h-4 w-4" /> Add User
+        <Button onClick={() => handleOpenModal()} className="bg-teal-600 hover:bg-teal-700 text-white shadow-md">
+          <PlusCircle className="mr-2 h-4 w-4" /> Add System User
         </Button>
       </div>
 
-      <div className="rounded-xl border dark:border-teal-500/20 overflow-hidden">
+      <div className="rounded-xl border dark:border-teal-500/20 overflow-hidden shadow-sm">
         <div className="divide-y divide-border dark:divide-teal-500/10">
           {users.length > 0 ? (
             users.map(user => (
@@ -122,7 +124,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                     </div>
                     <div>
                       <p className="font-bold text-foreground">{user.name}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
+                      <p className="text-xs text-muted-foreground capitalize bg-muted px-2 py-0.5 rounded-full inline-block">{user.role}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -135,17 +137,17 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="dark:border-primary/40">
                             <AlertDialogHeader>
                             <AlertDialogTitle>Delete Account?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will permanently delete the account for "{user.name}".
+                                This will permanently delete the account for "{user.name}". This action cannot be undone.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel className="dark:text-foreground">Cancel</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive hover:bg-destructive/90">
-                                Delete
+                                Delete Account
                             </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -154,15 +156,15 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
               </div>
             ))
           ) : (
-            <p className="text-center text-muted-foreground py-8">No system users found.</p>
+            <p className="text-center text-muted-foreground py-8 italic">No system users found.</p>
           )}
         </div>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-lg dark:border-teal-500/30">
+        <DialogContent className="sm:max-w-lg dark:border-teal-500/30 overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-teal-600 dark:text-teal-400">{currentUser?.id ? 'Edit' : 'Add'} System User</DialogTitle>
+            <DialogTitle className="text-teal-600 dark:text-teal-400 font-bold">{currentUser?.id ? 'Edit' : 'Add'} System User</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
@@ -188,18 +190,25 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="password" className="text-primary font-bold">Account Password {currentUser?.id && '(Leave blank to keep current)'}</Label>
+                <Label htmlFor="password" className="text-primary font-bold">Account Password {currentUser?.id && '(Optional)'}</Label>
                 <div className="relative">
-                    <Input id="password" name="password" type="password" value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} className="pr-10 dark:border-teal-500/40" />
-                    <Key className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="password" name="password" type={showPassword ? "text" : "password"} value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} className="pr-10 dark:border-teal-500/40" />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                    >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                 </div>
+                {currentUser?.id && <p className="text-[10px] text-muted-foreground italic">Leave blank to keep the current password.</p>}
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2">
               <DialogClose asChild>
                 <Button type="button" variant="outline" className="dark:text-foreground">Cancel</Button>
               </DialogClose>
-              <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700">
+              <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700 min-w-[120px]">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {currentUser?.id ? 'Save Changes' : 'Create Account'}
               </Button>

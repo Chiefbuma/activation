@@ -42,7 +42,7 @@ export default function Report({ patient, corporate }: ReportProps) {
     <div className="report-body-container bg-white text-gray-800 flex flex-col min-h-screen">
       <div className="flex-grow">
         <div className="header">
-            <img src="/images/taria-logo.png" alt="Taria Health Logo" className="logo" />
+            <img src="https://picsum.photos/seed/taria/450/60" alt="Taria Health Logo" className="logo" data-ai-hint="healthcare logo" />
         </div>
         <div className="content-wrapper">
           <div className="content-area">
@@ -117,9 +117,8 @@ export default function Report({ patient, corporate }: ReportProps) {
         </div>
       </div>
       
-      {/* Footer with Logo */}
       <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col items-center gap-2 pb-4">
-          <img src="/images/taria-logo.png" alt="Taria Health Logo" className="h-8 w-auto grayscale opacity-50" />
+          <img src="https://picsum.photos/seed/taria/200/40" alt="Taria Health Logo" className="h-8 w-auto grayscale opacity-50" data-ai-hint="healthcare logo" />
           <p className="text-[9pt] text-gray-400 italic">Official Individual Activation Report - Taria Health</p>
       </div>
     </div>
