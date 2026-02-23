@@ -65,7 +65,16 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     const femaleCount = patients.filter(p => p.sex === 'Female').length;
     const totalCorps = corporates.length;
 
-    return { totalReg, totalActive, totalCorps, maleCount, femaleCount };
+    // New parameters for clinical summaries
+    const recommendedMealPlan = patients.filter(p => 
+        p.nutritions.some(n => n.meal_plan === 'Recommended')
+    ).length;
+    
+    const recommendedCounselling = patients.filter(p => 
+        p.clinicals.some(c => c.counselling_sessions === 'Recommended')
+    ).length;
+
+    return { totalReg, totalActive, totalCorps, maleCount, femaleCount, recommendedMealPlan, recommendedCounselling };
   }, [patients, corporates]);
 
   const genderChartData = [
@@ -150,9 +159,17 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
                     <TableCell className="font-medium text-muted-foreground">Male Participants</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.maleCount}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-none">
+                  <TableRow className="hover:bg-transparent border-b border-primary/5">
                     <TableCell className="font-medium text-muted-foreground">Female Participants</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.femaleCount}</TableCell>
+                  </TableRow>
+                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                    <TableCell className="font-medium text-muted-foreground">Recommended Meal Plans</TableCell>
+                    <TableCell className="text-right font-bold text-lg text-teal-600">{summary.recommendedMealPlan}</TableCell>
+                  </TableRow>
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableCell className="font-medium text-muted-foreground">Recommended Counselling</TableCell>
+                    <TableCell className="text-right font-bold text-lg text-teal-600">{summary.recommendedCounselling}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
