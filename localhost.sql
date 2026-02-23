@@ -1,5 +1,5 @@
--- Taria Health - Production Database Schema
--- Database: gledcapi_activation
+-- Taria Health Production Database Schema
+-- Aligned for activation.gle360dcapital.africa
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -15,13 +15,11 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `role` enum('admin','staff','physician','navigator','payer') NOT NULL DEFAULT 'staff',
   `avatarUrl` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Seed Admin (Password is 'password')
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
-('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
 
 -- ----------------------------
 -- Table structure for corporates
@@ -31,13 +29,10 @@ CREATE TABLE `corporates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `wellness_date` date DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO `corporates` (`name`, `wellness_date`) VALUES 
-('Bio Food Products', '2025-09-29'),
-('Taria', '2025-10-01'),
-('NCBA', '2026-02-02');
 
 -- ----------------------------
 -- Table structure for registrations
@@ -98,10 +93,11 @@ CREATE TABLE `nutritions` (
   `llw` decimal(5,2) DEFAULT NULL,
   `ulw` decimal(5,2) DEFAULT NULL,
   `excess_weight` decimal(5,2) DEFAULT NULL,
-  `visceral_fat` int DEFAULT NULL,
-  `body_fat_percent` decimal(5,2) DEFAULT NULL,
   `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
   `weight_loss_period` varchar(50) DEFAULT NULL,
+  `notes_nutritionist` text DEFAULT NULL,
+  `visceral_fat` int DEFAULT NULL,
+  `body_fat_percent` decimal(4,1) DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -118,13 +114,25 @@ CREATE TABLE `clinicals` (
   `registration_id` int NOT NULL,
   `counselling_sessions` enum('Recommended','Not Recommended') DEFAULT NULL,
   `verbal_stress_rating` int DEFAULT NULL,
-  `conclusion` varchar(255) DEFAULT NULL,
+  `conclusion` text DEFAULT NULL,
   `doctor_notes` text DEFAULT NULL,
+  `wellness_check_type` varchar(100) DEFAULT 'None',
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- Seed Data
+-- ----------------------------
+INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
+('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
+
+INSERT INTO `corporates` (`name`, `wellness_date`) VALUES 
+('Bio Food Products', '2025-09-29'),
+('Taria', '2025-10-01'),
+('NCBA', '2026-02-02');
 
 SET FOREIGN_KEY_CHECKS = 1;

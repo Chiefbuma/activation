@@ -1,8 +1,10 @@
 import mysql from 'mysql2/promise';
 
-// Create a connection pool. This is more efficient than creating a new connection for every request.
-// It reads the connection details from the environment variables.
-const db = mysql.createPool({
+/**
+ * Database connection pool for production.
+ * Uses environment variables configured in the hosting environment.
+ */
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -13,4 +15,4 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-export { db };
+export default pool;

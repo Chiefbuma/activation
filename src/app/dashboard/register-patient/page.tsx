@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -17,7 +16,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { fetchCorporates } from '@/lib/data';
+import { getCorporates } from '@/lib/serve';
 import { registerParticipant } from '@/lib/actions';
 import type { Corporate, User } from '@/lib/types';
 
@@ -41,10 +40,12 @@ export default function RegisterParticipantPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchCorporates().then(setCorporates);
+    getCorporates().then(setCorporates).catch(() => {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to load corporate partners.' });
+    });
     const stored = localStorage.getItem('loggedInUser');
     if (stored) setCurrentUser(JSON.parse(stored));
-  }, []);
+  }, [toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -61,7 +62,7 @@ export default function RegisterParticipantPage() {
     const result = await registerParticipant({
         ...formData,
         age: formData.age ? parseInt(formData.age) : null,
-        corporate_id: formData.corporate_id !== 'none' ? parseInt(formData.corporate_id) : null,
+        corporate_id: formData.corporate_id !== 'none' && formData.corporate_id !== '' ? parseInt(formData.corporate_id) : null,
         user_id: currentUser?.id
     } as any);
 
@@ -76,9 +77,9 @@ export default function RegisterParticipantPage() {
 
   return (
     <div className="container mx-auto flex justify-center items-start py-8">
-      <Card className="w-full max-w-4xl border-primary/20 shadow-lg">
+      <Card className="w-full max-w-4xl border-primary/20 shadow-lg dark:border-primary/40">
         <CardHeader className="text-center bg-muted/30 pb-8">
-          <CardTitle className="text-2xl text-primary">New Participant Registration</CardTitle>
+          <CardTitle className="text-2xl text-primary font-bold">New Participant Registration</CardTitle>
           <CardDescription>Enter participant details to create a new activation record.</CardDescription>
         </CardHeader>
         <CardContent className="pt-8">
@@ -102,7 +103,7 @@ export default function RegisterParticipantPage() {
               <div className="space-y-2">
                 <Label htmlFor="sex" className="text-primary font-bold">Sex *</Label>
                 <Select value={formData.sex} onValueChange={(v) => handleSelectChange('sex', v)} required>
-                  <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                  <SelectTrigger className="dark:border-primary/40"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
@@ -131,7 +132,7 @@ export default function RegisterParticipantPage() {
               <div className="space-y-2">
                 <Label htmlFor="corporate_id" className="text-primary font-bold">Corporate Partner</Label>
                 <Select value={formData.corporate_id} onValueChange={(v) => handleSelectChange('corporate_id', v)}>
-                  <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Assign corporate" /></SelectTrigger>
+                  <SelectTrigger className="dark:border-primary/40"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
                     {corporates.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
@@ -145,10 +146,10 @@ export default function RegisterParticipantPage() {
             </div>
 
             <div className="pt-4 flex justify-between gap-4">
-              <Button variant="outline" asChild className="dark:text-foreground">
+              <Button variant="outline" asChild className="dark:text-foreground border-primary/20 hover:border-primary/50">
                 <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Link>
               </Button>
-              <Button type="submit" disabled={loading} className="px-8">
+              <Button type="submit" disabled={loading} className="px-8 shadow-sm">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Register Participant
               </Button>

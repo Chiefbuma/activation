@@ -1,8 +1,12 @@
 import type { Registration, Corporate, User, Vital, Nutrition, Clinical } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+/**
+ * Service layer for Client Components.
+ * Uses standard fetch to communicate with the REST API.
+ */
 
-// Generic function to handle API responses and extract error messages
+const API_BASE = '/api';
+
 async function getErrorFromResponse(response: Response): Promise<Error> {
     try {
         const errorData = await response.json();
@@ -24,7 +28,7 @@ export async function login(credentials: {email: string, password: string}): Pro
     return res.json();
 }
 
-// --- Registration Functions ---
+// --- GET Functions ---
 
 export async function getRegistrations(): Promise<Registration[]> {
     const res = await fetch(`${API_BASE}/registrations`, { cache: 'no-store' });
@@ -38,17 +42,19 @@ export async function getRegistrationById(id: string): Promise<Registration> {
     return res.json();
 }
 
-export async function createRegistration(data: Partial<Registration>): Promise<{id: number}> {
-    const res = await fetch(`${API_BASE}/registrations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
+export async function getCorporates(): Promise<Corporate[]> {
+    const res = await fetch(`${API_BASE}/corporates`, { cache: 'no-store' });
     if (!res.ok) throw await getErrorFromResponse(res);
     return res.json();
 }
 
-// --- Assessment Mutations ---
+export async function getUsers(): Promise<User[]> {
+    const res = await fetch(`${API_BASE}/users`, { cache: 'no-store' });
+    if (!res.ok) throw await getErrorFromResponse(res);
+    return res.json();
+}
+
+// --- Mutations ---
 
 export async function saveVital(data: Partial<Vital>): Promise<void> {
     const res = await fetch(`${API_BASE}/vitals`, {
@@ -82,14 +88,6 @@ export async function deleteAssessment(type: 'vitals' | 'nutritions' | 'clinical
     if (!res.ok) throw await getErrorFromResponse(res);
 }
 
-// --- Corporate Mutations ---
-
-export async function getCorporates(): Promise<Corporate[]> {
-    const res = await fetch(`${API_BASE}/corporates`, { cache: 'no-store' });
-    if (!res.ok) throw await getErrorFromResponse(res);
-    return res.json();
-}
-
 export async function saveCorporate(data: Partial<Corporate>): Promise<void> {
     const res = await fetch(`${API_BASE}/corporates`, {
         method: data.id ? 'PUT' : 'POST',
@@ -102,14 +100,6 @@ export async function saveCorporate(data: Partial<Corporate>): Promise<void> {
 export async function deleteCorporate(id: number): Promise<void> {
     const res = await fetch(`${API_BASE}/corporates?id=${id}`, { method: 'DELETE' });
     if (!res.ok) throw await getErrorFromResponse(res);
-}
-
-// --- User Mutations ---
-
-export async function getUsers(): Promise<User[]> {
-    const res = await fetch(`${API_BASE}/users`, { cache: 'no-store' });
-    if (!res.ok) throw await getErrorFromResponse(res);
-    return res.json();
 }
 
 export async function saveUser(data: Partial<User>): Promise<void> {

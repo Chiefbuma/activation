@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 import type { Vital, Nutrition, Clinical } from '@/lib/types';
 

@@ -1,7 +1,11 @@
-
-import { db } from './db';
+import db from './db';
 import type { Registration, User, Corporate, Vital, Nutrition, Clinical } from './types';
 import { unstable_noStore as noStore } from 'next/cache';
+
+/**
+ * Server-side data fetching functions.
+ * ONLY for use in Server Components.
+ */
 
 export async function fetchPatients(): Promise<Registration[]> {
     noStore();
@@ -15,7 +19,6 @@ export async function fetchPatients(): Promise<Registration[]> {
         
         const registrations = rows as any[];
         
-        // Enrich each registration with its related records
         const enriched = await Promise.all(registrations.map(async (reg) => {
             const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
             const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
@@ -26,7 +29,7 @@ export async function fetchPatients(): Promise<Registration[]> {
                 vitals: vitals as Vital[],
                 nutritions: nutritions as Nutrition[],
                 clinicals: clinicals as Clinical[],
-                status: 'Active'
+                status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
             } as Registration;
         }));
 
@@ -60,7 +63,7 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
             vitals: vitals as Vital[],
             nutritions: nutritions as Nutrition[],
             clinicals: clinicals as Clinical[],
-            status: 'Active'
+            status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
         } as Registration;
     } catch (error) {
         console.error('Database Error:', error);

@@ -1,6 +1,6 @@
-import { db } from '@/lib/db';
+import db from '@/lib/db';
 import { NextResponse } from 'next/server';
-import type { Registration, Vital, Nutrition, Clinical } from '@/lib/types';
+import type { Vital, Nutrition, Clinical } from '@/lib/types';
 
 export async function GET() {
     try {

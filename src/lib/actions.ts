@@ -1,10 +1,14 @@
-
 'use server';
 
-import { db } from './db';
+import db from './db';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import type { Registration, Vital, Nutrition, Clinical } from './types';
+
+/**
+ * Server Actions for data mutations.
+ * These are safe to import into Client Components because of the 'use server' directive.
+ */
 
 export async function loginUser(email: string, password: string) {
     try {
