@@ -33,9 +33,11 @@ export default function Report({ patient, corporate }: ReportProps) {
     formattedDate = 'Date Not Available';
   }
 
-  const discussionParagraphs = [
-    latestClinical?.notes_doctor,
-    latestClinical?.notes_psychologist,
+  const clinicalDetails = [
+    latestClinical?.conclusion && `Conclusion: ${latestClinical.conclusion}`,
+    latestClinical?.wellness_check_type && latestClinical.wellness_check_type !== 'None' && `Targeted Wellness Check: ${latestClinical.wellness_check_type}`,
+    latestClinical?.counselling_sessions && `Counselling: ${latestClinical.counselling_sessions}`,
+    latestClinical?.doctor_notes && `Observations: ${latestClinical.doctor_notes}`,
   ].filter(Boolean) as string[];
 
   return (
@@ -84,20 +86,26 @@ export default function Report({ patient, corporate }: ReportProps) {
                   <div className="body-text screening-item">BMI: {latestNutrition.bmi}</div>
               )}
               {latestVital?.rbs && (
-                  <div className="body-text screening-item">Blood sugar: {latestVital.rbs}</div>
+                  <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs}</div>
+              )}
+              {latestVital?.fbs && (
+                  <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs}</div>
               )}
               {latestNutrition?.body_fat_percent && (
                   <div className="body-text screening-item">Body fat: {latestNutrition.body_fat_percent}%</div>
               )}
+              {latestNutrition?.meal_plan && (
+                  <div className="body-text screening-item">Meal Plan: {latestNutrition.meal_plan}</div>
+              )}
             </div>
           </div>
 
-          {discussionParagraphs.length > 0 && (
+          {clinicalDetails.length > 0 && (
               <>
-                  <div className="section-heading min-space-before">Discussion Summary</div>
+                  <div className="section-heading min-space-before">Clinical Summary</div>
                   <div className="content-section">
-                      {discussionParagraphs.map((paragraph, index) => (
-                          <div key={index} className="content-item">{paragraph}</div>
+                      {clinicalDetails.map((detail, index) => (
+                          <div key={index} className="content-item">{detail}</div>
                       ))}
                   </div>
               </>

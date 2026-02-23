@@ -75,27 +75,54 @@ export const registrations: Omit<Registration, 'vitals' | 'nutritions' | 'goals'
 ];
 
 export const vitals: Vital[] = [
-    { id: 2, registration_id: 2, bp_systolic: 150, bp_diastolic: 99, pulse: 62, temp: 36.4, rbs: '6.2', user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
-    { id: 3, registration_id: 3, bp_systolic: 133, bp_diastolic: 81, pulse: 70, temp: 36.1, rbs: 'NOT SUPPORTED', user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
-    { id: 4, registration_id: 4, bp_systolic: 135, bp_diastolic: 89, pulse: 74, temp: 37, rbs: '5.5', user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
-    { id: 5, registration_id: 5, bp_systolic: 171, bp_diastolic: 118, pulse: 76, temp: 37, rbs: '5.8', user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' }
+    { id: 2, registration_id: 2, bp_systolic: 150, bp_diastolic: 99, pulse: 62, temp: 36.4, rbs: '6.2', fbs: null, user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
+    { id: 3, registration_id: 3, bp_systolic: 133, bp_diastolic: 81, pulse: 70, temp: 36.1, rbs: '5.4', fbs: '5.1', user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
+    { id: 4, registration_id: 4, bp_systolic: 135, bp_diastolic: 89, pulse: 74, temp: 37, rbs: '5.5', fbs: null, user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' },
+    { id: 5, registration_id: 5, bp_systolic: 171, bp_diastolic: 118, pulse: 76, temp: 37, rbs: '5.8', fbs: null, user_id: null, measured_at: '2026-01-31 14:03:10', created_at: '2026-01-31 14:03:10' }
 ];
 
 export const nutritions: Nutrition[] = [
-    { id: 2, registration_id: 2, height: 175, weight: 84, bmi: 27, visceral_fat: null, body_fat_percent: null, notes_nutritionist: null, user_id: null, created_at: '2026-01-31 14:03:10' },
-    { id: 3, registration_id: 3, height: 169, weight: 81, bmi: 28, visceral_fat: null, body_fat_percent: null, notes_nutritionist: 'ecouraged on excercise', user_id: null, created_at: '2026-01-31 14:03:10' },
-    { id: 4, registration_id: 4, height: 181, weight: 74.8, bmi: 23, visceral_fat: 6, body_fat_percent: 18.5, notes_nutritionist: 'encouraged on exercise', user_id: null, created_at: '2026-01-31 14:03:10' },
-    { id: 7, registration_id: 5, height: 45, weight: 23, bmi: 113.6, visceral_fat: 45, body_fat_percent: 12, notes_nutritionist: 'Nutritionist Notes', user_id: null, created_at: '2026-02-01 06:45:27' }
+    { id: 2, registration_id: 2, height: 175, weight: 84, bmi: 27, visceral_fat: null, body_fat_percent: null, meal_plan: 'Recommended', notes_nutritionist: null, user_id: null, created_at: '2026-01-31 14:03:10' },
+    { id: 3, registration_id: 3, height: 169, weight: 81, bmi: 28, visceral_fat: null, body_fat_percent: null, meal_plan: 'Recommended', notes_nutritionist: 'ecouraged on excercise', user_id: null, created_at: '2026-01-31 14:03:10' },
+    { id: 4, registration_id: 4, height: 181, weight: 74.8, bmi: 23, visceral_fat: 6, body_fat_percent: 18.5, meal_plan: 'Recommended', notes_nutritionist: 'encouraged on exercise', user_id: null, created_at: '2026-01-31 14:03:10' },
+    { id: 7, registration_id: 5, height: 45, weight: 23, bmi: 113.6, visceral_fat: 45, body_fat_percent: 12, meal_plan: 'Not Recommended', notes_nutritionist: 'Nutritionist Notes', user_id: null, created_at: '2026-02-01 06:45:27' }
 ];
 
 export const goals: Goal[] = [
     { id: 2, registration_id: 2, user_id: 1, discussion: 'Patient is concerned about his high blood pressure reading and wants to manage it better.', goal: 'Reduce daily sodium intake to under 2,300mg. Monitor blood pressure at home weekly and keep a log.', created_at: '2026-01-31 14:03:10' },
-    { id: 4, registration_id: 3, user_id: 1, discussion: '8994', goal: '7884', created_at: '2026-02-01 06:43:48' },
+    { id: 4, registration_id: 3, user_id: 1, discussion: 'Regular checkup discussion', goal: 'Maintain healthy lifestyle', created_at: '2026-02-01 06:43:48' },
     { id: 5, registration_id: 5, user_id: 1, discussion: 'Discussion', goal: 'Goal', created_at: '2026-02-01 06:45:49' }
 ];
 
 export const clinicals: Clinical[] = [
-    { id: 2, registration_id: 2, notes_psychologist: 'Patient is showing signs of anxiety related to his new diagnosis. Provided resources for stress management.', notes_doctor: 'Diagnosed with Stage 1 Hypertension. Prescribed Lisinopril 10mg. Advised on lifestyle modifications, particularly diet and exercise. Follow up in 1 month to check BP.', user_id: 1, created_at: '2026-01-31 14:03:10' },
-    { id: 4, registration_id: 3, notes_psychologist: 'Psychologist\'s Notes', notes_doctor: 'Doctor\'s Notes', user_id: 1, created_at: '2026-02-01 06:44:04' },
-    { id: 5, registration_id: 5, notes_psychologist: 'Psychologist\'s Notes', notes_doctor: 'Doctor\'s Notes', user_id: 1, created_at: '2026-02-01 06:45:58' }
+    { 
+        id: 2, 
+        registration_id: 2, 
+        counselling_sessions: 'Recommended', 
+        conclusion: 'Medical Review recommended', 
+        doctor_notes: 'Diagnosed with Stage 1 Hypertension. Follow up in 1 month.', 
+        wellness_check_type: 'Hypertension', 
+        user_id: 1, 
+        created_at: '2026-01-31 14:03:10' 
+    },
+    { 
+        id: 4, 
+        registration_id: 3, 
+        counselling_sessions: 'Not Recommended', 
+        conclusion: 'All results within healthy range', 
+        doctor_notes: 'Patient is in good health.', 
+        wellness_check_type: 'None', 
+        user_id: 1, 
+        created_at: '2026-02-01 06:44:04' 
+    },
+    { 
+        id: 5, 
+        registration_id: 5, 
+        counselling_sessions: 'Recommended', 
+        conclusion: 'Healthy lifestyle changes recommended', 
+        doctor_notes: 'Encouraged more physical activity.', 
+        wellness_check_type: 'Diabetes', 
+        user_id: 1, 
+        created_at: '2026-02-01 06:45:58' 
+    }
 ];
