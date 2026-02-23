@@ -120,8 +120,8 @@ body {
 .guidance-box {
     margin: 20px 0;
     padding: 15px;
-    background-color: rgba(23, 162, 184, 0.08); /* Light teal fill */
-    border-left: 4px solid #17a2b8;
+    background-color: rgba(23, 162, 184, 0.12); /* Slightly stronger teal fill */
+    border-left: 5px solid #17a2b8;
     border-radius: 4px;
     break-inside: avoid;
 }
@@ -137,7 +137,7 @@ body {
 
 .guidance-content {
     font-size: 10pt;
-    color: #444;
+    color: #333;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -145,7 +145,7 @@ body {
 
 .font-bold {
     font-weight: bold;
-    color: #333;
+    color: #000;
 }
 
 .content-item {
@@ -214,7 +214,7 @@ body {
     
     .screening-grid {
         display: grid;
-        grid-template-columns: 1fr 1 column;
+        grid-template-columns: 1fr 1fr;
         gap: 15px;
         page-break-inside: avoid;
     }
