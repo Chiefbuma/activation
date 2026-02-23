@@ -215,12 +215,13 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
+  // Stability fix: Only trigger callback when actual row selection data changes
+  const selectedRowsData = table.getFilteredSelectedRowModel().rows;
   React.useEffect(() => {
     if (onSelectionChange) {
-        const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original);
-        onSelectionChange(selectedRows.length, selectedRows)
+        onSelectionChange(selectedRowsData.length, selectedRowsData.map(r => r.original));
     }
-  }, [rowSelection, onSelectionChange, table])
+  }, [rowSelection, onSelectionChange, selectedRowsData.length]);
 
   return (
     <div className="space-y-4">

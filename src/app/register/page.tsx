@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/logo';
 
 export default function RegisterPage() {
@@ -27,6 +27,7 @@ export default function RegisterPage() {
     age: '',
     sex: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -61,9 +62,9 @@ export default function RegisterPage() {
             <div className="flex justify-center items-center mb-6">
                 <Logo className="h-8 w-auto" />
             </div>
-             <Card>
+             <Card className="dark:border-primary/40 shadow-xl">
                 <CardHeader className="text-center">
-                    <CardTitle>Create Your Account</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
                     <CardDescription>
                         Sign up to begin your journey with Taria Health.
                     </CardDescription>
@@ -71,36 +72,56 @@ export default function RegisterPage() {
                 <CardContent>
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="first_name">First Name</Label>
-                            <Input id="first_name" required onChange={handleInputChange} />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="first_name" className="text-primary font-bold">First Name</Label>
+                                <Input id="first_name" required onChange={handleInputChange} className="dark:border-primary/40" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="surname" className="text-primary font-bold">Surname</Label>
+                                <Input id="surname" required onChange={handleInputChange} className="dark:border-primary/40" />
+                            </div>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="surname">Surname</Label>
-                            <Input id="surname" required onChange={handleInputChange} />
+                            <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
+                            <Input id="email" type="email" required onChange={handleInputChange} placeholder="Your login email" className="dark:border-primary/40" />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input id="email" type="email" required onChange={handleInputChange} placeholder="Your login email" />
+                            <Label htmlFor="password" title="Password" className="text-primary font-bold">Password</Label>
+                            <div className="relative">
+                                <Input 
+                                    id="password" 
+                                    type={showPassword ? "text" : "password"} 
+                                    required 
+                                    onChange={handleInputChange} 
+                                    placeholder="Create a password" 
+                                    className="pr-10 dark:border-primary/40" 
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" required onChange={handleInputChange} placeholder="Create a password" />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="age">Age</Label>
-                            <Input id="age" type="number" required onChange={handleInputChange} />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="sex">Sex</Label>
-                            <Select name="sex" onValueChange={(value) => handleSelectChange('sex', value)} required>
-                                <SelectTrigger id="sex"><SelectValue placeholder="Select sex" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Male">Male</SelectItem>
-                                    <SelectItem value="Female">Female</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="age" className="text-primary font-bold">Age</Label>
+                                <Input id="age" type="number" required onChange={handleInputChange} className="dark:border-primary/40" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="sex" className="text-primary font-bold">Sex</Label>
+                                <Select name="sex" onValueChange={(value) => handleSelectChange('sex', value)} required>
+                                    <SelectTrigger id="sex" className="dark:border-primary/40"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Male">Male</SelectItem>
+                                        <SelectItem value="Female">Female</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
                     <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -108,7 +129,7 @@ export default function RegisterPage() {
                             <ArrowLeft className="mr-1 h-4 w-4" />
                             Back to Login
                         </Link>
-                        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+                        <Button type="submit" disabled={loading} className="w-full sm:w-auto px-8">
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? 'Creating Account...' : 'Create Account'}
                         </Button>

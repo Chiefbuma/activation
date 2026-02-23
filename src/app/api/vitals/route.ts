@@ -22,6 +22,10 @@ export async function POST(request: Request) {
         const data = await request.json();
         const mysqlDate = formatMySQLDate(data.measured_at);
 
+        if (!data.registration_id) {
+            return NextResponse.json({ error: 'Registration ID is required' }, { status: 400 });
+        }
+
         await db.query(`
             INSERT INTO vitals (registration_id, bp_systolic, bp_diastolic, pulse, temp, rbs, fbs, user_id, measured_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -47,6 +51,10 @@ export async function PUT(request: Request) {
     try {
         const data = await request.json();
         const mysqlDate = formatMySQLDate(data.measured_at);
+
+        if (!data.id) {
+            return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
+        }
 
         await db.query(`
             UPDATE vitals SET bp_systolic=?, bp_diastolic=?, pulse=?, temp=?, rbs=?, fbs=?, measured_at=?

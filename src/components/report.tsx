@@ -1,7 +1,7 @@
 'use client';
 
 import type { Registration, Corporate } from '@/lib/types';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 
 type ReportProps = {
   patient: Registration;
@@ -26,7 +26,7 @@ export default function Report({ patient, corporate }: ReportProps) {
 
   // Logic: Determine Report Date based on Priority
   let reportDate: Date = new Date();
-  if (patient.wellness_date) {
+  if (patient.wellness_date && isValid(parseISO(patient.wellness_date))) {
     reportDate = parseISO(patient.wellness_date);
   } else if (latestClinical?.created_at) {
     reportDate = new Date(latestClinical.created_at);
@@ -54,14 +54,17 @@ export default function Report({ patient, corporate }: ReportProps) {
   const lowerWeight = heightM ? (18.5 * heightM * heightM).toFixed(1) : '53.3';
   const upperWeight = heightM ? (25 * heightM * heightM).toFixed(1) : '74.0';
 
-  // Assessor Logic
   const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
+
+  // Environment-specific image logic
+  const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+  const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
 
   return (
     <div className="report-body-container">
       {/* HEADER */}
       <div className="header">
-        <img src="https://picsum.photos/seed/taria/350/40" alt="Taria Health Logo" className="logo" />
+        <img src={logoPath} alt="Taria Health Logo" className="logo" />
       </div>
 
       {/* CONTENT AREA */}
@@ -173,6 +176,12 @@ export default function Report({ patient, corporate }: ReportProps) {
           {/* Doctor Signature */}
           <div className="doctor-signature keep-together min-space-before">
             <span className="doctor-prefix">Dr.</span> {mainAssessor}
+          </div>
+
+          {/* FOOTER */}
+          <div className="footer-container min-space-before">
+            <img src={logoPath} alt="Taria Health Footer" className="logo footer-logo" />
+            <div className="footer-text">© {new Date().getFullYear()} Taria Health. All rights reserved.</div>
           </div>
 
           <div className="end-spacer"></div>
