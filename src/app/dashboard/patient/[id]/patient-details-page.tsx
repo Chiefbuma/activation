@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -501,7 +502,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Verbal Stress Rating (1-10)</Label>
                                 <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} placeholder="Scale 1-10" onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})}/>
-                                <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (>7 triggers recommendation).</p>
+                                <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (&gt;7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
