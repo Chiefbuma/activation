@@ -513,6 +513,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (&gt;7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
+                                <Label className="text-primary font-bold">Counselling Status</Label>
+                                <Input 
+                                    value={clinicalForm.verbal_stress_rating ? (Number(clinicalForm.verbal_stress_rating) > 7 ? 'Recommended' : 'Not Recommended') : 'N/A'} 
+                                    readOnly 
+                                    className="bg-muted/30 font-bold" 
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
                                 <Select value={clinicalForm.conclusion || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
                                     <SelectTrigger><SelectValue placeholder="Select conclusion" /></SelectTrigger>
