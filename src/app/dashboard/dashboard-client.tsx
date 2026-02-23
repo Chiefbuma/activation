@@ -24,7 +24,7 @@ export default function DashboardClient({
   const [users, setUsers] = useState(initialUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   
-  // Set activations as default view and ensure it is the first tab
+  // Activations is the first tab and default view
   const [activeView, setActiveView] = useState<View>('activations');
 
   useEffect(() => {
@@ -35,11 +35,11 @@ export default function DashboardClient({
   }, []);
 
   const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
-    setCorporates(updatedCorporates);
+    // Shared state management if needed
   };
   
   const handleUpdateUsers = (updatedUsers: User[]) => {
-    setUsers(updatedUsers);
+    // Shared state management if needed
   };
 
   const getViewTitle = () => {

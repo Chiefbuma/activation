@@ -33,7 +33,6 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
   const handleBulkDelete = async () => {
     setIsSubmitting(true);
     try {
-        // Sequentially remove participants via API
         for (const patient of selectedRows) {
             await fetch(`/api/registrations?id=${patient.id}`, { method: 'DELETE' });
         }
@@ -74,7 +73,7 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Confirm Bulk Deletion</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        You are about to delete {selectedCount} participant records. This action cannot be undone and will remove all associated clinical data.
+                                        You are about to delete {selectedCount} participant records. This action cannot be undone.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -104,7 +103,6 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                                 variant={viewMode === 'table' ? 'secondary' : 'ghost'} 
                                 size="icon" 
                                 onClick={() => setViewMode('table')}
-                                aria-label="Table View"
                                 className="h-8 w-8"
                             >
                                 <List className="h-4 w-4" />
@@ -113,7 +111,6 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
                                 size="icon" 
                                 onClick={() => setViewMode('grid')}
-                                aria-label="Grid View"
                                 className="h-8 w-8"
                             >
                                 <LayoutGrid className="h-4 w-4" />

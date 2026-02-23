@@ -24,7 +24,7 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestClinical = patient.clinicals?.[0];
   const latestGoal = patient.goals?.[0];
 
-  // Logic: Determine Report Date based on Priority
+  // Date Priority Logic
   let reportDate: Date = new Date();
   if (patient.wellness_date && isValid(parseISO(patient.wellness_date))) {
     reportDate = parseISO(patient.wellness_date);
@@ -34,56 +34,45 @@ export default function Report({ patient, corporate }: ReportProps) {
     reportDate = new Date(latestNutrition.created_at);
   } else if (latestVital?.created_at) {
     reportDate = new Date(latestVital.created_at);
-  } else if (patient.created_at) {
-    reportDate = new Date(patient.created_at);
   }
 
   const day = reportDate.getDate();
   const suffix = getDaySuffix(day);
   const formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(reportDate, ' MMMM yyyy')}`;
 
-  // Discussion Summary Logic
   const discussionParagraphs = [
     latestClinical?.doctor_notes?.trim(),
     latestClinical?.notes_psychologist?.trim(),
     latestNutrition?.notes_nutritionist?.trim()
   ].filter(Boolean) as string[];
 
-  // Calculation for Weight Guidance
-  const heightM = latestNutrition?.height ? latestNutrition.height / 100 : null;
-  const lowerWeight = heightM ? (18.5 * heightM * heightM).toFixed(1) : '53.3';
-  const upperWeight = heightM ? (25 * heightM * heightM).toFixed(1) : '74.0';
+  const lowerWeight = latestNutrition?.llw ? latestNutrition.llw.toFixed(1) : '53.3';
+  const upperWeight = latestNutrition?.ulw ? latestNutrition.ulw.toFixed(1) : '74.0';
 
   const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
 
-  // Environment-specific image logic
+  // Environment Image Logic
   const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
 
   return (
     <div className="report-body-container">
-      {/* HEADER */}
       <div className="header">
         <img src={logoPath} alt="Taria Health Logo" className="logo" />
       </div>
 
-      {/* CONTENT AREA */}
       <div className="content-wrapper">
         <div className="content-area">
-          
-          {/* Title and Date */}
           <div className="title-container keep-together">
             <div className="report-title">INDIVIDUAL WELLNESS REPORT:</div>
             <div className="report-date">{formattedDate}</div>
           </div>
 
-          {/* Patient Info */}
           <div className="patient-info keep-together">
             <span className="patient-name">{`${patient.first_name} ${patient.surname || ''}`}</span>
             <span className="patient-email">{patient.email || ''}</span>
           </div>
 
-          {/* Screening Results Section */}
           <div className="section-heading min-space-before">Screening Results</div>
           
           <div className="screening-grid force-together">
@@ -126,7 +115,6 @@ export default function Report({ patient, corporate }: ReportProps) {
             </div>
           </div>
 
-          {/* Clinical Guidance Text */}
           <div className="keep-together">
             <div className="guidance-text body-text">
               Healthy weight for height range (kgs): {lowerWeight}kgs - {upperWeight}kgs
@@ -139,10 +127,8 @@ export default function Report({ patient, corporate }: ReportProps) {
             </div>
           </div>
 
-          {/* Assessor Attribution */}
           <div className="section-assessor min-space-before">Assessed by: {mainAssessor}</div>
 
-          {/* Discussion Summary */}
           {discussionParagraphs.length > 0 && (
             <>
               <div className="section-heading min-space-before">Discussion Summary</div>
@@ -156,8 +142,7 @@ export default function Report({ patient, corporate }: ReportProps) {
             </>
           )}
 
-          {/* Personalized Health Goal */}
-          {latestGoal && (
+          {latestGoal && (latestGoal.discussion || latestGoal.goal) && (
             <>
               <div className="section-heading min-space-before">Personalized Health Goal</div>
               <div className="content-section">
@@ -173,17 +158,14 @@ export default function Report({ patient, corporate }: ReportProps) {
             </>
           )}
 
-          {/* Doctor Signature */}
           <div className="doctor-signature keep-together min-space-before">
             <span className="doctor-prefix">Dr.</span> {mainAssessor}
           </div>
 
-          {/* FOOTER */}
           <div className="footer-container min-space-before">
             <img src={logoPath} alt="Taria Health Footer" className="logo footer-logo" />
             <div className="footer-text">© {new Date().getFullYear()} Taria Health. All rights reserved.</div>
           </div>
-
           <div className="end-spacer"></div>
         </div>
       </div>
