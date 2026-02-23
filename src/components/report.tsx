@@ -38,6 +38,11 @@ export default function Report({ patient, corporate }: ReportProps) {
     latestClinical?.doctor_notes && `Observations: ${latestClinical.doctor_notes}`,
   ].filter(Boolean) as string[];
 
+  // Patient specific range or default example
+  const weightRangeStr = latestNutrition?.llw && latestNutrition?.ulw 
+    ? `${latestNutrition.llw}kgs - ${latestNutrition.ulw}kgs`
+    : '53.3kgs - 74.0kgs';
+
   return (
     <div className="report-body-container bg-white text-gray-800 flex flex-col min-h-screen">
       <div className="flex-grow">
@@ -99,6 +104,16 @@ export default function Report({ patient, corporate }: ReportProps) {
               </div>
             </div>
 
+            {/* Informational Guidance Section */}
+            <div className="guidance-box keep-together">
+                <p className="guidance-title">Target Health Indicators Reference:</p>
+                <div className="guidance-content">
+                    <p>• Healthy weight for height range: <span className="font-bold">{weightRangeStr}</span></p>
+                    <p>• Healthy Body fat % ranges: Men <span className="font-bold">18-24%</span>, Women <span className="font-bold">24-31%</span></p>
+                    <p>• Visceral fat range: <span className="font-bold">Under 12</span></p>
+                </div>
+            </div>
+
             {clinicalDetails.length > 0 && (
                 <>
                     <div className="section-heading min-space-before">Clinical Summary</div>
@@ -117,9 +132,13 @@ export default function Report({ patient, corporate }: ReportProps) {
         </div>
       </div>
       
-      <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col items-center gap-2 pb-4">
-          <img src="https://picsum.photos/seed/taria/200/40" alt="Taria Health Logo" className="h-8 w-auto grayscale opacity-50" data-ai-hint="healthcare logo" />
-          <p className="text-[9pt] text-gray-400 italic">Official Individual Activation Report - Taria Health</p>
+      {/* Report Footer */}
+      <div className="report-footer keep-together min-space-before">
+          <div className="footer-line"></div>
+          <div className="footer-content">
+              <img src="https://picsum.photos/seed/taria/250/40" alt="Taria Health Logo" className="footer-logo" data-ai-hint="healthcare logo" />
+              <p className="footer-text">Official Wellness Activation Report &copy; {new Date().getFullYear()} Taria Health</p>
+          </div>
       </div>
     </div>
   );
