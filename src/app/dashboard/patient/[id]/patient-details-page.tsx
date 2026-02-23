@@ -120,7 +120,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             user_id: currentUser?.id,
             measured_at: vitalsForm.measured_at || new Date().toISOString()
         });
-        toast({ title: 'Success', description: 'Vitals record saved.' });
+        toast({ title: 'Success', description: `Vitals record ${vitalsForm.id ? 'updated' : 'saved'}.` });
         setIsVitalsDialogOpen(false);
         setVitalsForm({});
         refreshData();
@@ -183,7 +183,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             registration_id: patient.id,
             user_id: currentUser?.id
         });
-        toast({ title: 'Success', description: 'Nutrition record saved.' });
+        toast({ title: 'Success', description: `Nutrition record ${nutritionForm.id ? 'updated' : 'saved'}.` });
         setIsNutritionDialogOpen(false);
         setNutritionForm({});
         refreshData();
@@ -204,7 +204,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             registration_id: patient.id,
             user_id: currentUser?.id
         });
-        toast({ title: 'Success', description: 'Clinical review recorded.' });
+        toast({ title: 'Success', description: `Clinical review ${clinicalForm.id ? 'updated' : 'recorded'}.` });
         setIsClinicalDialogOpen(false);
         setClinicalForm({});
         refreshData();
@@ -282,15 +282,18 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Latest physiological measurements</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isVitalsDialogOpen} onOpenChange={setIsVitalsDialogOpen}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto"><PlusCircle className="mr-2 h-4 w-4"/>Record Vitals</Button></DialogTrigger>
+                <Dialog open={isVitalsDialogOpen} onOpenChange={(open) => {
+                    if (!open) setVitalsForm({});
+                    setIsVitalsDialogOpen(open);
+                }}>
+                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setVitalsForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Record Vitals</Button></DialogTrigger>
                     <DialogContent className="max-w-md border-primary/20 w-[95vw] sm:w-full">
                         <DialogHeader><DialogTitle className="text-primary">{vitalsForm.id ? 'Edit' : 'New'} Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Temp (°C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Temp (°C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: e.target.value})} /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">RBS (mmol/L)</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})} /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">FBS (mmol/L)</Label><Input value={vitalsForm.fbs || ''} onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})} /></div>
                         </div>
@@ -298,7 +301,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveVitals} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Record
+                                {vitalsForm.id ? 'Update Record' : 'Save Record'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -321,7 +324,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <td className="py-3 px-4">{new Date(v.created_at).toLocaleDateString()}</td>
                                         <td className="py-3 px-4 font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
                                         <td className="py-3 px-4 text-right flex justify-end gap-1">
-                                            <Button variant="ghost" size="icon" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7"><Edit className="h-3 w-3"/></Button>
+                                            <Button variant="ghost" size="icon" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-7 w-7" onClick={() => handleDeleteVital(v.id)}><Trash2 className="h-3 w-3"/></Button>
                                         </td>
                                     </tr>
@@ -342,15 +345,18 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Body composition tracking</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isNutritionDialogOpen} onOpenChange={setIsNutritionDialogOpen}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto"><PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition</Button></DialogTrigger>
+                <Dialog open={isNutritionDialogOpen} onOpenChange={(open) => {
+                    if (!open) setNutritionForm({});
+                    setIsNutritionDialogOpen(open);
+                }}>
+                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setNutritionForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition</Button></DialogTrigger>
                     <DialogContent className="max-w-md border-primary/20 w-[95vw] sm:w-full">
-                        <DialogHeader><DialogTitle className="text-primary">Nutrition Record</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="text-primary">{nutritionForm.id ? 'Edit' : 'New'} Nutrition Record</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})} /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: e.target.value})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold text-xs">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: e.target.value})} /></div>
                         </div>
                         {nutritionForm.height && nutritionForm.weight && (
                             <div className="bg-muted/50 p-3 rounded-xl space-y-2 text-[10px] md:text-xs border border-primary/10">
@@ -369,7 +375,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveNutrition} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Record
+                                {nutritionForm.id ? 'Update Record' : 'Save Record'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -395,7 +401,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
                                         <td className="py-3 px-4 font-medium">{n.bmi}</td>
                                         <td className="py-3 px-4 font-semibold hidden md:table-cell">{n.meal_plan}</td>
-                                        <td className="py-3 px-4 text-right">
+                                        <td className="py-3 px-4 text-right flex justify-end gap-1">
+                                            <Button variant="ghost" size="icon" onClick={() => { setNutritionForm(n); setIsNutritionDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('nutritions', n.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
                                         </td>
                                     </tr>
@@ -416,18 +423,21 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <CardDescription>Professional observations</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isClinicalDialogOpen} onOpenChange={setIsClinicalDialogOpen}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto"><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
+                <Dialog open={isClinicalDialogOpen} onOpenChange={(open) => {
+                    if (!open) setClinicalForm({});
+                    setIsClinicalDialogOpen(open);
+                }}>
+                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setClinicalForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
                     <DialogContent className="max-w-lg border-primary/20 w-[95vw] sm:w-full">
-                        <DialogHeader><DialogTitle className="text-primary">Clinical Review</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="text-primary">{clinicalForm.id ? 'Edit' : 'New'} Clinical Review</DialogTitle></DialogHeader>
                         <div className="flex flex-col gap-4 py-4">
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold text-xs">Verbal Stress Rating (1-10)</Label>
-                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})} />
+                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: e.target.value})} />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold text-xs">Wellness Check Conclusion</Label>
-                                <Select onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
+                                <Select value={clinicalForm.conclusion || undefined} onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
                                     <SelectTrigger><SelectValue placeholder="Select outcome" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All results within healthy range">All within healthy range</SelectItem>
@@ -447,7 +457,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveClinical} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Submit Review
+                                {clinicalForm.id ? 'Update Review' : 'Submit Review'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -460,9 +470,15 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div key={c.id} className="p-4 border rounded-xl bg-muted/20 relative dark:border-primary/10">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-primary rounded-l-xl" />
                                 <div className="grid grid-cols-1 gap-3">
-                                    <div>
-                                        <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Counselling</Label>
-                                        <p className="font-semibold text-sm text-foreground">{c.counselling_sessions}</p>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Counselling</Label>
+                                            <p className="font-semibold text-sm text-foreground">{c.counselling_sessions}</p>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <Button variant="ghost" size="icon" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
+                                        </div>
                                     </div>
                                     <div>
                                         <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Conclusion</Label>
@@ -471,9 +487,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                     <div>
                                         <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Doctor's Notes</Label>
                                         <p className="text-xs italic text-muted-foreground line-clamp-3">{c.doctor_notes}</p>
-                                    </div>
-                                    <div className="flex justify-end pt-1">
-                                        <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
                                     </div>
                                 </div>
                             </div>

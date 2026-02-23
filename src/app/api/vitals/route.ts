@@ -11,6 +11,12 @@ const formatMySQLDate = (dateStr?: string) => {
     }
 };
 
+const toNum = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const n = parseFloat(val);
+    return isNaN(n) ? null : n;
+};
+
 export async function POST(request: Request) {
     try {
         const data = await request.json();
@@ -20,14 +26,14 @@ export async function POST(request: Request) {
             INSERT INTO vitals (registration_id, bp_systolic, bp_diastolic, pulse, temp, rbs, fbs, user_id, measured_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            data.registration_id ? Number(data.registration_id) : null, 
-            data.bp_systolic !== undefined && data.bp_systolic !== null ? Number(data.bp_systolic) : null, 
-            data.bp_diastolic !== undefined && data.bp_diastolic !== null ? Number(data.bp_diastolic) : null, 
-            data.pulse !== undefined && data.pulse !== null ? Number(data.pulse) : null, 
-            data.temp !== undefined && data.temp !== null ? Number(data.temp) : null, 
+            toNum(data.registration_id), 
+            toNum(data.bp_systolic), 
+            toNum(data.bp_diastolic), 
+            toNum(data.pulse), 
+            toNum(data.temp), 
             data.rbs ? String(data.rbs) : null, 
             data.fbs ? String(data.fbs) : null, 
-            data.user_id ? Number(data.user_id) : null, 
+            toNum(data.user_id), 
             mysqlDate
         ]);
         return NextResponse.json({ success: true });
@@ -46,14 +52,14 @@ export async function PUT(request: Request) {
             UPDATE vitals SET bp_systolic=?, bp_diastolic=?, pulse=?, temp=?, rbs=?, fbs=?, measured_at=?
             WHERE id=?
         `, [
-            data.bp_systolic !== undefined && data.bp_systolic !== null ? Number(data.bp_systolic) : null, 
-            data.bp_diastolic !== undefined && data.bp_diastolic !== null ? Number(data.bp_diastolic) : null, 
-            data.pulse !== undefined && data.pulse !== null ? Number(data.pulse) : null, 
-            data.temp !== undefined && data.temp !== null ? Number(data.temp) : null, 
+            toNum(data.bp_systolic), 
+            toNum(data.bp_diastolic), 
+            toNum(data.pulse), 
+            toNum(data.temp), 
             data.rbs ? String(data.rbs) : null, 
             data.fbs ? String(data.fbs) : null, 
             mysqlDate, 
-            data.id ? Number(data.id) : null
+            toNum(data.id)
         ]);
         return NextResponse.json({ success: true });
     } catch (error: any) {

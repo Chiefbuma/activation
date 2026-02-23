@@ -9,22 +9,25 @@ export async function GET() {
             FROM registrations r 
             LEFT JOIN corporates c ON r.corporate_id = c.id
             ORDER BY r.created_at DESC
+            LIMIT 1000
         `);
         
         const registrations = rows as any[];
-        
-        const enriched = await Promise.all(registrations.map(async (reg) => {
-            const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            
-            return {
-                ...reg,
-                vitals: vitals as Vital[],
-                nutritions: nutritions as Nutrition[],
-                clinicals: clinicals as Clinical[],
-                status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
-            };
+        if (registrations.length === 0) return NextResponse.json([]);
+
+        const ids = registrations.map(r => r.id);
+
+        // Optimized Bulk Fetch
+        const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+        const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+        const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+
+        const enriched = registrations.map(reg => ({
+            ...reg,
+            vitals: (vitals as Vital[]).filter(v => v.registration_id === reg.id),
+            nutritions: (nutritions as Nutrition[]).filter(n => n.registration_id === reg.id),
+            clinicals: (clinicals as Clinical[]).filter(c => c.registration_id === reg.id),
+            status: (vitals as Vital[]).some(v => v.registration_id === reg.id) ? 'Active' : 'Pending'
         }));
 
         return NextResponse.json(enriched);

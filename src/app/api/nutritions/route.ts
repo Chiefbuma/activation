@@ -1,6 +1,12 @@
 import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+const toNum = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const n = parseFloat(val);
+    return isNaN(n) ? null : n;
+};
+
 export async function POST(request: Request) {
     try {
         const data = await request.json();
@@ -8,18 +14,18 @@ export async function POST(request: Request) {
             INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, user_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            data.registration_id ? Number(data.registration_id) : null, 
-            data.height ? Number(data.height) : null, 
-            data.weight ? Number(data.weight) : null, 
-            data.bmi ? Number(data.bmi) : null, 
-            data.llw ? Number(data.llw) : null, 
-            data.ulw ? Number(data.ulw) : null, 
-            data.excess_weight ? Number(data.excess_weight) : null,
-            data.visceral_fat ? Number(data.visceral_fat) : null,
-            data.body_fat_percent ? Number(data.body_fat_percent) : null,
+            toNum(data.registration_id), 
+            toNum(data.height), 
+            toNum(data.weight), 
+            toNum(data.bmi), 
+            toNum(data.llw), 
+            toNum(data.ulw), 
+            toNum(data.excess_weight),
+            toNum(data.visceral_fat),
+            toNum(data.body_fat_percent),
             data.meal_plan || null, 
             data.weight_loss_period || null, 
-            data.user_id ? Number(data.user_id) : null
+            toNum(data.user_id)
         ]);
         return NextResponse.json({ success: true });
     } catch (error: any) {
@@ -35,17 +41,17 @@ export async function PUT(request: Request) {
             UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?
             WHERE id=?
         `, [
-            data.height ? Number(data.height) : null, 
-            data.weight ? Number(data.weight) : null, 
-            data.bmi ? Number(data.bmi) : null, 
-            data.llw ? Number(data.llw) : null, 
-            data.ulw ? Number(data.ulw) : null, 
-            data.excess_weight ? Number(data.excess_weight) : null, 
-            data.visceral_fat ? Number(data.visceral_fat) : null,
-            data.body_fat_percent ? Number(data.body_fat_percent) : null,
+            toNum(data.height), 
+            toNum(data.weight), 
+            toNum(data.bmi), 
+            toNum(data.llw), 
+            toNum(data.ulw), 
+            toNum(data.excess_weight), 
+            toNum(data.visceral_fat),
+            toNum(data.body_fat_percent),
             data.meal_plan || null, 
             data.weight_loss_period || null, 
-            data.id ? Number(data.id) : null
+            toNum(data.id)
         ]);
         return NextResponse.json({ success: true });
     } catch (error: any) {
