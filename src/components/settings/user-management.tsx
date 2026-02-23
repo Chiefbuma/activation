@@ -151,8 +151,8 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
         header: "User",
         cell: ({ row }) => {
             const user = row.original;
-            // Safe split logic
-            const initials = String(user.name || '').split(' ').map(n => n[0]).join('').slice(0, 2);
+            const nameStr = String(user.name || 'U');
+            const initials = nameStr.trim().split(/\s+/).map(n => n[0]).join('').slice(0, 2).toUpperCase();
             return (
                 <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">

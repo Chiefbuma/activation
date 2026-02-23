@@ -212,27 +212,20 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // STABILIZED: Optimized selection callback to prevent Error #185 (infinite loop)
-  const onSelectionChangeRef = React.useRef(onSelectionChange);
+  // STABLE SELECTION CALLBACK (FIX FOR ERROR #185)
+  // We use a ref to track the last selection state string to prevent recursive loops
+  const lastSelectionKeys = React.useRef<string>('')
+  
   React.useEffect(() => {
-    onSelectionChangeRef.current = onSelectionChange;
-  }, [onSelectionChange]);
-
-  const lastSelectionStr = React.useRef<string>('');
-
-  React.useEffect(() => {
-    const selectionKeys = Object.keys(rowSelection);
-    const currentStr = selectionKeys.sort().join(',');
-    
-    // Only notify parent if selection actually changed to avoid infinite cycles
-    if (currentStr !== lastSelectionStr.current) {
-        lastSelectionStr.current = currentStr;
-        if (onSelectionChangeRef.current) {
-            const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original);
-            onSelectionChangeRef.current(selectedRows.length, selectedRows);
-        }
+    const currentKeys = Object.keys(rowSelection).sort().join(',')
+    if (currentKeys !== lastSelectionKeys.current) {
+      lastSelectionKeys.current = currentKeys
+      if (onSelectionChange) {
+        const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original)
+        onSelectionChange(selectedRows.length, selectedRows)
+      }
     }
-  }, [rowSelection, table]);
+  }, [rowSelection, table, onSelectionChange])
 
   return (
     <div className="space-y-4">

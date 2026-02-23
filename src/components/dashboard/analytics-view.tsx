@@ -49,28 +49,37 @@ interface AnalyticsViewProps {
   corporates: Corporate[];
 }
 
+// Safe split helper for dates
+const safeSplitDate = (dateStr: string | undefined | null, separator: string = '-') => {
+  if (!dateStr) return [];
+  try {
+    return String(dateStr).split(separator);
+  } catch (error) {
+    console.error('Error splitting date:', error);
+    return [];
+  }
+};
+
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
-  // 1. Summary Calculations
   const summary = useMemo(() => {
     const totalReg = patients.length;
     const totalActive = patients.filter(p => 
-        p.vitals.length > 0 || 
-        p.nutritions.length > 0 || 
-        p.clinicals.length > 0
+        (p.vitals?.length || 0) > 0 || 
+        (p.nutritions?.length || 0) > 0 || 
+        (p.clinicals?.length || 0) > 0
     ).length;
     const maleCount = patients.filter(p => p.sex === 'Male').length;
     const femaleCount = patients.filter(p => p.sex === 'Female').length;
     const totalCorps = corporates.length;
 
-    // New parameters for clinical summaries
     const recommendedMealPlan = patients.filter(p => 
-        p.nutritions.some(n => n.meal_plan === 'Recommended')
+        p.nutritions?.some(n => n.meal_plan === 'Recommended')
     ).length;
     
     const recommendedCounselling = patients.filter(p => 
-        p.clinicals.some(c => c.counselling_sessions === 'Recommended')
+        p.clinicals?.some(c => c.counselling_sessions === 'Recommended')
     ).length;
 
     return { totalReg, totalActive, totalCorps, maleCount, femaleCount, recommendedMealPlan, recommendedCounselling };
@@ -81,7 +90,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     { name: 'Female', value: summary.femaleCount, color: 'hsl(var(--chart-3))' },
   ];
 
-  // 2. Month Options (Last 6 months)
   const monthOptions = useMemo(() => {
     return Array.from({ length: 6 }).map((_, i) => {
       const date = subMonths(new Date(), i);
@@ -92,54 +100,63 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     });
   }, []);
 
-  // 3. Weekly Tracker Logic
   const weeklyTrackerData = useMemo(() => {
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const targetDate = new Date(year, month - 1, 1);
-    const monthStart = startOfMonth(targetDate);
-    const monthEnd = endOfMonth(targetDate);
-
-    // Get weeks in this month
-    const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
-    
-    return weeks.slice(0, 5).map((weekStart, idx) => {
-      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-      const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
-
-      const interval = { start: weekStart, end: effectiveEnd };
-      const weekPatients = patients.filter(p => {
-        const created = new Date(p.created_at);
-        return isWithinInterval(created, interval) && isSameMonth(created, monthStart);
-      });
-
-      const uniqueCorps = new Set(weekPatients.filter(p => p.corporate_id).map(p => p.corporate_id)).size;
-      const male = weekPatients.filter(p => p.sex === 'Male').length;
-      const female = weekPatients.filter(p => p.sex === 'Female').length;
-
-      const recommendedMealPlans = weekPatients.filter(p => 
-        p.nutritions.some(n => n.meal_plan === 'Recommended')
-      ).length;
+    try {
+      const parts = safeSplitDate(selectedMonth || format(new Date(), 'yyyy-MM'), '-');
+      if (parts.length !== 2) return [];
       
-      const recommendedCounselling = weekPatients.filter(p => 
-        p.clinicals.some(c => c.counselling_sessions === 'Recommended')
-      ).length;
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      
+      if (isNaN(year) || isNaN(month)) return [];
 
-      return {
-        weekLabel: `Week ${idx + 1}`,
-        registrations: weekPatients.length,
-        male,
-        female,
-        corporates: uniqueCorps,
-        recommendedMealPlans,
-        recommendedCounselling
-      };
-    });
+      const targetDate = new Date(year, month - 1, 1);
+      const monthStart = startOfMonth(targetDate);
+      const monthEnd = endOfMonth(targetDate);
+
+      const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+      
+      return weeks.slice(0, 5).map((weekStart, idx) => {
+        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+        const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+
+        const interval = { start: weekStart, end: effectiveEnd };
+        const weekPatients = patients.filter(p => {
+          const created = new Date(p.created_at);
+          return isWithinInterval(created, interval) && isSameMonth(created, monthStart);
+        });
+
+        const uniqueCorps = new Set(weekPatients.filter(p => p.corporate_id).map(p => p.corporate_id)).size;
+        const male = weekPatients.filter(p => p.sex === 'Male').length;
+        const female = weekPatients.filter(p => p.sex === 'Female').length;
+
+        const recommendedMealPlans = weekPatients.filter(p => 
+          p.nutritions?.some(n => n.meal_plan === 'Recommended')
+        ).length;
+        
+        const recommendedCounselling = weekPatients.filter(p => 
+          p.clinicals?.some(c => c.counselling_sessions === 'Recommended')
+        ).length;
+
+        return {
+          weekLabel: `Week ${idx + 1}`,
+          registrations: weekPatients.length,
+          male,
+          female,
+          corporates: uniqueCorps,
+          recommendedMealPlans,
+          recommendedCounselling
+        };
+      });
+    } catch (error) {
+      console.error('Error in weeklyTrackerData:', error);
+      return [];
+    }
   }, [patients, selectedMonth]);
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Summary Table & Mini Donut */}
         <Card className="lg:col-span-1 border-primary/10 flex flex-col h-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -184,7 +201,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
               </Table>
             </div>
 
-            {/* Small Donut Chart */}
             <div className="h-[140px] w-full flex items-center justify-center">
                 <ChartContainer config={{}} className="h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
@@ -220,7 +236,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
           </CardContent>
         </Card>
 
-        {/* Weekly Tracker Table */}
         <Card className="lg:col-span-2 border-primary/10 h-full flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>

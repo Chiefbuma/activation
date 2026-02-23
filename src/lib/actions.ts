@@ -88,7 +88,7 @@ export async function saveNutrition(data: Partial<Nutrition>) {
             await db.query(`
                 INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, notes_nutritionist, user_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [toNum(data.registration_id), toNum(toNum(data.height)), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, toNum(data.user_id)]);
+            `, [toNum(data.registration_id), toNum(data.height), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, toNum(data.user_id)]);
         }
         revalidatePath(`/dashboard/patient/${data.registration_id}`);
         return { success: true };
