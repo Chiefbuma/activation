@@ -4,34 +4,55 @@ import { useState } from 'react';
 import type { Registration } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, List, LayoutGrid, FileDown, Trash2, CheckSquare } from 'lucide-react';
+import { PlusCircle, List, LayoutGrid, Trash2, CheckSquare, Loader2 } from 'lucide-react';
 import { DataTable } from '../ui/data-table';
 import { columns } from '../../app/dashboard/columns';
 import Link from 'next/link';
 import PatientCard from './patient-card';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function PatientList({ patients }: { patients: Registration[] }) {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-  const [selectedRows, setSelectedRows] = useState<number>(0);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [selectedRows, setSelectedRows] = useState<Registration[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSelectionChange = (count: number) => {
-    setSelectedRows(count);
-  };
-
-  const handleBulkAction = (action: string) => {
-    toast({
-        title: "Bulk Action Initiated",
-        description: `Performing ${action} on ${selectedRows} selected participants.`
-    });
+  const handleBulkDelete = async () => {
+    setIsSubmitting(true);
+    try {
+        // Sequentially remove participants via API
+        for (const patient of selectedRows) {
+            await fetch(`/api/registrations?id=${patient.id}`, { method: 'DELETE' });
+        }
+        
+        toast({
+            title: "Bulk Deletion Complete",
+            description: `Successfully removed ${selectedCount} activation records.`
+        });
+        window.location.reload();
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Bulk deletion failed. Please try again.' });
+    }
+    setIsSubmitting(false);
   };
 
   return (
      <div className="space-y-4">
         <AnimatePresence>
-            {selectedRows > 0 && (
+            {selectedCount > 0 && (
                 <motion.div 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -40,15 +61,31 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                 >
                     <div className="flex items-center gap-3 text-primary">
                         <CheckSquare className="h-5 w-5" />
-                        <span className="font-bold text-sm">{selectedRows} participants selected</span>
+                        <span className="font-bold text-sm">{selectedCount} participants selected</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" className="h-8 bg-background" onClick={() => handleBulkAction('Export')}>
-                            <FileDown className="mr-2 h-4 w-4" /> Export
-                        </Button>
-                        <Button size="sm" variant="destructive" className="h-8" onClick={() => handleBulkAction('Delete')}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="destructive" className="h-8">
+                                    <Trash2 className="mr-2 h-4 w-4" /> Bulk Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Bulk Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You are about to delete {selectedCount} participant records. This action cannot be undone and will remove all associated clinical data.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90" disabled={isSubmitting}>
+                                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Delete Permanently
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </motion.div>
             )}
@@ -96,7 +133,10 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                         <DataTable 
                             columns={columns} 
                             data={patients} 
-                            onSelectionChange={handleSelectionChange}
+                            onSelectionChange={(count, rows) => {
+                                setSelectedCount(count);
+                                setSelectedRows(rows);
+                            }}
                         />
                     </div>
                 ) : (

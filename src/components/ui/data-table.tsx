@@ -16,8 +16,6 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   ListFilter,
   X,
 } from "lucide-react"
@@ -135,7 +133,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[5, 10, 20, 30].map((pageSize) => (
+              {[5, 10, 20].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
@@ -173,7 +171,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  onSelectionChange?: (count: number) => void
+  onSelectionChange?: (count: number, selectedRows: TData[]) => void
 }
 
 export function DataTable<TData, TValue>({ 
@@ -219,7 +217,8 @@ export function DataTable<TData, TValue>({
 
   React.useEffect(() => {
     if (onSelectionChange) {
-        onSelectionChange(table.getFilteredSelectedRowModel().rows.length)
+        const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original);
+        onSelectionChange(selectedRows.length, selectedRows)
     }
   }, [rowSelection, onSelectionChange, table])
 
@@ -270,7 +269,7 @@ export function DataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground"
                     >
-                    No participants found.
+                    No records found.
                     </TableCell>
                 </TableRow>
                 )}

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Trash2, Loader2, Key, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Loader2, Eye, EyeOff, CheckSquare, Trash } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { saveUser, deleteUser } from '@/lib/serve';
+import { DataTable } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserManagementProps {
   initialUsers: User[];
@@ -48,11 +53,13 @@ const emptyUser: Omit<User, 'id'> = {
 };
 
 export default function UserManagement({ initialUsers, onUsersUpdate }: UserManagementProps) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users] = useState<User[]>(initialUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentUser, setCurrentUser] = useState<Partial<User> | null>(null);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const { toast } = useToast();
 
   const handleOpenModal = (user?: User) => {
@@ -105,81 +112,171 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
       }
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => handleOpenModal()} className="bg-teal-600 hover:bg-teal-700 text-white shadow-md">
-          <PlusCircle className="mr-2 h-4 w-4" /> Add System User
-        </Button>
-      </div>
+  const handleBulkDelete = async () => {
+      setIsSubmitting(true);
+      try {
+          for (const row of selectedRows) {
+              await deleteUser(row.id);
+          }
+          toast({ title: 'Success', description: `${selectedRows.length} user accounts removed.` });
+          window.location.reload();
+      } catch (err: any) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Bulk deletion failed.' });
+      }
+      setIsSubmitting(false);
+  };
 
-      <div className="rounded-xl border dark:border-teal-500/20 overflow-hidden shadow-sm">
-        <div className="divide-y divide-border dark:divide-teal-500/10">
-          {users.length > 0 ? (
-            users.map(user => (
-              <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 flex items-center justify-center bg-primary/10 text-primary font-bold rounded-full border shadow-sm">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <p className="font-bold text-foreground">{user.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize bg-muted px-2 py-0.5 rounded-full inline-block">{user.role}</p>
+  const columns: ColumnDef<User>[] = [
+    {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
+        accessorKey: "name",
+        header: "User",
+        cell: ({ row }) => {
+            const user = row.original;
+            const initials = user.name.split(' ').map(n => n[0]).join('');
+            return (
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-[10px]">{initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-0.5">
+                        <p className="font-bold text-sm leading-none">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(user)} className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 dark:hover:bg-teal-900/20">
+            )
+        }
+    },
+    {
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ row }) => <span className="capitalize bg-muted px-2 py-0.5 rounded-full text-xs font-medium">{row.getValue("role")}</span>
+    },
+    {
+        id: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => {
+            const user = row.original;
+            return (
+                <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => handleOpenModal(user)} className="text-primary hover:bg-primary/10">
                         <Edit className="h-4 w-4" />
                     </Button>
-                     <AlertDialog>
+                    <AlertDialog>
                         <AlertDialogTrigger asChild>
-                           <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                           <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="dark:border-primary/40">
+                        <AlertDialogContent>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Account?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This will permanently delete the account for "{user.name}". This action cannot be undone.
-                            </AlertDialogDescription>
+                                <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+                                <AlertDialogDescription>Permanently remove "{user.name}".</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                            <AlertDialogCancel className="dark:text-foreground">Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive hover:bg-destructive/90">
-                                Delete Account
-                            </AlertDialogAction>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
                 </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground py-8 italic">No system users found.</p>
-          )}
-        </div>
+            )
+        }
+    }
+  ];
+
+  return (
+    <div className="space-y-4">
+      <AnimatePresence>
+        {selectedCount > 0 && (
+            <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-primary/10 border border-primary/20 p-2 rounded-lg flex items-center justify-between shadow-sm"
+            >
+                <div className="flex items-center gap-2 text-primary px-2">
+                    <CheckSquare className="h-4 w-4" />
+                    <span className="font-bold text-xs">{selectedCount} users selected</span>
+                </div>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="destructive" className="h-8">
+                            <Trash className="mr-2 h-3.5 w-3.5" /> Bulk Delete
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Bulk Delete Users</AlertDialogTitle>
+                            <AlertDialogDescription>Remove {selectedCount} system accounts? This cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                Confirm Deletion
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex justify-end">
+        <Button onClick={() => handleOpenModal()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <PlusCircle className="mr-2 h-4 w-4" /> Add System User
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <DataTable 
+            columns={columns} 
+            data={users} 
+            onSelectionChange={(count, rows) => {
+                setSelectedCount(count);
+                setSelectedRows(rows);
+            }} 
+        />
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-lg dark:border-teal-500/30 overflow-hidden">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-teal-600 dark:text-teal-400 font-bold">{currentUser?.id ? 'Edit' : 'Add'} System User</DialogTitle>
+            <DialogTitle className="text-primary font-bold">{currentUser?.id ? 'Edit' : 'Add'} System User</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="name" className="text-primary font-bold">Full Name</Label>
-                <Input id="name" name="name" value={currentUser?.name || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
+                <Input id="name" name="name" value={currentUser?.name || ''} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
-                <Input id="email" name="email" type="email" value={currentUser?.email || ''} onChange={handleChange} required className="dark:border-teal-500/40" />
+                <Input id="email" name="email" type="email" value={currentUser?.email || ''} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-primary font-bold">System Role</Label>
                 <Select name="role" value={currentUser?.role || ''} onValueChange={(value) => handleSelectChange('role', value)}>
-                    <SelectTrigger className="dark:border-teal-500/40"><SelectValue placeholder="Select role" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="navigator">Navigator</SelectItem>
@@ -190,9 +287,9 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="password" className="text-primary font-bold">Account Password {currentUser?.id && '(Optional)'}</Label>
+                <Label htmlFor="password_user" className="text-primary font-bold">Account Password {currentUser?.id && '(Optional)'}</Label>
                 <div className="relative">
-                    <Input id="password" name="password" type={showPassword ? "text" : "password"} value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} className="pr-10 dark:border-teal-500/40" />
+                    <Input id="password_user" name="password" type={showPassword ? "text" : "password"} value={currentUser?.password || ''} onChange={handleChange} required={!currentUser?.id} />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -201,14 +298,13 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                 </div>
-                {currentUser?.id && <p className="text-[10px] text-muted-foreground italic">Leave blank to keep the current password.</p>}
               </div>
             </div>
-            <DialogFooter className="gap-2">
+            <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline" className="dark:text-foreground">Cancel</Button>
+                <Button type="button" variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700 min-w-[120px]">
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {currentUser?.id ? 'Save Changes' : 'Create Account'}
               </Button>
