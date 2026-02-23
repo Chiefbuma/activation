@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -565,7 +564,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <SelectItem value="All results within healthy range">All results within healthy range</SelectItem>
                                         <SelectItem value="Healthy lifestyle changes recommended">Healthy lifestyle changes recommended</SelectItem>
                                         <SelectItem value="Comprehensive check recommended">Comprehensive check recommended</SelectItem>
-                                        <SelectItem value="Medical Review recommended">Medical Review recommended</SelectItem>
+                                        <SelectItem value="Medical Review recommended for raised blood pressure">Medical Review recommended for raised blood pressure</SelectItem>
+                                        <SelectItem value="Medical Review recommended for raised blood sugar">Medical Review recommended for raised blood sugar</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

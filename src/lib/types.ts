@@ -58,7 +58,13 @@ export type Clinical = {
   id: number;
   registration_id: number;
   counselling_sessions: 'Recommended' | 'Not Recommended' | null;
-  conclusion: 'All results within healthy range' | 'Healthy lifestyle changes recommended' | 'Comprehensive check recommended' | 'Medical Review recommended' | null;
+  conclusion: 
+    | 'All results within healthy range' 
+    | 'Healthy lifestyle changes recommended' 
+    | 'Comprehensive check recommended' 
+    | 'Medical Review recommended for raised blood pressure' 
+    | 'Medical Review recommended for raised blood sugar' 
+    | null;
   doctor_notes: string | null;
   wellness_check_type: 'Hypertension' | 'Diabetes' | 'None' | null;
   user_id: number | null;
