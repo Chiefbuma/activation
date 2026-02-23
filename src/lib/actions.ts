@@ -7,8 +7,13 @@ import type { Registration, Vital, Nutrition, Clinical } from './types';
 
 /**
  * Server Actions for data mutations.
- * These are safe to import into Client Components because of the 'use server' directive.
  */
+
+const toNum = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const n = parseFloat(val);
+    return isNaN(n) ? null : n;
+};
 
 export async function loginUser(email: string, password: string) {
     try {
@@ -58,12 +63,12 @@ export async function saveVital(data: Partial<Vital>) {
             await db.query(`
                 UPDATE vitals SET bp_systolic=?, bp_diastolic=?, pulse=?, temp=?, rbs=?, fbs=?, measured_at=?
                 WHERE id=?
-            `, [data.bp_systolic, data.bp_diastolic, data.pulse, data.temp, data.rbs, data.fbs, data.measured_at, data.id]);
+            `, [toNum(data.bp_systolic), toNum(data.bp_diastolic), toNum(data.pulse), toNum(data.temp), data.rbs || null, data.fbs || null, data.measured_at, data.id]);
         } else {
             await db.query(`
                 INSERT INTO vitals (registration_id, bp_systolic, bp_diastolic, pulse, temp, rbs, fbs, user_id, measured_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [data.registration_id, data.bp_systolic, data.bp_diastolic, data.pulse, data.temp, data.rbs, data.fbs, data.user_id, data.measured_at]);
+            `, [toNum(data.registration_id), toNum(data.bp_systolic), toNum(data.bp_diastolic), toNum(data.pulse), toNum(data.temp), data.rbs || null, data.fbs || null, toNum(data.user_id), data.measured_at]);
         }
         revalidatePath(`/dashboard/patient/${data.registration_id}`);
         return { success: true };
@@ -76,14 +81,14 @@ export async function saveNutrition(data: Partial<Nutrition>) {
     try {
         if (data.id) {
             await db.query(`
-                UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, meal_plan=?, weight_loss_period=?
+                UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?, notes_nutritionist=?
                 WHERE id=?
-            `, [data.height, data.weight, data.bmi, data.llw, data.ulw, data.excess_weight, data.meal_plan, data.weight_loss_period, data.id]);
+            `, [toNum(data.height), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, data.id]);
         } else {
             await db.query(`
-                INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, meal_plan, weight_loss_period, user_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [data.registration_id, data.height, data.weight, data.bmi, data.llw, data.ulw, data.excess_weight, data.meal_plan, data.weight_loss_period, data.user_id]);
+                INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, notes_nutritionist, user_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [toNum(data.registration_id), toNum(toNum(data.height)), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, toNum(data.user_id)]);
         }
         revalidatePath(`/dashboard/patient/${data.registration_id}`);
         return { success: true };
@@ -98,12 +103,12 @@ export async function saveClinical(data: Partial<Clinical>) {
             await db.query(`
                 UPDATE clinicals SET counselling_sessions=?, verbal_stress_rating=?, conclusion=?, doctor_notes=?
                 WHERE id=?
-            `, [data.counselling_sessions, data.verbal_stress_rating, data.conclusion, data.doctor_notes, data.id]);
+            `, [data.counselling_sessions, toNum(data.verbal_stress_rating), data.conclusion, data.doctor_notes, data.id]);
         } else {
             await db.query(`
                 INSERT INTO clinicals (registration_id, counselling_sessions, verbal_stress_rating, conclusion, doctor_notes, user_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            `, [data.registration_id, data.counselling_sessions, data.verbal_stress_rating, data.conclusion, data.doctor_notes, data.user_id]);
+            `, [toNum(data.registration_id), data.counselling_sessions, toNum(data.verbal_stress_rating), data.conclusion, data.doctor_notes, toNum(data.user_id)]);
         }
         revalidatePath(`/dashboard/patient/${data.registration_id}`);
         return { success: true };

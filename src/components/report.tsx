@@ -24,10 +24,8 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
-// FIXED: Safe split helper with better type checking
 const safeSplitLines = (val: any): string[] => {
     if (!val) return [];
-    // Ensure we convert to string first, then split
     return String(val)
         .split('\n')
         .map(line => line.trim())
@@ -38,7 +36,6 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
   const latestClinical = patient.clinicals?.[0];
-  const latestGoal = patient.goals?.[0];
 
   // Date Priority Logic
   let reportDate: Date = new Date();
@@ -154,26 +151,6 @@ export default function Report({ patient, corporate }: ReportProps) {
                     {para}
                   </div>
                 ))}
-              </div>
-            </>
-          )}
-
-          {latestGoal && (latestGoal.discussion || latestGoal.goal) && (
-            <>
-              <div className="section-heading min-space-before">Personalized Health Goal</div>
-              <div className="content-section">
-                {latestGoal.discussion && (
-                  safeSplitLines(latestGoal.discussion).map((line, idx) => (
-                    <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
-                        {line}
-                    </div>
-                  ))
-                )}
-                {latestGoal.goal && (
-                  <div className="target-text keep-together">
-                    Target: {String(latestGoal.goal).replace(/^target\s*:\s*/i, '')}
-                  </div>
-                )}
               </div>
             </>
           )}
