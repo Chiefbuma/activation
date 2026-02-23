@@ -146,7 +146,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const visceral = Number(form.visceral_fat);
     const bodyFat = Number(form.body_fat_percent);
 
-    if (!height || !weight) return { meal_plan: 'Not Recommended' };
+    if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A' };
 
     const hM = height / 100;
     const bmi = weight / (hM * hM);
@@ -158,13 +158,18 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const bfMin = patient.sex === 'Male' ? 18 : 24;
 
     const needsPlan = bmi > 25 || bmi < 18.5 || visceral >= 12 || bodyFat > bfMax || bodyFat < bfMin;
+    const excess = Math.max(0, weight - ulw);
+    
+    // Formula: Recommended months for weight loss in years = excess weight / 12
+    const weight_loss_period = excess > 0 ? `${(excess / 12).toFixed(1)} Years` : '0 Years';
 
     return {
         bmi: parseFloat(bmi.toFixed(1)),
         meal_plan: needsPlan ? 'Recommended' : 'Not Recommended',
         llw: llw.toFixed(1),
         ulw: ulw.toFixed(1),
-        excess: (weight - ulw > 0) ? (weight - ulw).toFixed(1) : '0'
+        excess: excess.toFixed(1),
+        weight_loss_period
     };
   };
 
@@ -423,12 +428,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <p className="font-bold text-primary">Calculation Insights:</p>
                                 <p>Healthy Weight Range: {nutritionResults.llw || '-'}kg - {nutritionResults.ulw || '-'}kg</p>
                                 <p>Excess Weight: {nutritionResults.excess || '0'}kg</p>
+                                <p className="pt-1">Weight Loss Period (Target): <span className="font-bold">{nutritionResults.weight_loss_period}</span></p>
                                 <p className="pt-1">Meal Plan Status: <span className="font-bold">{nutritionResults.meal_plan}</span></p>
                             </div>
 
                             <div className="col-span-2 space-y-2">
-                                <Label className="text-primary font-bold">Rec. Months for Weight Loss</Label>
-                                <Input value={nutritionForm.weight_loss_period || ''} placeholder="e.g. 6 months" onChange={e => setNutritionForm({...nutritionForm, weight_loss_period: e.target.value})}/>
+                                <Label className="text-primary font-bold">Rec. Period for Weight Loss (Years)</Label>
+                                <Input value={nutritionResults.weight_loss_period || ''} readOnly className="bg-muted/30" />
+                                <p className="text-[10px] text-muted-foreground italic">Automated based on excess weight / 12.</p>
                             </div>
                             
                             <div className="col-span-2 space-y-2"><Label className="text-primary font-bold">Notes</Label><Textarea value={nutritionForm.notes_nutritionist || ''} onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
