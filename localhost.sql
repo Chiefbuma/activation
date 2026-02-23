@@ -1,44 +1,31 @@
--- Taria Health Production Database Schema
--- Aligned for activation.gle360dcapital.africa
+-- Taria Health - Production Database Schema
+-- Optimized for patient monitoring and clinical assessments
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- Table structure for users
--- ----------------------------
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+-- 1. Users Table
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','staff','physician','navigator','payer') NOT NULL DEFAULT 'staff',
   `avatarUrl` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Table structure for corporates
--- ----------------------------
-DROP TABLE IF EXISTS `corporates`;
-CREATE TABLE `corporates` (
+-- 2. Corporates Table
+CREATE TABLE IF NOT EXISTS `corporates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `wellness_date` date DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Table structure for registrations
--- ----------------------------
-DROP TABLE IF EXISTS `registrations`;
-CREATE TABLE `registrations` (
+-- 3. Registrations (Participants) Table
+CREATE TABLE IF NOT EXISTS `registrations` (
   `id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(100) NOT NULL,
   `middle_name` varchar(100) DEFAULT NULL,
@@ -53,17 +40,14 @@ CREATE TABLE `registrations` (
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `corporate_id` (`corporate_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`corporate_id`) REFERENCES `corporates` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `idx_corporate` (`corporate_id`),
+  KEY `idx_user` (`user_id`),
+  CONSTRAINT `fk_reg_corporate` FOREIGN KEY (`corporate_id`) REFERENCES `corporates` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_reg_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Table structure for vitals
--- ----------------------------
-DROP TABLE IF EXISTS `vitals`;
-CREATE TABLE `vitals` (
+-- 4. Vitals Table
+CREATE TABLE IF NOT EXISTS `vitals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
   `bp_systolic` int DEFAULT NULL,
@@ -76,15 +60,12 @@ CREATE TABLE `vitals` (
   `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `vitals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `idx_vitals_reg` (`registration_id`),
+  CONSTRAINT `fk_vitals_reg` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Table structure for nutritions
--- ----------------------------
-DROP TABLE IF EXISTS `nutritions`;
-CREATE TABLE `nutritions` (
+-- 5. Nutritions Table
+CREATE TABLE IF NOT EXISTS `nutritions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
   `height` int DEFAULT NULL,
@@ -95,38 +76,34 @@ CREATE TABLE `nutritions` (
   `excess_weight` decimal(5,2) DEFAULT NULL,
   `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
   `weight_loss_period` varchar(50) DEFAULT NULL,
-  `notes_nutritionist` text DEFAULT NULL,
   `visceral_fat` int DEFAULT NULL,
   `body_fat_percent` decimal(4,1) DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `nutritions_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `idx_nutri_reg` (`registration_id`),
+  CONSTRAINT `fk_nutri_reg` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Table structure for clinicals
--- ----------------------------
-DROP TABLE IF EXISTS `clinicals`;
-CREATE TABLE `clinicals` (
+-- 6. Clinicals Table
+CREATE TABLE IF NOT EXISTS `clinicals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
   `counselling_sessions` enum('Recommended','Not Recommended') DEFAULT NULL,
   `verbal_stress_rating` int DEFAULT NULL,
   `conclusion` text DEFAULT NULL,
   `doctor_notes` text DEFAULT NULL,
-  `wellness_check_type` varchar(100) DEFAULT 'None',
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `idx_clinical_reg` (`registration_id`),
+  CONSTRAINT `fk_clinical_reg` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------
--- Seed Data
--- ----------------------------
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- INITIAL SEED DATA
+-- Default password is 'password' (bcrypt: $2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr)
 INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
 ('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
 
@@ -134,5 +111,3 @@ INSERT INTO `corporates` (`name`, `wellness_date`) VALUES
 ('Bio Food Products', '2025-09-29'),
 ('Taria', '2025-10-01'),
 ('NCBA', '2026-02-02');
-
-SET FOREIGN_KEY_CHECKS = 1;
