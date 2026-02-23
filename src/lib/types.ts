@@ -37,6 +37,9 @@ export type Nutrition = {
   height: number | null;
   weight: number | null;
   bmi: number | null;
+  llw: number | null;
+  ulw: number | null;
+  excess_weight: number | null;
   visceral_fat: number | null;
   body_fat_percent: number | null;
   meal_plan: 'Recommended' | 'Not Recommended' | null;

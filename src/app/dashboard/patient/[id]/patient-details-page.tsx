@@ -146,7 +146,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const visceral = Number(form.visceral_fat);
     const bodyFat = Number(form.body_fat_percent);
 
-    if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A' };
+    if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A', llw: null, ulw: null, excess_weight: null, bmi: null };
 
     const hM = height / 100;
     const bmi = weight / (hM * hM);
@@ -165,10 +165,10 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
     return {
         bmi: parseFloat(bmi.toFixed(1)),
-        meal_plan: needsPlan ? 'Recommended' : 'Not Recommended',
-        llw: llw.toFixed(1),
-        ulw: ulw.toFixed(1),
-        excess: excess.toFixed(1),
+        meal_plan: (needsPlan ? 'Recommended' : 'Not Recommended') as 'Recommended' | 'Not Recommended',
+        llw: parseFloat(llw.toFixed(1)),
+        ulw: parseFloat(ulw.toFixed(1)),
+        excess_weight: parseFloat(excess.toFixed(1)),
         weight_loss_period
     };
   };
@@ -179,6 +179,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     
     setTimeout(() => {
         const payload = { ...nutritionForm, ...results } as Nutrition;
+        // Ensure notes is cleaned up as it is removed from UI
+        payload.notes_nutritionist = null;
+
         if (nutritionForm.id) {
             setPatient(prev => ({
                 ...prev,
@@ -427,7 +430,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="col-span-2 p-3 bg-muted/50 rounded-lg space-y-1 text-xs">
                                 <p className="font-bold text-primary">Calculation Insights:</p>
                                 <p>Healthy Weight Range: {nutritionResults.llw || '-'}kg - {nutritionResults.ulw || '-'}kg</p>
-                                <p>Excess Weight: {nutritionResults.excess || '0'}kg</p>
+                                <p>Excess Weight: {nutritionResults.excess_weight || '0'}kg</p>
                                 <p className="pt-1">Weight Loss Period (Target): <span className="font-bold">{nutritionResults.weight_loss_period}</span></p>
                                 <p className="pt-1">Meal Plan Status: <span className="font-bold">{nutritionResults.meal_plan}</span></p>
                             </div>
@@ -437,8 +440,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <Input value={nutritionResults.weight_loss_period || ''} readOnly className="bg-muted/30" />
                                 <p className="text-[10px] text-muted-foreground italic">Automated based on excess weight / 12.</p>
                             </div>
-                            
-                            <div className="col-span-2 space-y-2"><Label className="text-primary font-bold">Notes</Label><Textarea value={nutritionForm.notes_nutritionist || ''} onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" className="dark:text-foreground" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
