@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         const data = await request.json();
         const mysqlDate = formatMySQLDate(data.measured_at);
 
-        if (!data.registration_id) {
+        if (!toNum(data.registration_id)) {
             return NextResponse.json({ error: 'Registration ID is required' }, { status: 400 });
         }
 
@@ -52,7 +52,7 @@ export async function PUT(request: Request) {
         const data = await request.json();
         const mysqlDate = formatMySQLDate(data.measured_at);
 
-        if (!data.id) {
+        if (!toNum(data.id)) {
             return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
         }
 

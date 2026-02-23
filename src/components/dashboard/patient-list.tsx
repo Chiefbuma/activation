@@ -33,13 +33,15 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
   const handleBulkDelete = async () => {
     setIsSubmitting(true);
     try {
+        let deleted = 0;
         for (const patient of selectedRows) {
-            await fetch(`/api/registrations?id=${patient.id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/registrations?id=${patient.id}`, { method: 'DELETE' });
+            if (res.ok) deleted++;
         }
         
         toast({
             title: "Bulk Deletion Complete",
-            description: `Successfully removed ${selectedCount} activation records.`
+            description: `Successfully removed ${deleted} activation records.`
         });
         window.location.reload();
     } catch (error) {

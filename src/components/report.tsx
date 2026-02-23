@@ -18,15 +18,22 @@ function getDaySuffix(day: number) {
   }
 }
 
+const safeToFixed = (val: any, digits: number = 1) => {
+    const n = parseFloat(val);
+    return isNaN(n) ? '-' : n.toFixed(digits);
+};
+
 export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
   const latestClinical = patient.clinicals?.[0];
   const latestGoal = patient.goals?.[0];
 
-  // Date Priority Logic
+  // Date Priority Logic: Corporate Wellness Date > Clinical > Nutrition > Vitals > Fallback
   let reportDate: Date = new Date();
-  if (patient.wellness_date && isValid(parseISO(patient.wellness_date))) {
+  if (corporate?.wellness_date && isValid(parseISO(corporate.wellness_date))) {
+    reportDate = parseISO(corporate.wellness_date);
+  } else if (patient.wellness_date && isValid(parseISO(patient.wellness_date))) {
     reportDate = parseISO(patient.wellness_date);
   } else if (latestClinical?.created_at) {
     reportDate = new Date(latestClinical.created_at);
@@ -46,12 +53,12 @@ export default function Report({ patient, corporate }: ReportProps) {
     latestNutrition?.notes_nutritionist?.trim()
   ].filter(Boolean) as string[];
 
-  const lowerWeight = latestNutrition?.llw ? latestNutrition.llw.toFixed(1) : '53.3';
-  const upperWeight = latestNutrition?.ulw ? latestNutrition.ulw.toFixed(1) : '74.0';
+  const lowerWeight = latestNutrition?.llw ? safeToFixed(latestNutrition.llw) : '53.3';
+  const upperWeight = latestNutrition?.ulw ? safeToFixed(latestNutrition.ulw) : '74.0';
 
   const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
 
-  // Environment Image Logic
+  // Environment-Aware Branding
   const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
 
@@ -101,7 +108,7 @@ export default function Report({ patient, corporate }: ReportProps) {
             
             <div className="screening-right">
               {latestNutrition?.bmi && (
-                <div className="body-text screening-item">BMI: {latestNutrition.bmi.toFixed(1)}</div>
+                <div className="body-text screening-item">BMI: {safeToFixed(latestNutrition.bmi)}</div>
               )}
               {latestVital?.rbs && (
                 <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs} mmol/L</div>

@@ -10,6 +10,11 @@ const toNum = (val: any) => {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
+        
+        if (!toNum(data.registration_id)) {
+            return NextResponse.json({ error: 'Registration ID required' }, { status: 400 });
+        }
+
         await db.query(`
             INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, notes_nutritionist, user_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -31,13 +36,18 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Nutrition POST Error:', error);
-        return NextResponse.json({ error: 'Failed to save: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to save: ' + (error.message || 'Database error') }, { status: 500 });
     }
 }
 
 export async function PUT(request: Request) {
     try {
         const data = await request.json();
+        
+        if (!toNum(data.id)) {
+            return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        }
+
         await db.query(`
             UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?, notes_nutritionist=?
             WHERE id=?
@@ -58,6 +68,6 @@ export async function PUT(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Nutrition PUT Error:', error);
-        return NextResponse.json({ error: 'Failed to update: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update: ' + (error.message || 'Database error') }, { status: 500 });
     }
 }

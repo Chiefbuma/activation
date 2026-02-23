@@ -120,7 +120,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
         {table.getFilteredRowModel().rows.length} selected
       </div>
-      <div className="flex flex-wrap items-center gap-4 lg:gap-8">
+      <div className="flex wrap items-center gap-4 lg:gap-8">
         <div className="flex items-center space-x-2">
           <p className="text-xs font-medium">Rows</p>
           <Select
@@ -180,11 +180,8 @@ export function DataTable<TData, TValue>({
     onSelectionChange 
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
 
@@ -215,21 +212,25 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
+  // Avoid recursive render loop (Error #185) by only triggering onSelectionChange 
+  // when the rowSelection state actually changes in value.
   const onSelectionChangeRef = React.useRef(onSelectionChange);
   React.useEffect(() => {
     onSelectionChangeRef.current = onSelectionChange;
   }, [onSelectionChange]);
 
-  const lastSelectionKey = React.useRef<string>('');
+  const lastSelectionStr = React.useRef<string>('');
 
   React.useEffect(() => {
-    const currentKey = Object.keys(rowSelection).sort().join(',');
-    if (currentKey !== lastSelectionKey.current) {
+    const selectionKeys = Object.keys(rowSelection);
+    const currentStr = selectionKeys.sort().join(',');
+    
+    if (currentStr !== lastSelectionStr.current) {
+        lastSelectionStr.current = currentStr;
         if (onSelectionChangeRef.current) {
             const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original);
             onSelectionChangeRef.current(selectedRows.length, selectedRows);
         }
-        lastSelectionKey.current = currentKey;
     }
   }, [rowSelection, table]);
 
