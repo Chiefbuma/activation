@@ -42,6 +42,9 @@ CREATE TABLE `registrations` (
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  KEY `idx_reg_corporate` (`corporate_id`),
+  KEY `idx_reg_user` (`user_id`),
+  KEY `idx_reg_created` (`created_at`),
   FOREIGN KEY (`corporate_id`) REFERENCES `corporates`(`id`) ON DELETE SET NULL,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 );
@@ -59,6 +62,8 @@ CREATE TABLE `vitals` (
   `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  KEY `idx_vitals_registration` (`registration_id`),
+  KEY `idx_vitals_measured` (`measured_at`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
 );
 
@@ -71,11 +76,15 @@ CREATE TABLE `nutritions` (
   `llw` decimal(5,2) DEFAULT NULL,
   `ulw` decimal(5,2) DEFAULT NULL,
   `excess_weight` decimal(5,2) DEFAULT NULL,
+  `visceral_fat` int DEFAULT NULL,
+  `body_fat_percent` decimal(5,2) DEFAULT NULL,
   `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
   `weight_loss_period` varchar(50) DEFAULT NULL,
+  `notes_nutritionist` text DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  KEY `idx_nutritions_registration` (`registration_id`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
 );
 
@@ -89,6 +98,7 @@ CREATE TABLE `clinicals` (
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  KEY `idx_clinicals_registration` (`registration_id`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
 );
 ```

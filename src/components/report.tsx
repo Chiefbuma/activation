@@ -38,9 +38,10 @@ export default function Report({ patient, corporate }: ReportProps) {
     latestClinical?.doctor_notes && `Observations: ${latestClinical.doctor_notes}`,
   ].filter(Boolean) as string[];
 
-  // Patient specific range or default example
-  const weightRangeStr = latestNutrition?.llw && latestNutrition?.ulw 
-    ? `${latestNutrition.llw}kgs - ${latestNutrition.ulw}kgs`
+  // Calculate dynamic weight range based on BMI 18.5 - 25 if height is available
+  const heightM = latestNutrition?.height ? latestNutrition.height / 100 : null;
+  const weightRangeStr = heightM 
+    ? `${(18.5 * heightM * heightM).toFixed(1)}kgs - ${(25 * heightM * heightM).toFixed(1)}kgs`
     : '53.3kgs - 74.0kgs';
 
   return (
@@ -136,7 +137,7 @@ export default function Report({ patient, corporate }: ReportProps) {
       <div className="report-footer keep-together min-space-before">
           <div className="footer-line"></div>
           <div className="footer-content">
-              <img src="https://picsum.photos/seed/taria/250/40" alt="Taria Health Logo" className="footer-logo" data-ai-hint="healthcare logo" />
+              <img src="https://picsum.photos/seed/taria/450/60" alt="Taria Health Logo" className="footer-logo" data-ai-hint="healthcare logo" />
               <p className="footer-text">Official Wellness Activation Report &copy; {new Date().getFullYear()} Taria Health</p>
           </div>
       </div>
