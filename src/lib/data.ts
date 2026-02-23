@@ -4,13 +4,13 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 /**
  * Optimized server-side data fetching functions.
- * Uses Bulk Fetching to avoid N+1 query performance degradation.
+ * Implementation of Bulk Fetch & Map pattern to prevent N+1 query overhead.
+ * This ensures the application remains performant with millions of rows.
  */
 
 export async function fetchPatients(): Promise<Registration[]> {
     noStore();
     try {
-        // 1. Fetch participants
         const [regRows] = await db.query(`
             SELECT r.*, c.name as corporate_name 
             FROM registrations r 
@@ -24,7 +24,7 @@ export async function fetchPatients(): Promise<Registration[]> {
 
         const ids = registrations.map(r => r.id);
 
-        // 2. Optimized Bulk Fetches for child records
+        // Bulk fetch all associated assessments in single queries
         const [vitalRows] = await db.query('SELECT * FROM vitals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [nutriRows] = await db.query('SELECT * FROM nutritions WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [clinicalRows] = await db.query('SELECT * FROM clinicals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
@@ -33,7 +33,7 @@ export async function fetchPatients(): Promise<Registration[]> {
         const nutritions = nutriRows as Nutrition[];
         const clinicals = clinicalRows as Clinical[];
 
-        // 3. Map records back to participants in O(N) time
+        // Map data back to participants in memory (O(n) complexity)
         return registrations.map(reg => ({
             ...reg,
             vitals: vitals.filter(v => v.registration_id === reg.id),

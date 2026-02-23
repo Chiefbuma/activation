@@ -24,7 +24,7 @@ export default function DashboardClient({
   const [users, setUsers] = useState(initialUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   
-  // Default to activations as requested
+  // Set activations as default view
   const [activeView, setActiveView] = useState<View>('activations');
 
   useEffect(() => {
@@ -63,15 +63,15 @@ export default function DashboardClient({
   return (
     <div className="space-y-8">
        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            <div className="w-full md:w-auto">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
                     {getViewTitle()}
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-sm md:text-base text-muted-foreground">
                     {getViewSubtitle()}
                 </p>
             </div>
-            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit shadow-sm dark:border-primary/20">
+            <div className="flex items-center gap-1 p-1 bg-muted rounded-xl border w-full md:w-fit shadow-sm dark:border-primary/20 overflow-x-auto">
                 <NavButton 
                     label="Dashboard" 
                     icon={<LayoutDashboard className="h-4 w-4" />} 
@@ -103,12 +103,13 @@ export default function DashboardClient({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
+          className="w-full"
         >
           {activeView === 'dashboard' && (
             <AnalyticsView patients={patients} corporates={corporates} />
           )}
           {activeView === 'activations' && (
-            <div className="max-w-full">
+            <div className="max-w-full overflow-hidden">
                 <PatientList patients={patients as any} />
             </div>
           )}
@@ -130,7 +131,7 @@ const NavButton = ({ label, icon, isActive, onClick }: { label: string, icon: Re
   return (
     <motion.button
       onClick={onClick}
-      className={`relative flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+      className={`relative flex flex-1 md:flex-initial items-center justify-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all duration-300 whitespace-nowrap ${
         isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
       }`}
       whileHover={{ scale: 1.02 }}

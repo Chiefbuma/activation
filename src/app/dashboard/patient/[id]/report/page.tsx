@@ -4,6 +4,7 @@ import { fetchPatientById } from '@/lib/data';
 import type { Corporate } from '@/lib/types';
 
 export default async function ReportPage(props: { params: Promise<{ id: string }> }) {
+  // Next.js 15 requires awaiting params
   const { id } = await props.params;
   const patient = await fetchPatientById(id);
 

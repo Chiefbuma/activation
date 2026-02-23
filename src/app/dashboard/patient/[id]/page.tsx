@@ -13,6 +13,7 @@ async function getPatientData(id: string) {
 }
 
 export default async function PatientPage(props: { params: Promise<{ id: string }> }) {
+  // Next.js 15 requires awaiting params
   const { id } = await props.params;
   const patient = await getPatientData(id);
   

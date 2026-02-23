@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function DELETE(request: Request, context: { params: Promise<{ type: string, id: string }> }) {
     try {
+        // Next.js 15 requires awaiting params
         const { type, id } = await context.params;
         const validTypes = ['vitals', 'nutritions', 'clinicals'];
         

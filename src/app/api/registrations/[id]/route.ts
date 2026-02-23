@@ -4,6 +4,7 @@ import type { Vital, Nutrition, Clinical } from '@/lib/types';
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
+        // Next.js 15 requires awaiting params
         const { id } = await context.params;
         const [rows] = await db.query(`
             SELECT r.*, c.name as corporate_name 
