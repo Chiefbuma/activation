@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -140,20 +139,51 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     toast({ title: 'Deleted', description: 'Vitals record removed.' });
   };
 
+  const calculateNutritionResults = (form: Partial<Nutrition>) => {
+    const height = Number(form.height);
+    const weight = Number(form.weight);
+    const visceral = Number(form.visceral_fat);
+    const bodyFat = Number(form.body_fat_percent);
+
+    if (!height || !weight) return { meal_plan: 'Not Recommended' };
+
+    const hM = height / 100;
+    const bmi = weight / (hM * hM);
+    const llw = 18 * (hM * hM);
+    const ulw = 25 * (hM * hM);
+    
+    // Gender logic
+    const bfMax = patient.sex === 'Male' ? 24 : 31;
+    const bfMin = patient.sex === 'Male' ? 18 : 24;
+
+    const needsPlan = bmi > 25 || bmi < 18.5 || visceral >= 12 || bodyFat > bfMax || bodyFat < bfMin;
+
+    return {
+        bmi: parseFloat(bmi.toFixed(1)),
+        meal_plan: needsPlan ? 'Recommended' : 'Not Recommended',
+        llw: llw.toFixed(1),
+        ulw: ulw.toFixed(1),
+        excess: (weight - ulw > 0) ? (weight - ulw).toFixed(1) : '0'
+    };
+  };
+
   const handleSaveNutrition = () => {
     setIsSubmitting(true);
+    const results = calculateNutritionResults(nutritionForm);
+    
     setTimeout(() => {
+        const payload = { ...nutritionForm, ...results } as Nutrition;
         if (nutritionForm.id) {
             setPatient(prev => ({
                 ...prev,
-                nutritions: prev.nutritions.map(n => n.id === nutritionForm.id ? { ...n, ...nutritionForm } as Nutrition : n)
+                nutritions: prev.nutritions.map(n => n.id === nutritionForm.id ? { ...n, ...payload } as Nutrition : n)
             }));
             toast({ title: 'Updated', description: 'Nutrition record updated.' });
         } else {
             const newNutri: Nutrition = {
                 id: Date.now(),
                 registration_id: patient.id,
-                ...nutritionForm,
+                ...payload,
                 created_at: new Date().toISOString(),
                 user_id: currentUser?.id || null
             } as Nutrition;
@@ -172,18 +202,22 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
   const handleSaveClinical = () => {
     setIsSubmitting(true);
+    const stressRating = Number(clinicalForm.verbal_stress_rating);
+    const counselling = stressRating > 7 ? 'Recommended' : 'Not Recommended';
+
     setTimeout(() => {
+        const payload = { ...clinicalForm, counselling_sessions: counselling } as Clinical;
         if (clinicalForm.id) {
             setPatient(prev => ({
                 ...prev,
-                clinicals: prev.clinicals.map(c => c.id === clinicalForm.id ? { ...c, ...clinicalForm } as Clinical : c)
+                clinicals: prev.clinicals.map(c => c.id === clinicalForm.id ? { ...c, ...payload } as Clinical : c)
             }));
             toast({ title: 'Updated', description: 'Clinical review updated.' });
         } else {
             const newClinical: Clinical = {
                 id: Date.now(),
                 registration_id: patient.id,
-                ...clinicalForm,
+                ...payload,
                 created_at: new Date().toISOString(),
                 user_id: currentUser?.id || null
             } as Clinical;
@@ -227,6 +261,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const diff = current.getTime() - start.getTime();
     return Math.floor(diff / (1000 * 60 * 60 * 24 * 7)) + 1;
   };
+
+  const nutritionResults = calculateNutritionResults(nutritionForm);
 
   return (
     <div className="container mx-auto max-w-7xl py-6 px-4">
@@ -381,16 +417,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2"><Label className="text-primary font-bold">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})}/></div>
                             <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})}/></div>
                             <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})}/></div>
-                            <div className="col-span-2 space-y-2">
-                                <Label className="text-primary font-bold">Nutritionist Meal Plan</Label>
-                                <Select value={nutritionForm.meal_plan || ''} onValueChange={(v) => setNutritionForm({...nutritionForm, meal_plan: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select plan status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Recommended">Recommended</SelectItem>
-                                        <SelectItem value="Not Recommended">Not Recommended</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            
+                            <div className="col-span-2 p-3 bg-muted/50 rounded-lg space-y-1 text-xs">
+                                <p className="font-bold text-primary">Calculation Insights:</p>
+                                <p>Healthy Weight Range: {nutritionResults.llw || '-'}kg - {nutritionResults.ulw || '-'}kg</p>
+                                <p>Excess Weight: {nutritionResults.excess || '0'}kg</p>
+                                <p className="pt-1">Meal Plan Status: <span className="font-bold">{nutritionResults.meal_plan}</span></p>
                             </div>
+
+                            <div className="col-span-2 space-y-2">
+                                <Label className="text-primary font-bold">Rec. Months for Weight Loss</Label>
+                                <Input value={nutritionForm.weight_loss_period || ''} placeholder="e.g. 6 months" onChange={e => setNutritionForm({...nutritionForm, weight_loss_period: e.target.value})}/>
+                            </div>
+                            
                             <div className="col-span-2 space-y-2"><Label className="text-primary font-bold">Notes</Label><Textarea value={nutritionForm.notes_nutritionist || ''} onChange={e => setNutritionForm({...nutritionForm, notes_nutritionist: e.target.value})}/></div>
                         </div>
                         <DialogFooter>
@@ -460,14 +499,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <DialogHeader><DialogTitle className="text-primary">{clinicalForm.id ? 'Edit' : 'New'} Clinical Review</DialogTitle></DialogHeader>
                         <div className="flex flex-col gap-6 py-4">
                             <div className="space-y-2">
-                                <Label className="text-primary font-bold">Counselling Sessions</Label>
-                                <Select value={clinicalForm.counselling_sessions || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, counselling_sessions: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Recommended">Recommended</SelectItem>
-                                        <SelectItem value="Not Recommended">Not Recommended</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Label className="text-primary font-bold">Verbal Stress Rating (1-10)</Label>
+                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} placeholder="Scale 1-10" onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})}/>
+                                <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (>7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
@@ -513,7 +547,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 </div>
                                 <div className="flex flex-col gap-6">
                                     <div>
-                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Counselling</p>
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Counselling (Stress: {c.verbal_stress_rating || 'N/A'})</p>
                                         <p className="text-sm text-foreground font-semibold">{c.counselling_sessions || '-'}</p>
                                     </div>
                                     <div>

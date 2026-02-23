@@ -40,6 +40,7 @@ export type Nutrition = {
   visceral_fat: number | null;
   body_fat_percent: number | null;
   meal_plan: 'Recommended' | 'Not Recommended' | null;
+  weight_loss_period: string | null;
   notes_nutritionist: string | null;
   user_id: number | null;
   created_at: string;
@@ -49,6 +50,7 @@ export type Clinical = {
   id: number;
   registration_id: number;
   counselling_sessions: 'Recommended' | 'Not Recommended' | null;
+  verbal_stress_rating: number | null;
   conclusion: 
     | 'All results within healthy range' 
     | 'Healthy lifestyle changes recommended' 
