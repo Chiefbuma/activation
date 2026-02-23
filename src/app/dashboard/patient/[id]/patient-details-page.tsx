@@ -446,9 +446,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <thead className="bg-muted/50">
                                     <tr>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Date</th>
-                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Plan</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Value</th>
                                         <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">BMI</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted-foreground border-b">Nutritionist meal plan</th>
                                         <th className="text-right py-3 px-4 font-medium text-muted-foreground border-b">Actions</th>
                                     </tr>
                                 </thead>
@@ -456,13 +456,13 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                     {patient.nutritions.map((n) => (
                                         <tr key={n.id} className="hover:bg-muted/30 group border-b border-primary/5">
                                             <td className="py-3 px-4">{new Date(n.created_at).toLocaleDateString()}</td>
+                                            <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
+                                            <td className="py-3 px-4">{n.bmi || '-'}</td>
                                             <td className="py-3 px-4">
                                                 <Badge variant={n.meal_plan === 'Recommended' ? 'default' : 'secondary'} className="text-[10px]">
                                                     {n.meal_plan || 'N/A'}
                                                 </Badge>
                                             </td>
-                                            <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
-                                            <td className="py-3 px-4">{n.bmi || '-'}</td>
                                             <td className="py-3 px-4 text-right space-x-2">
                                                 <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-primary/10" onClick={() => { setNutritionForm(n); setIsNutritionDialogOpen(true); }}>
                                                     <Edit className="h-4 w-4" />
