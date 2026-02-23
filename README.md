@@ -1,39 +1,12 @@
 # Taria Health - Patient Monitoring Dashboard
 
-A modern, patient-centric health monitoring dashboard designed to track personalized health metrics over time. It provides a clean, intuitive interface for healthcare providers to monitor patient progress against their health goals.
+A modern, patient-centric health monitoring dashboard designed to track personalized health metrics over time.
 
-The application is built with a modern tech stack and follows best practices for creating a fast, user-friendly, and maintainable application.
+## Production Setup
 
-## Features
+### Database Schema
 
--   **Patient-Centric Dashboard**: A central dashboard displaying a list of all patients, with key information at a glance.
--   **Two-Step Patient Intake**: A streamlined workflow that separates initial registration from detailed clinical onboarding.
--   **Comprehensive Onboarding**: A dedicated form to capture detailed patient history, lifestyle factors, and medical information.
--   **Detailed Patient View**: A comprehensive view for each patient, including:
-    -   Personalized health metrics tracked over time with support for numeric, text, and choice-based goals.
-    -   Interactive charts to visualize metric history.
-    -   A section for patient-specific health goals.
--   **Dynamic Parameter Management**: A full-featured settings page to create, edit, and delete the clinical parameters used for tracking.
--   **Modern UI/UX**: A clean, responsive interface with smooth animations, built with ShadCN UI, Tailwind CSS, and Framer Motion.
--   **API Driven**: The application features a dedicated API layer for data management, preparing it for database integration.
-
-## Tech Stack
-
--   **Framework**: **Next.js** (v14+ with App Router)
--   **Language**: **TypeScript**
--   **UI Library**: **ShadCN UI** & **Tailwind CSS**
--   **Animations**: **Framer Motion**
--   **Charting**: **Recharts**
--   **Database**: **MySQL** (current implementation uses a mock API)
--   **Containerization**: **Docker** and **Docker Compose**
-
-## Database Schema
-
-The following tables are used in the application.
-
-### `users`
-
-Stores user accounts for staff, navigators, and physicians.
+Run the following SQL to create the necessary tables in your `gledcapi_activation` database:
 
 ```sql
 CREATE TABLE `users` (
@@ -41,172 +14,102 @@ CREATE TABLE `users` (
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','staff','physician','navigator','payer','patient') NOT NULL,
+  `role` enum('admin','staff','physician','navigator','payer') NOT NULL,
   `avatarUrl` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 );
-```
 
-### `corporates`
-
-Stores corporate partner information.
-
-```sql
 CREATE TABLE `corporates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `wellness_date` date NOT NULL,
+  `wellness_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
-```
 
-### `payers`
-
-Stores payer information (e.g., insurance companies).
-
-```sql
-CREATE TABLE `payers` (
+CREATE TABLE `registrations` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-);
-```
-
-### `patients`
-
-The central table for patient information, including demographic and onboarding data.
-
-```sql
-CREATE TABLE `patients` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `middle_name` varchar(100) DEFAULT NULL,
   `surname` varchar(100) DEFAULT NULL,
+  `sex` enum('Male','Female','Other') DEFAULT NULL,
   `dob` date DEFAULT NULL,
   `age` int DEFAULT NULL,
-  `sex` enum('Male','Female','Other') DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
-  `wellness_date` date NOT NULL,
   `corporate_id` int DEFAULT NULL,
-  `payer_id` int DEFAULT NULL,
-  `status` enum('Active','Pending','Critical','Discharged','In Review') NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_of_onboarding` date DEFAULT NULL,
-  `has_glucometer` tinyint(1) DEFAULT '0',
-  `has_bp_machine` tinyint(1) DEFAULT '0',
-  `has_tape_measure` tinyint(1) DEFAULT '0',
-  `brief_medical_history` text,
-  `years_since_diagnosis` int DEFAULT NULL,
-  `emergency_contact_name` varchar(100) DEFAULT NULL,
-  `emergency_contact_phone` varchar(20) DEFAULT NULL,
-  `emergency_contact_relation` varchar(50) DEFAULT NULL,
-  `consent_date` date DEFAULT NULL,
-  `navigator_id` int DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
-  FOREIGN KEY (`corporate_id`) REFERENCES `corporates`(`id`),
-  FOREIGN KEY (`navigator_id`) REFERENCES `users`(`id`),
-  FOREIGN KEY (`payer_id`) REFERENCES `payers`(`id`)
-);
-```
-
-### `clinical_parameters`
-
-Stores the definitions for all trackable health metrics.
-
-```sql
-CREATE TABLE `clinical_parameters` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `type` enum('numeric','text','choice') NOT NULL,
-  `unit` varchar(50) DEFAULT NULL,
-  `options` json DEFAULT NULL,
-  PRIMARY KEY (`id`)
-);
-```
-
-### `assessments`
-
-Stores each individual measurement or assessment recorded for a patient.
-
-```sql
-CREATE TABLE `assessments` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
-  `clinical_parameter_id` int NOT NULL,
-  `value` varchar(255) NOT NULL,
-  `notes` text,
-  `is_normal` tinyint(1) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `measured_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`patient_id`) REFERENCES `patients`(`id`),
-  FOREIGN KEY (`clinical_parameter_id`) REFERENCES `clinical_parameters`(`id`)
-);
-```
-
-### `goals`
-
-Stores the health goals set for each patient.
-
-```sql
-CREATE TABLE `goals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
-  `clinical_parameter_id` int NOT NULL,
-  `target_value` varchar(255) NOT NULL,
-  `target_operator` varchar(10) NOT NULL,
-  `status` enum('active','completed','cancelled') NOT NULL,
-  `notes` text,
-  `deadline` date NOT NULL,
+  `wellness_date` date DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`patient_id`) REFERENCES `patients`(`id`),
-  FOREIGN KEY (`clinical_parameter_id`) REFERENCES `clinical_parameters`(`id`)
+  FOREIGN KEY (`corporate_id`) REFERENCES `corporates`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+);
+
+CREATE TABLE `vitals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `registration_id` int NOT NULL,
+  `bp_systolic` int DEFAULT NULL,
+  `bp_diastolic` int DEFAULT NULL,
+  `pulse` int DEFAULT NULL,
+  `temp` decimal(4,1) DEFAULT NULL,
+  `rbs` varchar(20) DEFAULT NULL,
+  `fbs` varchar(20) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `nutritions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `registration_id` int NOT NULL,
+  `height` int DEFAULT NULL,
+  `weight` decimal(5,2) DEFAULT NULL,
+  `bmi` decimal(5,2) DEFAULT NULL,
+  `llw` decimal(5,2) DEFAULT NULL,
+  `ulw` decimal(5,2) DEFAULT NULL,
+  `excess_weight` decimal(5,2) DEFAULT NULL,
+  `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
+  `weight_loss_period` varchar(50) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `clinicals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `registration_id` int NOT NULL,
+  `counselling_sessions` enum('Recommended','Not Recommended') DEFAULT NULL,
+  `verbal_stress_rating` int DEFAULT NULL,
+  `conclusion` text DEFAULT NULL,
+  `doctor_notes` text DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE
 );
 ```
 
-### `prescriptions`
+### Initial Data Seed
 
-Stores medication prescriptions for patients.
+Run this to create the initial admin user (password is `password`) and sample corporates:
 
 ```sql
-CREATE TABLE `prescriptions` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
-  `medication_id` int NOT NULL,
-  `dosage` varchar(255) NOT NULL,
-  `frequency` varchar(50) NOT NULL,
-  `start_date` date NOT NULL,
-  `expiry_date` date DEFAULT NULL,
-  `notes` text,
-  `status` enum('active','completed','discontinued') NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`patient_id`) REFERENCES `patients`(`id`),
-  FOREIGN KEY (`medication_id`) REFERENCES `medications`(`id`)
-);
+INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
+('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
+
+INSERT INTO `corporates` (`name`, `wellness_date`) VALUES 
+('Bio Food Products', '2025-09-29'),
+('Taria', '2025-10-01'),
+('NCBA', '2026-02-02');
 ```
 
-### `appointments`
+## Tech Stack
 
-Stores upcoming and past appointments for patients.
-
-```sql
-CREATE TABLE `appointments` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `patient_id` int NOT NULL,
-  `clinician_id` int NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `appointment_date` datetime NOT NULL,
-  `end_date` datetime DEFAULT NULL,
-  `description` text,
-  `status` enum('scheduled','confirmed','cancelled','completed','no_show','rescheduled') NOT NULL,
-  `cancellation_reason` text,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`patient_id`) REFERENCES `patients`(`id`),
-  FOREIGN KEY (`clinician_id`) REFERENCES `users`(`id`)
-);
-```
+- **Framework**: Next.js 15 (App Router)
+- **Database**: MySQL 8
+- **UI**: ShadCN, Tailwind CSS
+- **Auth**: Password-based with Bcrypt

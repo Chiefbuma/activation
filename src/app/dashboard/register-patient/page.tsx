@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,7 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { fetchCorporates } from '@/lib/data';
-import type { Corporate } from '@/lib/types';
+import { registerParticipant } from '@/lib/actions';
+import type { Corporate, User } from '@/lib/types';
 
 export default function RegisterParticipantPage() {
   const [formData, setFormData] = useState({
@@ -34,11 +36,14 @@ export default function RegisterParticipantPage() {
   });
   const [corporates, setCorporates] = useState<Corporate[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
     fetchCorporates().then(setCorporates);
+    const stored = localStorage.getItem('loggedInUser');
+    if (stored) setCurrentUser(JSON.parse(stored));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,15 +58,19 @@ export default function RegisterParticipantPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const result = await registerParticipant({
+        ...formData,
+        age: formData.age ? parseInt(formData.age) : null,
+        corporate_id: formData.corporate_id !== 'none' ? parseInt(formData.corporate_id) : null,
+        user_id: currentUser?.id
+    } as any);
 
-    toast({
-        title: 'Registration Successful',
-        description: 'The participant has been registered successfully.',
-    });
-    
-    router.push('/dashboard');
+    if (result.success) {
+        toast({ title: 'Success', description: 'Participant registered successfully.' });
+        router.push('/dashboard');
+    } else {
+        toast({ variant: 'destructive', title: 'Error', description: result.error });
+    }
     setLoading(false);
   }
 
@@ -69,28 +78,27 @@ export default function RegisterParticipantPage() {
     <div className="container mx-auto flex justify-center items-start py-8">
       <Card className="w-full max-w-4xl border-primary/20 shadow-lg">
         <CardHeader className="text-center bg-muted/30 pb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-xl mb-4">
-            <CardTitle className="text-2xl text-primary">New Participant Registration</CardTitle>
-          </div>
-          <CardDescription>
-            Enter participant details to create a new activation record.
-          </CardDescription>
+          <CardTitle className="text-2xl text-primary">New Participant Registration</CardTitle>
+          <CardDescription>Enter participant details to create a new activation record.</CardDescription>
         </CardHeader>
         <CardContent className="pt-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="first_name" className="text-primary font-bold">First Name *</Label>
-                <Input id="first_name" required value={formData.first_name} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="first_name" required value={formData.first_name} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="middle_name" className="text-primary font-bold">Middle Name</Label>
-                <Input id="middle_name" value={formData.middle_name} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="middle_name" value={formData.middle_name} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="surname" className="text-primary font-bold">Surname *</Label>
-                <Input id="surname" required value={formData.surname} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="surname" required value={formData.surname} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="sex" className="text-primary font-bold">Sex *</Label>
                 <Select value={formData.sex} onValueChange={(v) => handleSelectChange('sex', v)} required>
@@ -102,27 +110,20 @@ export default function RegisterParticipantPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="dob" className="text-primary font-bold">Date of Birth (Optional)</Label>
-                <Input id="dob" type="date" value={formData.dob} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="age" className="text-primary font-bold">Age (Optional)</Label>
-                <Input id="age" type="number" value={formData.age} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Label htmlFor="age" className="text-primary font-bold">Age</Label>
+                <Input id="age" type="number" value={formData.age} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
-                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-primary font-bold">Phone Number</Label>
-                <Input id="phone" value={formData.phone} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="phone" value={formData.phone} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
             </div>
 
@@ -139,18 +140,17 @@ export default function RegisterParticipantPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
-                <Input id="wellness_date" type="date" value={formData.wellness_date} onChange={handleInputChange} className="dark:border-primary/40 dark:focus:ring-primary" />
+                <Input id="wellness_date" type="date" value={formData.wellness_date} onChange={handleInputChange} className="dark:border-primary/40" />
               </div>
             </div>
 
             <div className="pt-4 flex justify-between gap-4">
               <Button variant="outline" asChild className="dark:text-foreground">
-                <Link href="/dashboard">
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Cancel
-                </Link>
+                <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Link>
               </Button>
               <Button type="submit" disabled={loading} className="px-8">
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Register Participant'}
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Register Participant
               </Button>
             </div>
           </form>

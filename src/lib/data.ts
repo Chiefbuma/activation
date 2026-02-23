@@ -1,75 +1,91 @@
-import type { Registration, User, Corporate } from './types';
+
+import { db } from './db';
+import type { Registration, User, Corporate, Vital, Nutrition, Clinical } from './types';
 import { unstable_noStore as noStore } from 'next/cache';
-import { 
-    registrations as mockRegistrations, 
-    users as mockUsers,
-    corporates as mockCorporates,
-    vitals as mockVitals,
-    nutritions as mockNutritions,
-    clinicals as mockClinicals
-} from './mock-data';
 
 export async function fetchPatients(): Promise<Registration[]> {
     noStore();
-    
-    const enriched = mockRegistrations.map(reg => {
-        const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
-        const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    try {
+        const [rows] = await db.query(`
+            SELECT r.*, c.name as corporate_name 
+            FROM registrations r 
+            LEFT JOIN corporates c ON r.corporate_id = c.id
+            ORDER BY r.created_at DESC
+        `);
+        
+        const registrations = rows as any[];
+        
+        // Enrich each registration with its related records
+        const enriched = await Promise.all(registrations.map(async (reg) => {
+            const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+            const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+            const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+            
+            return {
+                ...reg,
+                vitals: vitals as Vital[],
+                nutritions: nutritions as Nutrition[],
+                clinicals: clinicals as Clinical[],
+                status: 'Active'
+            } as Registration;
+        }));
 
-        return {
-            ...reg,
-            corporate_name: corporate?.name,
-            vitals: regVitals,
-            nutritions: regNutritions,
-            clinicals: regClinicals,
-            status: 'Active' // Participants are active once registered
-        } as Registration;
-    });
-
-    return enriched.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return enriched;
+    } catch (error) {
+        console.error('Database Error:', error);
+        return [];
+    }
 }
 
 export async function fetchPatientById(id: string): Promise<Registration | null> {
     noStore();
-    
-    const reg = mockRegistrations.find(r => r.id === parseInt(id));
-
-    if (!reg) {
+    try {
+        const [rows] = await db.query(`
+            SELECT r.*, c.name as corporate_name 
+            FROM registrations r 
+            LEFT JOIN corporates c ON r.corporate_id = c.id
+            WHERE r.id = ?
+        `, [id]);
+        
+        const registrations = rows as any[];
+        if (registrations.length === 0) return null;
+        
+        const reg = registrations[0];
+        const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        
+        return {
+            ...reg,
+            vitals: vitals as Vital[],
+            nutritions: nutritions as Nutrition[],
+            clinicals: clinicals as Clinical[],
+            status: 'Active'
+        } as Registration;
+    } catch (error) {
+        console.error('Database Error:', error);
         return null;
     }
-
-    const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
-    const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    return {
-        ...reg,
-        corporate_name: corporate?.name,
-        vitals: regVitals,
-        nutritions: regNutritions,
-        clinicals: regClinicals,
-        status: 'Active'
-    } as Registration;
 }
 
 export async function fetchUsers(): Promise<User[]> {
     noStore();
-    return mockUsers;
+    try {
+        const [rows] = await db.query('SELECT id, name, email, role, avatarUrl FROM users ORDER BY name ASC');
+        return rows as User[];
+    } catch (error) {
+        console.error('Database Error:', error);
+        return [];
+    }
 }
 
 export async function fetchCorporates(): Promise<Corporate[]> {
     noStore();
-    return mockCorporates.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-export async function fetchClinicalParameters() {
-    return [
-        { id: 1, name: 'Blood Pressure', type: 'numeric', unit: 'mmHg' },
-        { id: 2, name: 'Heart Rate', type: 'numeric', unit: 'bpm' },
-        { id: 3, name: 'Weight', type: 'numeric', unit: 'kg' },
-        { id: 4, name: 'Height', type: 'numeric', unit: 'cm' },
-    ];
+    try {
+        const [rows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
+        return rows as Corporate[];
+    } catch (error) {
+        console.error('Database Error:', error);
+        return [];
+    }
 }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,11 +11,11 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Logo from '@/components/logo';
-import { users } from '@/lib/mock-data';
+import { loginUser } from '@/lib/actions';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@superadmin.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -23,29 +24,26 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate a network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const result = await loginUser(email, password);
 
-    const user = users.find(u => u.email === email);
-
-    if (!user || password !== 'password') {
+    if (result.error) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Invalid credentials',
+        title: 'Login Failed',
+        description: result.error,
       });
       setLoading(false);
       return;
     }
 
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
-    
-    toast({
-      title: 'Success!',
-      description: 'Logged in successfully. Redirecting...',
-    });
-
-    router.push('/dashboard');
+    if (result.user) {
+        localStorage.setItem('loggedInUser', JSON.stringify(result.user));
+        toast({
+            title: 'Success!',
+            description: 'Logged in successfully.',
+        });
+        router.push('/dashboard');
+    }
   };
   
   return (
