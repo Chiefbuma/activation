@@ -1,4 +1,4 @@
--- Taria Health Production Database Schema
+-- Taria Health Production Schema
 -- Database: gledcapi_activation
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -12,22 +12,21 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','staff','physician','navigator','payer') NOT NULL DEFAULT 'staff',
   `avatarUrl` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `users` (Password is 'password')
+-- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
+INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
 ('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
 
 -- --------------------------------------------------------
@@ -37,18 +36,17 @@ INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
 --
 
 CREATE TABLE `corporates` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `wellness_date` date DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `corporates`
 --
 
-INSERT INTO `corporates` (`name`, `wellness_date`) VALUES
+INSERT INTO `corporates` (`name`, `wellness_date`) VALUES 
 ('Bio Food Products', '2025-09-29'),
 ('Taria', '2025-10-01'),
 ('NCBA', '2026-02-02');
@@ -60,25 +58,25 @@ INSERT INTO `corporates` (`name`, `wellness_date`) VALUES
 --
 
 CREATE TABLE `registrations` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `first_name` varchar(100) NOT NULL,
   `middle_name` varchar(100) DEFAULT NULL,
   `surname` varchar(100) DEFAULT NULL,
   `sex` enum('Male','Female','Other') DEFAULT NULL,
   `dob` date DEFAULT NULL,
-  `age` int DEFAULT NULL,
+  `age` int(11) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
-  `corporate_id` int DEFAULT NULL,
+  `corporate_id` int(11) DEFAULT NULL,
   `wellness_date` date DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `corporate_id` (`corporate_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`corporate_id`) REFERENCES `corporates` (`id`) ON DELETE SET NULL,
   CONSTRAINT `registrations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -87,21 +85,21 @@ CREATE TABLE `registrations` (
 --
 
 CREATE TABLE `vitals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `bp_systolic` int DEFAULT NULL,
-  `bp_diastolic` int DEFAULT NULL,
-  `pulse` int DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration_id` int(11) NOT NULL,
+  `bp_systolic` int(11) DEFAULT NULL,
+  `bp_diastolic` int(11) DEFAULT NULL,
+  `pulse` int(11) DEFAULT NULL,
   `temp` decimal(4,1) DEFAULT NULL,
   `rbs` varchar(20) DEFAULT NULL,
   `fbs` varchar(20) DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `vitals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -110,9 +108,9 @@ CREATE TABLE `vitals` (
 --
 
 CREATE TABLE `nutritions` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `height` int DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration_id` int(11) NOT NULL,
+  `height` int(11) DEFAULT NULL,
   `weight` decimal(5,2) DEFAULT NULL,
   `bmi` decimal(5,2) DEFAULT NULL,
   `llw` decimal(5,2) DEFAULT NULL,
@@ -120,12 +118,12 @@ CREATE TABLE `nutritions` (
   `excess_weight` decimal(5,2) DEFAULT NULL,
   `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
   `weight_loss_period` varchar(50) DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `nutritions_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -134,23 +132,17 @@ CREATE TABLE `nutritions` (
 --
 
 CREATE TABLE `clinicals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `registration_id` int(11) NOT NULL,
   `counselling_sessions` enum('Recommended','Not Recommended') DEFAULT NULL,
-  `verbal_stress_rating` int DEFAULT NULL,
-  `conclusion` enum(
-    'All results within healthy range',
-    'Healthy lifestyle changes recommended',
-    'Comprehensive check recommended',
-    'Medical Review recommended for raised blood pressure',
-    'Medical Review recommended for raised blood sugar'
-  ) DEFAULT NULL,
+  `verbal_stress_rating` int(11) DEFAULT NULL,
+  `conclusion` varchar(255) DEFAULT NULL,
   `doctor_notes` text DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
