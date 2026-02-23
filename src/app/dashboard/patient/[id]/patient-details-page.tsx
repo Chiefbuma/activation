@@ -145,6 +145,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const calculateNutritionResults = (form: Partial<Nutrition>) => {
     const height = Number(form.height);
     const weight = Number(form.weight);
+    const bodyFat = Number(form.body_fat_percent);
+    const visceralFat = Number(form.visceral_fat);
+    
     if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A', llw: null, ulw: null, excess_weight: null, bmi: null };
 
     const hM = height / 100;
@@ -154,7 +157,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const excess = Math.max(0, weight - ulw);
     const weight_loss_period = excess > 0 ? `${(excess / 12).toFixed(1)} Years` : '0 Years';
 
-    const needsPlan = bmi > 25 || bmi < 18.5 || Number(form.visceral_fat) >= 12;
+    const isMale = patient.sex === 'Male';
+    let needsPlan = bmi > 25 || bmi < 18.5 || visceralFat >= 12;
+    
+    // Healthy Body fat % ranges: Men 18-24%, Women 24-31%
+    if (bodyFat) {
+        if (isMale && (bodyFat < 18 || bodyFat > 24)) needsPlan = true;
+        if (!isMale && (bodyFat < 24 || bodyFat > 31)) needsPlan = true;
+    }
 
     return {
         bmi: parseFloat(bmi.toFixed(1)),
@@ -364,6 +374,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             </div>
                         )}
                         <DialogFooter>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveNutrition} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Record
@@ -382,15 +393,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                     <th className="text-left py-3 px-4 font-medium border-b">Value</th>
                                     <th className="text-left py-3 px-4 font-medium border-b">BMI</th>
                                     <th className="text-left py-3 px-4 font-medium border-b">Nutritionist Meal Plan</th>
+                                    <th className="text-right py-3 px-4 font-medium border-b">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {patient.nutritions.map((n) => (
-                                    <tr key={n.id} className="border-b border-primary/5">
+                                    <tr key={n.id} className="hover:bg-muted/30 border-b border-primary/5">
                                         <td className="py-3 px-4">{new Date(n.created_at).toLocaleDateString()}</td>
                                         <td className="py-3 px-4">{n.weight}kg, {n.height}cm</td>
                                         <td className="py-3 px-4">{n.bmi}</td>
-                                        <td className="py-3 px-4 font-bold">{n.meal_plan}</td>
+                                        <td className="py-3 px-4 font-semibold">{n.meal_plan}</td>
+                                        <td className="py-3 px-4 text-right">
+                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteAssessment('nutritions', n.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -445,7 +460,11 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button onClick={handleSaveClinical} disabled={isSubmitting}>Submit Review</Button>
+                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={handleSaveClinical} disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Submit Review
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -456,18 +475,21 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         {patient.clinicals.map(c => (
                             <div key={c.id} className="p-4 border rounded-xl bg-muted/20 relative">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="text-xs font-bold text-primary uppercase">Counselling</p>
-                                        <p className="font-semibold">{c.counselling_sessions}</p>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="flex flex-col">
+                                        <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Counselling</Label>
+                                        <p className="font-semibold text-sm">{c.counselling_sessions}</p>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-primary uppercase">Wellness Check Conclusion</p>
-                                        <p className="font-semibold">{c.conclusion}</p>
+                                    <div className="flex flex-col">
+                                        <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Wellness Check Conclusion</Label>
+                                        <p className="font-semibold text-sm">{c.conclusion}</p>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-primary uppercase">Doctor's Notes</p>
-                                        <p className="text-sm">{c.doctor_notes}</p>
+                                    <div className="flex flex-col">
+                                        <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Doctor's Notes</Label>
+                                        <p className="text-sm italic">{c.doctor_notes}</p>
+                                    </div>
+                                    <div className="flex justify-end pt-2">
+                                        <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
                                     </div>
                                 </div>
                             </div>
