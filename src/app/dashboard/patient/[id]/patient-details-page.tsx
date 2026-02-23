@@ -160,7 +160,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     const isMale = patient.sex === 'Male';
     let needsPlan = bmi > 25 || bmi < 18.5 || visceralFat >= 12;
     
-    // Healthy Body fat % ranges: Men 18-24%, Women 24-31%
     if (bodyFat) {
         if (isMale && (bodyFat < 18 || bodyFat > 24)) needsPlan = true;
         if (!isMale && (bodyFat < 24 || bodyFat > 31)) needsPlan = true;
@@ -255,7 +254,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
-                 <Separator />
+                 <Separator className="dark:bg-primary/10" />
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <DetailItem icon={UserIcon} label="Full Name" value={`${patient.first_name} ${patient.middle_name || ''} ${patient.surname || ''}`} />
                   <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : 'N/A'} />
@@ -291,14 +290,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <DialogContent className="max-w-md border-primary/20">
                         <DialogHeader><DialogTitle className="text-primary">{vitalsForm.id ? 'Edit' : 'New'} Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Temp (°C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">RBS (mmol/L)</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Temp (°C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">RBS (mmol/L)</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})} /></div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">FBS (mmol/L)</Label>
-                                <Input value={vitalsForm.fbs || ''} onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})} className="dark:border-primary/40" />
+                                <Input value={vitalsForm.fbs || ''} onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})} />
                             </div>
                         </div>
                         <DialogFooter>
@@ -316,20 +315,20 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <div className="overflow-x-auto rounded-xl border border-primary/10">
                         <table className="min-w-full text-xs">
                             <thead className="bg-muted/50">
-                                <tr>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Date</th>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Value</th>
-                                    <th className="text-right py-3 px-4 font-medium border-b">Actions</th>
+                                <tr className="border-b border-primary/10">
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Date</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Value</th>
+                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {patient.vitals.map((v) => (
                                     <tr key={v.id} className="hover:bg-muted/30 border-b border-primary/5">
                                         <td className="py-3 px-4">{new Date(v.created_at).toLocaleDateString()}</td>
-                                        <td className="py-3 px-4">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
+                                        <td className="py-3 px-4 font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
                                         <td className="py-3 px-4 text-right space-x-2">
-                                            <Button variant="ghost" size="icon" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }}><Edit className="h-4 w-4"/></Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteVital(v.id)}><Trash2 className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }} className="hover:bg-primary/10"><Edit className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteVital(v.id)}><Trash2 className="h-4 w-4"/></Button>
                                         </td>
                                     </tr>
                                 ))}
@@ -355,10 +354,10 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <DialogContent className="max-w-md border-primary/20">
                         <DialogHeader><DialogTitle className="text-primary">Nutrition Record</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})} /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})} /></div>
                         </div>
                         {nutritionForm.height && nutritionForm.weight && (
                             <div className="bg-muted/50 p-4 rounded-xl space-y-2 text-xs border border-primary/10">
@@ -388,23 +387,23 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <div className="overflow-x-auto rounded-xl border border-primary/10">
                         <table className="min-w-full text-xs">
                             <thead className="bg-muted/50">
-                                <tr>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Date</th>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Value</th>
-                                    <th className="text-left py-3 px-4 font-medium border-b">BMI</th>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Nutritionist Meal Plan</th>
-                                    <th className="text-right py-3 px-4 font-medium border-b">Actions</th>
+                                <tr className="border-b border-primary/10">
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Date</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Value</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">BMI</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Nutritionist Meal Plan</th>
+                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase tracking-wider border-b border-primary/10">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {patient.nutritions.map((n) => (
                                     <tr key={n.id} className="hover:bg-muted/30 border-b border-primary/5">
                                         <td className="py-3 px-4">{new Date(n.created_at).toLocaleDateString()}</td>
-                                        <td className="py-3 px-4">{n.weight}kg, {n.height}cm</td>
-                                        <td className="py-3 px-4">{n.bmi}</td>
+                                        <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
+                                        <td className="py-3 px-4 font-medium">{n.bmi}</td>
                                         <td className="py-3 px-4 font-semibold">{n.meal_plan}</td>
                                         <td className="py-3 px-4 text-right">
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteAssessment('nutritions', n.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteAssessment('nutritions', n.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
                                         </td>
                                     </tr>
                                 ))}
@@ -432,19 +431,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <div className="flex flex-col gap-4 py-4">
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Verbal Stress Rating (1-10)</Label>
-                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})} className="dark:border-primary/40" />
+                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})} />
                                 <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (&gt;7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Counselling Status</Label>
-                                <div className="p-2 border rounded-md bg-muted/30 font-semibold dark:border-primary/40">
+                                <div className="p-2 border rounded-md bg-muted/30 font-semibold dark:border-primary/40 text-foreground">
                                     {(clinicalForm.verbal_stress_rating || 0) > 7 ? 'Recommended' : 'Not Recommended'}
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
                                 <Select onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v})}>
-                                    <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select outcome" /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder="Select outcome" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All results within healthy range">All results within healthy range</SelectItem>
                                         <SelectItem value="Healthy lifestyle changes recommended">Healthy lifestyle changes recommended</SelectItem>
@@ -456,7 +455,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Doctor's Notes</Label>
-                                <Textarea value={clinicalForm.doctor_notes || ''} onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})} className="dark:border-primary/40" />
+                                <Textarea value={clinicalForm.doctor_notes || ''} onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})} />
                             </div>
                         </div>
                         <DialogFooter>
@@ -473,23 +472,23 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.clinicals.length > 0 ? (
                     <div className="space-y-4">
                         {patient.clinicals.map(c => (
-                            <div key={c.id} className="p-4 border rounded-xl bg-muted/20 relative">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                            <div key={c.id} className="p-4 border rounded-xl bg-muted/20 relative dark:border-primary/10">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary rounded-l-xl" />
                                 <div className="grid grid-cols-1 gap-4">
                                     <div className="flex flex-col">
                                         <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Counselling</Label>
-                                        <p className="font-semibold text-sm">{c.counselling_sessions}</p>
+                                        <p className="font-semibold text-sm text-foreground">{c.counselling_sessions}</p>
                                     </div>
                                     <div className="flex flex-col">
                                         <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Wellness Check Conclusion</Label>
-                                        <p className="font-semibold text-sm">{c.conclusion}</p>
+                                        <p className="font-semibold text-sm text-foreground">{c.conclusion}</p>
                                     </div>
                                     <div className="flex flex-col">
                                         <Label className="text-primary text-[10px] uppercase font-bold tracking-wider mb-1">Doctor's Notes</Label>
-                                        <p className="text-sm italic">{c.doctor_notes}</p>
+                                        <p className="text-sm italic text-muted-foreground">{c.doctor_notes}</p>
                                     </div>
                                     <div className="flex justify-end pt-2">
-                                        <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive h-8 w-8 hover:bg-destructive/10" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-4 w-4"/></Button>
                                     </div>
                                 </div>
                             </div>

@@ -150,29 +150,29 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
           </CardHeader>
           <CardContent className="flex-1 flex flex-col gap-6">
             <div className="rounded-xl border border-primary/5 overflow-hidden bg-muted/30">
-              <Table>
+              <Table className="border-0">
                 <TableBody>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Total Registrations</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.totalReg}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Total Activations</TableCell>
                     <TableCell className="text-right font-bold text-lg text-primary">{summary.totalActive}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Active Corporates</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.totalCorps}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Male Participants</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.maleCount}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Female Participants</TableCell>
                     <TableCell className="text-right font-bold text-lg">{summary.femaleCount}</TableCell>
                   </TableRow>
-                  <TableRow className="hover:bg-transparent border-b border-primary/5">
+                  <TableRow className="hover:bg-transparent border-b border-primary/10">
                     <TableCell className="font-medium text-muted-foreground">Recommended Meal Plans</TableCell>
                     <TableCell className="text-right font-bold text-lg text-teal-600">{summary.recommendedMealPlan}</TableCell>
                   </TableRow>
@@ -231,10 +231,10 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
               <CardDescription>Metrics breakdown by week</CardDescription>
             </div>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-[180px] bg-background border-primary/20">
+              <SelectTrigger className="w-[180px] bg-background border-primary/20 dark:border-primary/40">
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="dark:border-primary/20">
                 {monthOptions.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                 ))}
@@ -242,9 +242,9 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
             </Select>
           </CardHeader>
           <CardContent className="flex-1">
-            <div className="rounded-xl border border-primary/5 overflow-hidden">
-              <Table>
-                <TableHeader className="bg-muted/50">
+            <div className="rounded-xl border border-primary/10 overflow-hidden">
+              <Table className="border-0">
+                <TableHeader className="bg-muted/50 border-b border-primary/10">
                   <TableRow>
                     <TableHead className="font-bold text-primary w-[150px]">Metric</TableHead>
                     {weeklyTrackerData.map(w => (
@@ -255,31 +255,31 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow className="hover:bg-primary/5 transition-colors">
+                  <TableRow className="hover:bg-primary/5 transition-colors border-b border-primary/10">
                     <TableCell className="font-semibold text-muted-foreground">Active Corporates</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center font-bold">{w.corporates}</TableCell>
                     ))}
                   </TableRow>
-                  <TableRow className="hover:bg-primary/5 transition-colors">
+                  <TableRow className="hover:bg-primary/5 transition-colors border-b border-primary/10">
                     <TableCell className="font-semibold text-muted-foreground">Total Registrations</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center font-bold text-lg">{w.registrations}</TableCell>
                     ))}
                   </TableRow>
-                  <TableRow className="hover:bg-primary/5 transition-colors">
+                  <TableRow className="hover:bg-primary/5 transition-colors border-b border-primary/10">
                     <TableCell className="font-semibold text-muted-foreground px-8">— Male</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center text-sm">{w.male}</TableCell>
                     ))}
                   </TableRow>
-                  <TableRow className="hover:bg-primary/5 transition-colors">
+                  <TableRow className="hover:bg-primary/5 transition-colors border-b border-primary/10">
                     <TableCell className="font-semibold text-muted-foreground px-8">— Female</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center text-sm">{w.female}</TableCell>
                     ))}
                   </TableRow>
-                  <TableRow className="hover:bg-primary/5 transition-colors">
+                  <TableRow className="hover:bg-primary/5 transition-colors border-b border-primary/10">
                     <TableCell className="font-semibold text-muted-foreground">Recommended Meal Plans</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center font-bold text-teal-600">{w.recommendedMealPlans}</TableCell>
