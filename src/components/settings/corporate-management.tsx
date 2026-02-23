@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { saveCorporate, deleteCorporate } from '@/lib/serve';
 
 interface CorporateManagementProps {
   initialCorporates: Corporate[];
@@ -59,7 +60,7 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
     setCurrentCorporate({ ...currentCorporate, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentCorporate || !currentCorporate.name) {
       toast({ variant: 'destructive', title: 'Error', description: 'Corporate name is required.' });
@@ -67,33 +68,26 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
     }
     
     setIsSubmitting(true);
-    setTimeout(() => {
-        let updatedCorporates;
-        if (currentCorporate.id) {
-            updatedCorporates = corporates.map(c => c.id === currentCorporate!.id ? (currentCorporate as Corporate) : c);
-        } else {
-            const newCorp: Corporate = {
-                id: Date.now(),
-                ...emptyCorporate,
-                ...currentCorporate,
-            } as Corporate;
-            updatedCorporates = [...corporates, newCorp];
-        }
-        
-        setCorporates(updatedCorporates);
-        onCorporatesUpdate(updatedCorporates);
-        toast({ title: 'Success', description: `Corporate ${currentCorporate.id ? 'updated' : 'added'} successfully.` });
-        
-        setIsSubmitting(false);
+    try {
+        await saveCorporate(currentCorporate);
+        // Refresh local list (ideally fetch from API again)
+        toast({ title: 'Success', description: 'Corporate partner saved.' });
         handleCloseModal();
-    }, 500);
+        window.location.reload(); // Simple refresh for now
+    } catch (err: any) {
+        toast({ variant: 'destructive', title: 'Error', description: err.message });
+    }
+    setIsSubmitting(false);
   };
   
-  const handleDelete = (id: number) => {
-      const updatedCorporates = corporates.filter(c => c.id !== id);
-      setCorporates(updatedCorporates);
-      onCorporatesUpdate(updatedCorporates);
-      toast({ title: 'Success', description: 'Corporate partner removed successfully.' });
+  const handleDelete = async (id: number) => {
+      try {
+          await deleteCorporate(id);
+          toast({ title: 'Success', description: 'Corporate partner removed.' });
+          window.location.reload();
+      } catch (err: any) {
+          toast({ variant: 'destructive', title: 'Error', description: err.message });
+      }
   };
 
   return (

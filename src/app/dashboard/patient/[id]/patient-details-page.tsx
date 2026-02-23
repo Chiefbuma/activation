@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -54,7 +53,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
-import { saveVital, saveNutrition, saveClinical, deleteAssessment } from '@/lib/actions';
+import { saveVital, saveNutrition, saveClinical, deleteAssessment, getRegistrationById } from '@/lib/serve';
 
 const DetailItem = ({
   label,
@@ -87,7 +86,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Modal States
   const [isVitalsDialogOpen, setIsVitalsDialogOpen] = useState(false);
@@ -98,7 +96,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({});
   const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({});
   const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({});
-  const [editFormData, setEditFormData] = useState<Partial<Registration>>({});
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -107,54 +104,57 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     }
   }, []);
 
-  const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`;
+  const refreshData = async () => {
+      try {
+          const updated = await getRegistrationById(String(patient.id));
+          setPatient(updated);
+      } catch (err) {
+          console.error("Refresh Error:", err);
+      }
+  };
 
   const handleSaveVitals = async () => {
     setIsSubmitting(true);
-    const result = await saveVital({
-        ...vitalsForm,
-        registration_id: patient.id,
-        user_id: currentUser?.id,
-        measured_at: vitalsForm.measured_at || new Date().toISOString()
-    });
-
-    if (result.success) {
+    try {
+        await saveVital({
+            ...vitalsForm,
+            registration_id: patient.id,
+            user_id: currentUser?.id,
+            measured_at: vitalsForm.measured_at || new Date().toISOString()
+        });
         toast({ title: 'Success', description: 'Vitals record saved.' });
         setIsVitalsDialogOpen(false);
-        router.refresh();
-    } else {
-        toast({ variant: 'destructive', title: 'Error', description: result.error });
+        setVitalsForm({});
+        refreshData();
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
     }
     setIsSubmitting(false);
   };
 
   const handleDeleteVital = async (id: number) => {
-    const result = await deleteAssessment('vitals', id, patient.id);
-    if (result.success) {
+    try {
+        await deleteAssessment('vitals', id);
         toast({ title: 'Deleted', description: 'Vitals record removed.' });
-        router.refresh();
+        refreshData();
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
     }
   };
 
   const calculateNutritionResults = (form: Partial<Nutrition>) => {
     const height = Number(form.height);
     const weight = Number(form.weight);
-    const visceral = Number(form.visceral_fat);
-    const bodyFat = Number(form.body_fat_percent);
-
     if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A', llw: null, ulw: null, excess_weight: null, bmi: null };
 
     const hM = height / 100;
     const bmi = weight / (hM * hM);
     const llw = 18 * (hM * hM);
     const ulw = 25 * (hM * hM);
-    
-    const bfMax = patient.sex === 'Male' ? 24 : 31;
-    const bfMin = patient.sex === 'Male' ? 18 : 24;
-
-    const needsPlan = bmi > 25 || bmi < 18.5 || visceral >= 12 || bodyFat > bfMax || bodyFat < bfMin;
     const excess = Math.max(0, weight - ulw);
     const weight_loss_period = excess > 0 ? `${(excess / 12).toFixed(1)} Years` : '0 Years';
+
+    const needsPlan = bmi > 25 || bmi < 18.5 || Number(form.visceral_fat) >= 12;
 
     return {
         bmi: parseFloat(bmi.toFixed(1)),
@@ -168,51 +168,50 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
   const handleSaveNutrition = async () => {
     setIsSubmitting(true);
-    const results = calculateNutritionResults(nutritionForm);
-    const result = await saveNutrition({
-        ...nutritionForm,
-        ...results,
-        registration_id: patient.id,
-        user_id: currentUser?.id
-    });
-
-    if (result.success) {
+    try {
+        const results = calculateNutritionResults(nutritionForm);
+        await saveNutrition({
+            ...nutritionForm,
+            ...results,
+            registration_id: patient.id,
+            user_id: currentUser?.id
+        });
         toast({ title: 'Success', description: 'Nutrition record saved.' });
         setIsNutritionDialogOpen(false);
-        router.refresh();
-    } else {
-        toast({ variant: 'destructive', title: 'Error', description: result.error });
+        setNutritionForm({});
+        refreshData();
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
     }
     setIsSubmitting(false);
   };
 
   const handleSaveClinical = async () => {
     setIsSubmitting(true);
-    const stressRating = Number(clinicalForm.verbal_stress_rating);
-    const counselling = stressRating > 7 ? 'Recommended' : 'Not Recommended';
-
-    const result = await saveClinical({
-        ...clinicalForm,
-        counselling_sessions: counselling,
-        registration_id: patient.id,
-        user_id: currentUser?.id
-    });
-
-    if (result.success) {
+    try {
+        const stressRating = Number(clinicalForm.verbal_stress_rating);
+        const counselling = stressRating > 7 ? 'Recommended' : 'Not Recommended';
+        await saveClinical({
+            ...clinicalForm,
+            counselling_sessions: counselling,
+            registration_id: patient.id,
+            user_id: currentUser?.id
+        });
         toast({ title: 'Success', description: 'Clinical review recorded.' });
         setIsClinicalDialogOpen(false);
-        router.refresh();
-    } else {
-        toast({ variant: 'destructive', title: 'Error', description: result.error });
+        setClinicalForm({});
+        refreshData();
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
     }
     setIsSubmitting(false);
   };
 
+  const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`;
   const nutritionResults = calculateNutritionResults(nutritionForm);
 
   return (
     <div className="container mx-auto max-w-7xl py-6 px-4">
-      {/* Existing UI layout remains same, just functions connected to real actions */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -261,7 +260,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10 bg-primary/5">
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Button variant="outline" className="justify-start dark:text-foreground" onClick={() => setIsEditModalOpen(true)}><Edit className="mr-2 h-4 w-4" /> Edit Profile</Button>
                 <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
               </CardContent>
             </Card>
@@ -352,6 +350,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
                         </div>
+                        {nutritionForm.height && nutritionForm.weight && (
+                            <div className="bg-muted/50 p-4 rounded-xl space-y-2 text-xs border border-primary/10">
+                                <p className="font-bold text-primary uppercase">Calculation Insights</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <p>Lower Limit Weight (BMI 18): <span className="font-bold">{nutritionResults.llw}kg</span></p>
+                                    <p>Upper Limit Weight (BMI 25): <span className="font-bold">{nutritionResults.ulw}kg</span></p>
+                                    <p>Excess Weight: <span className="font-bold">{nutritionResults.excess_weight}kg</span></p>
+                                    <p>Weight Loss Period: <span className="font-bold">{nutritionResults.weight_loss_period}</span></p>
+                                    <p>Calculated BMI: <span className="font-bold">{nutritionResults.bmi}</span></p>
+                                    <p>Meal Plan: <span className="font-bold text-primary">{nutritionResults.meal_plan}</span></p>
+                                </div>
+                            </div>
+                        )}
                         <DialogFooter>
                             <Button onClick={handleSaveNutrition} disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -370,7 +381,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                     <th className="text-left py-3 px-4 font-medium border-b">Date</th>
                                     <th className="text-left py-3 px-4 font-medium border-b">Value</th>
                                     <th className="text-left py-3 px-4 font-medium border-b">BMI</th>
-                                    <th className="text-left py-3 px-4 font-medium border-b">Meal Plan</th>
+                                    <th className="text-left py-3 px-4 font-medium border-b">Nutritionist Meal Plan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -396,7 +407,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <Stethoscope className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Clinical Review</CardTitle>
-                        <CardDescription>Medical observations</CardDescription>
+                        <CardDescription>Professional observations and plans</CardDescription>
                     </div>
                 </div>
                 <Dialog open={isClinicalDialogOpen} onOpenChange={setIsClinicalDialogOpen}>
@@ -407,14 +418,22 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Verbal Stress Rating (1-10)</Label>
                                 <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})} className="dark:border-primary/40" />
+                                <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (&gt;7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-primary font-bold">Conclusion</Label>
+                                <Label className="text-primary font-bold">Counselling Status</Label>
+                                <div className="p-2 border rounded-md bg-muted/30 font-semibold dark:border-primary/40">
+                                    {(clinicalForm.verbal_stress_rating || 0) > 7 ? 'Recommended' : 'Not Recommended'}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
                                 <Select onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v})}>
                                     <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select outcome" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All results within healthy range">All results within healthy range</SelectItem>
                                         <SelectItem value="Healthy lifestyle changes recommended">Healthy lifestyle changes recommended</SelectItem>
+                                        <SelectItem value="Comprehensive check recommended">Comprehensive check recommended</SelectItem>
                                         <SelectItem value="Medical Review recommended for raised blood pressure">Medical Review recommended for raised blood pressure</SelectItem>
                                         <SelectItem value="Medical Review recommended for raised blood sugar">Medical Review recommended for raised blood sugar</SelectItem>
                                     </SelectContent>
@@ -437,12 +456,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         {patient.clinicals.map(c => (
                             <div key={c.id} className="p-4 border rounded-xl bg-muted/20 relative">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                                <div className="space-y-2">
-                                    <p className="text-xs font-bold text-primary uppercase">Conclusion</p>
-                                    <p className="text-sm font-semibold">{c.conclusion}</p>
-                                    <Separator />
-                                    <p className="text-xs font-bold text-primary uppercase">Notes</p>
-                                    <p className="text-sm">{c.doctor_notes}</p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-xs font-bold text-primary uppercase">Counselling</p>
+                                        <p className="font-semibold">{c.counselling_sessions}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-primary uppercase">Wellness Check Conclusion</p>
+                                        <p className="font-semibold">{c.conclusion}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-primary uppercase">Doctor's Notes</p>
+                                        <p className="text-sm">{c.doctor_notes}</p>
+                                    </div>
                                 </div>
                             </div>
                         ))}

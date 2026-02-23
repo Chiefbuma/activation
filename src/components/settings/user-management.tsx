@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { saveUser, deleteUser } from '@/lib/serve';
 
 interface UserManagementProps {
   initialUsers: User[];
@@ -45,7 +45,6 @@ const emptyUser: Omit<User, 'id'> = {
   email: '',
   role: 'staff',
   password: '',
-  avatarUrl: ''
 };
 
 export default function UserManagement({ initialUsers, onUsersUpdate }: UserManagementProps) {
@@ -75,46 +74,33 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
     setCurrentUser({ ...currentUser, [name]: value });
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !currentUser.name || !currentUser.email) {
       toast({ variant: 'destructive', title: 'Error', description: 'Name and email are required.' });
       return;
     }
 
-    if (!currentUser.id && !currentUser.password) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Password is required for new users.' });
-        return;
-    }
-    
     setIsSubmitting(true);
-    setTimeout(() => {
-        let updatedUsers;
-        if (currentUser.id) {
-            updatedUsers = users.map(u => u.id === currentUser!.id ? (currentUser as User) : u);
-        } else {
-            const newUser: User = {
-                id: Date.now(),
-                ...emptyUser,
-                ...currentUser,
-            } as User;
-            updatedUsers = [...users, newUser];
-        }
-        
-        setUsers(updatedUsers);
-        onUsersUpdate(updatedUsers);
-        toast({ title: 'Success', description: `User ${currentUser.id ? 'updated' : 'created'} successfully.` });
-        
-        setIsSubmitting(false);
+    try {
+        await saveUser(currentUser);
+        toast({ title: 'Success', description: 'User account updated.' });
         handleCloseModal();
-    }, 500);
+        window.location.reload();
+    } catch (err: any) {
+        toast({ variant: 'destructive', title: 'Error', description: err.message });
+    }
+    setIsSubmitting(false);
   };
   
-  const handleDelete = (id: number) => {
-      const updatedUsers = users.filter(u => u.id !== id);
-      setUsers(updatedUsers);
-      onUsersUpdate(updatedUsers);
-      toast({ title: 'Success', description: 'User account deleted successfully.' });
+  const handleDelete = async (id: number) => {
+      try {
+          await deleteUser(id);
+          toast({ title: 'Success', description: 'User account deleted.' });
+          window.location.reload();
+      } catch (err: any) {
+          toast({ variant: 'destructive', title: 'Error', description: err.message });
+      }
   }
 
   return (
@@ -153,7 +139,7 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
                             <AlertDialogHeader>
                             <AlertDialogTitle>Delete Account?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will permanently delete the account for "{user.name}". This action cannot be undone.
+                                This will permanently delete the account for "{user.name}".
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

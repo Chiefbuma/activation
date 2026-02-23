@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,7 +10,7 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Logo from '@/components/logo';
-import { loginUser } from '@/lib/actions';
+import { login } from '@/lib/serve';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,25 +23,19 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    const result = await loginUser(email, password);
-
-    if (result.error) {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: result.error,
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (result.user) {
-        localStorage.setItem('loggedInUser', JSON.stringify(result.user));
-        toast({
-            title: 'Success!',
-            description: 'Logged in successfully.',
-        });
+    try {
+        const user = await login({ email, password });
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        toast({ title: 'Success!', description: 'Logged in successfully.' });
         router.push('/dashboard');
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: error.message || 'Check your credentials and try again.',
+        });
+    } finally {
+        setLoading(false);
     }
   };
   
