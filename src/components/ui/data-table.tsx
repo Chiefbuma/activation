@@ -59,7 +59,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Search patients..."
+          placeholder="Search records..."
           value={(table.getState().globalFilter as string) ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
@@ -210,7 +210,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     columns,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5, // Optimized for high-performance production view
       },
     },
     state: {

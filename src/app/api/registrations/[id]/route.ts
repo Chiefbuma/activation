@@ -2,9 +2,9 @@ import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 import type { Vital, Nutrition, Clinical } from '@/lib/types';
 
-export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = await props.params;
+        const { id } = await context.params;
         const [rows] = await db.query(`
             SELECT r.*, c.name as corporate_name 
             FROM registrations r 

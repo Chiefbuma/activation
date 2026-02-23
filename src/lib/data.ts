@@ -3,39 +3,47 @@ import type { Registration, User, Corporate, Vital, Nutrition, Clinical } from '
 import { unstable_noStore as noStore } from 'next/cache';
 
 /**
- * Server-side data fetching functions.
- * ONLY for use in Server Components.
+ * Optimized server-side data fetching functions.
+ * Uses Bulk Fetching to avoid N+1 query performance degradation.
  */
 
 export async function fetchPatients(): Promise<Registration[]> {
     noStore();
     try {
-        const [rows] = await db.query(`
+        // 1. Fetch participants
+        const [regRows] = await db.query(`
             SELECT r.*, c.name as corporate_name 
             FROM registrations r 
             LEFT JOIN corporates c ON r.corporate_id = c.id
             ORDER BY r.created_at DESC
+            LIMIT 1000
         `);
         
-        const registrations = rows as any[];
-        
-        const enriched = await Promise.all(registrations.map(async (reg) => {
-            const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-            
-            return {
-                ...reg,
-                vitals: vitals as Vital[],
-                nutritions: nutritions as Nutrition[],
-                clinicals: clinicals as Clinical[],
-                status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
-            } as Registration;
-        }));
+        const registrations = regRows as any[];
+        if (registrations.length === 0) return [];
 
-        return enriched;
+        const ids = registrations.map(r => r.id);
+
+        // 2. Optimized Bulk Fetches for child records
+        const [vitalRows] = await db.query('SELECT * FROM vitals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+        const [nutriRows] = await db.query('SELECT * FROM nutritions WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+        const [clinicalRows] = await db.query('SELECT * FROM clinicals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
+
+        const vitals = vitalRows as Vital[];
+        const nutritions = nutriRows as Nutrition[];
+        const clinicals = clinicalRows as Clinical[];
+
+        // 3. Map records back to participants in O(N) time
+        return registrations.map(reg => ({
+            ...reg,
+            vitals: vitals.filter(v => v.registration_id === reg.id),
+            nutritions: nutritions.filter(n => n.registration_id === reg.id),
+            clinicals: clinicals.filter(c => c.registration_id === reg.id),
+            status: vitals.some(v => v.registration_id === reg.id) ? 'Active' : 'Pending'
+        } as Registration));
+
     } catch (error) {
-        console.error('Database Error:', error);
+        console.error('[DATABASE_FETCH_PATIENTS_ERROR]', error);
         return [];
     }
 }
@@ -54,19 +62,19 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
         if (registrations.length === 0) return null;
         
         const reg = registrations[0];
-        const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-        const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
-        const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        const [v] = await db.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        const [n] = await db.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
+        const [c] = await db.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [reg.id]);
         
         return {
             ...reg,
-            vitals: vitals as Vital[],
-            nutritions: nutritions as Nutrition[],
-            clinicals: clinicals as Clinical[],
-            status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
+            vitals: v as Vital[],
+            nutritions: n as Nutrition[],
+            clinicals: c as Clinical[],
+            status: (v as any[]).length > 0 ? 'Active' : 'Pending'
         } as Registration;
     } catch (error) {
-        console.error('Database Error:', error);
+        console.error(`[DATABASE_FETCH_PATIENT_BY_ID_ERROR] ID: ${id}`, error);
         return null;
     }
 }
@@ -77,7 +85,7 @@ export async function fetchUsers(): Promise<User[]> {
         const [rows] = await db.query('SELECT id, name, email, role, avatarUrl FROM users ORDER BY name ASC');
         return rows as User[];
     } catch (error) {
-        console.error('Database Error:', error);
+        console.error('[DATABASE_FETCH_USERS_ERROR]', error);
         return [];
     }
 }
@@ -88,7 +96,7 @@ export async function fetchCorporates(): Promise<Corporate[]> {
         const [rows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
         return rows as Corporate[];
     } catch (error) {
-        console.error('Database Error:', error);
+        console.error('[DATABASE_FETCH_CORPORATES_ERROR]', error);
         return [];
     }
 }

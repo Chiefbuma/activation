@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise';
 
 /**
  * Production MySQL connection pool.
- * Configured via environment variables in the Node.js hosting environment.
+ * Configured via environment variables in the Node.js hosting environment (cPanel/Node server).
  */
 const pool = mysql.createPool({
   host: process.env.DB_HOST,

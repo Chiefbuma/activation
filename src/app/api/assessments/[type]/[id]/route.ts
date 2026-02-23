@@ -1,9 +1,9 @@
-import { db } from '@/lib/db';
+import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-export async function DELETE(request: Request, props: { params: Promise<{ type: string, id: string }> }) {
+export async function DELETE(request: Request, context: { params: Promise<{ type: string, id: string }> }) {
     try {
-        const { type, id } = await props.params;
+        const { type, id } = await context.params;
         const validTypes = ['vitals', 'nutritions', 'clinicals'];
         
         if (!validTypes.includes(type)) {
