@@ -34,8 +34,6 @@ export default function Report({ patient, corporate }: ReportProps) {
   let reportDate: Date = new Date();
   if (corporate?.wellness_date && isValid(parseISO(corporate.wellness_date))) {
     reportDate = parseISO(corporate.wellness_date);
-  } else if (patient.wellness_date && isValid(parseISO(patient.wellness_date))) {
-    reportDate = parseISO(patient.wellness_date);
   } else if (latestClinical?.created_at) {
     reportDate = new Date(latestClinical.created_at);
   } else if (latestNutrition?.created_at) {
@@ -62,6 +60,13 @@ export default function Report({ patient, corporate }: ReportProps) {
   // Environment-Aware Branding
   const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
+
+  // Safe split helper for discussions and goals
+  const safeSplitLines = (val: any) => {
+      if (!val) return [];
+      const str = String(val);
+      return str.split('\n').map(l => l.trim()).filter(Boolean);
+  };
 
   return (
     <div className="report-body-container">
@@ -154,12 +159,16 @@ export default function Report({ patient, corporate }: ReportProps) {
             <>
               <div className="section-heading min-space-before">Personalized Health Goal</div>
               <div className="content-section">
-                {latestGoal.discussion && typeof latestGoal.discussion === 'string' && (
-                  <div className="content-item">{latestGoal.discussion}</div>
+                {latestGoal.discussion && (
+                  safeSplitLines(latestGoal.discussion).map((line, idx) => (
+                    <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
+                        {line}
+                    </div>
+                  ))
                 )}
-                {latestGoal.goal && typeof latestGoal.goal === 'string' && (
+                {latestGoal.goal && (
                   <div className="target-text keep-together">
-                    Target: {latestGoal.goal.replace(/^target\s*:\s*/i, '')}
+                    Target: {String(latestGoal.goal).replace(/^target\s*:\s*/i, '')}
                   </div>
                 )}
               </div>

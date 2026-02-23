@@ -24,13 +24,13 @@ export default function Header({ user }: { user: User }) {
     router.push('/');
   };
 
-  // Safe split to avoid TypeError
-  const initials = (user?.name || 'User')
-    .split(' ')
-    .filter(Boolean)
-    .map(n => n[0])
-    .join('')
-    .toUpperCase() || 'U';
+  const getInitials = (name: any) => {
+      if (!name) return 'U';
+      const str = String(name);
+      return str.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  };
+
+  const initials = getInitials(user?.name);
 
   return (
     <div className="flex items-center gap-4">

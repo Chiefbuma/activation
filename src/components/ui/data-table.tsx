@@ -212,7 +212,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // STABILIZATION: Avoid recursive render loop (Error #185)
+  // Use a ref to prevent infinite loop
   const onSelectionChangeRef = React.useRef(onSelectionChange);
   React.useEffect(() => {
     onSelectionChangeRef.current = onSelectionChange;
