@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -458,10 +459,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                             <td className="py-3 px-4">{new Date(n.created_at).toLocaleDateString()}</td>
                                             <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
                                             <td className="py-3 px-4">{n.bmi || '-'}</td>
-                                            <td className="py-3 px-4">
-                                                <Badge variant={n.meal_plan === 'Recommended' ? 'default' : 'secondary'} className="text-[10px]">
-                                                    {n.meal_plan || 'N/A'}
-                                                </Badge>
+                                            <td className="py-3 px-4 font-semibold">
+                                                {n.meal_plan || 'N/A'}
                                             </td>
                                             <td className="py-3 px-4 text-right space-x-2">
                                                 <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-primary/10" onClick={() => { setNutritionForm(n); setIsNutritionDialogOpen(true); }}>
@@ -598,7 +597,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 {patient.clinicals.length > 0 ? (
                     <div className="space-y-6">
                         {patient.clinicals.map(c => (
-                            <div key={c.id} className="space-y-4 p-4 border border-primary/10 rounded-xl bg-muted/20 relative overflow-hidden group">
+                            <div key={c.id} className="space-y-4 p-6 border border-primary/10 rounded-xl bg-muted/20 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                                 <div className="absolute top-3 right-3 flex gap-1">
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }}>
@@ -608,26 +607,18 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <div className="flex flex-col gap-5">
+                                <div className="flex flex-col gap-6">
                                     <div>
-                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <UserIcon className="h-3 w-3" /> Counselling
-                                        </h4>
-                                        <Badge variant={c.counselling_sessions === 'Recommended' ? 'default' : 'secondary'} className="text-[10px]">
-                                            {c.counselling_sessions || 'N/A'}
-                                        </Badge>
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Counselling</p>
+                                        <p className="text-sm text-foreground font-semibold">{c.counselling_sessions || '-'}</p>
                                     </div>
                                     <div>
-                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <Activity className="h-3 w-3" /> Wellness Check Conclusion
-                                        </h4>
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Wellness Check Conclusion</p>
                                         <p className="text-sm text-foreground font-semibold">{c.conclusion || '-'}</p>
                                     </div>
                                     <div>
-                                        <h4 className="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <Binary className="h-3 w-3" /> Doctor's Notes
-                                        </h4>
-                                        <p className="text-sm text-foreground leading-relaxed pr-16">{c.doctor_notes || '-'}</p>
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Doctor's Notes</p>
+                                        <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap pr-16">{c.doctor_notes || '-'}</p>
                                     </div>
                                 </div>
                                 <div className="pt-4 flex justify-end">
