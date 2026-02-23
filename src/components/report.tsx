@@ -24,6 +24,16 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
+// FIXED: Safe split helper with better type checking
+const safeSplitLines = (val: any): string[] => {
+    if (!val) return [];
+    // Ensure we convert to string first, then split
+    return String(val)
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean);
+};
+
 export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
@@ -60,13 +70,6 @@ export default function Report({ patient, corporate }: ReportProps) {
   // Environment-Aware Branding
   const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
-
-  // Safe split helper for discussions and goals
-  const safeSplitLines = (val: any) => {
-      if (!val) return [];
-      const str = String(val);
-      return str.split('\n').map(l => l.trim()).filter(Boolean);
-  };
 
   return (
     <div className="report-body-container">

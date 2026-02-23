@@ -212,7 +212,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // Use a ref to prevent infinite loop
+  // STABILIZED: Optimized selection callback to prevent Error #185 (infinite loop)
   const onSelectionChangeRef = React.useRef(onSelectionChange);
   React.useEffect(() => {
     onSelectionChangeRef.current = onSelectionChange;
@@ -224,6 +224,7 @@ export function DataTable<TData, TValue>({
     const selectionKeys = Object.keys(rowSelection);
     const currentStr = selectionKeys.sort().join(',');
     
+    // Only notify parent if selection actually changed to avoid infinite cycles
     if (currentStr !== lastSelectionStr.current) {
         lastSelectionStr.current = currentStr;
         if (onSelectionChangeRef.current) {
