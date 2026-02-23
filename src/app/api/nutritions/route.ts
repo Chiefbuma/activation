@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Nutrition POST Error:', error);
-        return NextResponse.json({ error: 'Failed to save: ' + (error.message || 'Database error') }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to save nutrition record' }, { status: 500 });
     }
 }
 
@@ -68,6 +68,6 @@ export async function PUT(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Nutrition PUT Error:', error);
-        return NextResponse.json({ error: 'Failed to update: ' + (error.message || 'Database error') }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update nutrition record' }, { status: 500 });
     }
 }

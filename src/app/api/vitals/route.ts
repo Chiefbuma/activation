@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Vitals POST Error:', error);
-        return NextResponse.json({ error: 'Failed to save: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to save record' }, { status: 500 });
     }
 }
 
@@ -72,6 +72,6 @@ export async function PUT(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Vitals PUT Error:', error);
-        return NextResponse.json({ error: 'Failed to update: ' + error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
     }
 }

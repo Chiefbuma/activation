@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { User } from '@/lib/types';
@@ -25,7 +24,13 @@ export default function Header({ user }: { user: User }) {
     router.push('/');
   };
 
-  const initials = user.name.split(' ').map(n => n[0]).join('');
+  // Safe split to avoid TypeError
+  const initials = (user?.name || 'User')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase() || 'U';
 
   return (
     <div className="flex items-center gap-4">
@@ -44,9 +49,9 @@ export default function Header({ user }: { user: User }) {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-sm font-medium leading-none">{user?.name}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
+                {user?.email}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -57,7 +62,7 @@ export default function Header({ user }: { user: User }) {
                 <span>My Profile</span>
             </Link>
           </DropdownMenuItem>
-          {user.role === 'admin' && (
+          {user?.role === 'admin' && (
             <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href="/dashboard">
                     <Settings className="mr-2 h-4 w-4" />

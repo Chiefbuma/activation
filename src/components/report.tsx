@@ -19,6 +19,7 @@ function getDaySuffix(day: number) {
 }
 
 const safeToFixed = (val: any, digits: number = 1) => {
+    if (val === undefined || val === null || val === '') return '-';
     const n = parseFloat(val);
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
@@ -29,7 +30,7 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestClinical = patient.clinicals?.[0];
   const latestGoal = patient.goals?.[0];
 
-  // Date Priority Logic: Corporate Wellness Date > Clinical > Nutrition > Vitals > Fallback
+  // Date Priority Logic
   let reportDate: Date = new Date();
   if (corporate?.wellness_date && isValid(parseISO(corporate.wellness_date))) {
     reportDate = parseISO(corporate.wellness_date);
@@ -153,10 +154,10 @@ export default function Report({ patient, corporate }: ReportProps) {
             <>
               <div className="section-heading min-space-before">Personalized Health Goal</div>
               <div className="content-section">
-                {latestGoal.discussion && (
+                {latestGoal.discussion && typeof latestGoal.discussion === 'string' && (
                   <div className="content-item">{latestGoal.discussion}</div>
                 )}
-                {latestGoal.goal && (
+                {latestGoal.goal && typeof latestGoal.goal === 'string' && (
                   <div className="target-text keep-together">
                     Target: {latestGoal.goal.replace(/^target\s*:\s*/i, '')}
                   </div>
