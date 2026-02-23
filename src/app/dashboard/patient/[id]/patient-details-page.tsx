@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Registration, User, Vital, Nutrition, Goal, Clinical } from '@/lib/types';
+import type { Registration, User, Vital, Nutrition, Clinical } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -27,7 +26,6 @@ import {
   ArrowLeft,
   HeartPulse,
   Scale,
-  Target,
   User as UserIcon,
   Cake,
   Phone,
@@ -37,11 +35,9 @@ import {
   PlusCircle,
   FileText,
   Stethoscope,
-  Activity,
   Trash2,
   Edit,
   Loader2,
-  BriefcaseMedical
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -95,13 +91,11 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   // Modal States
   const [isVitalsDialogOpen, setIsVitalsDialogOpen] = useState(false);
   const [isNutritionDialogOpen, setIsNutritionDialogOpen] = useState(false);
-  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isClinicalDialogOpen, setIsClinicalDialogOpen] = useState(false);
 
   // Form States
   const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({});
   const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({});
-  const [goalForm, setGoalForm] = useState<Partial<Goal>>({});
   const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({});
   const [editFormData, setEditFormData] = useState<Partial<Registration>>({});
 
@@ -174,36 +168,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const handleDeleteNutrition = (id: number) => {
     setPatient(prev => ({ ...prev, nutritions: prev.nutritions.filter(n => n.id !== id) }));
     toast({ title: 'Deleted', description: 'Nutrition record removed.' });
-  };
-
-  const handleSaveGoal = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-        if (goalForm.id) {
-            setPatient(prev => ({
-                ...prev,
-                goals: prev.goals.map(g => g.id === goalForm.id ? { ...g, ...goalForm } as Goal : g)
-            }));
-            toast({ title: 'Updated', description: 'Goal updated.' });
-        } else {
-            const newGoal: Goal = {
-                id: Date.now(),
-                registration_id: patient.id,
-                ...goalForm,
-                created_at: new Date().toISOString(),
-                user_id: currentUser?.id || null
-            } as Goal;
-            setPatient(prev => ({ ...prev, goals: [newGoal, ...prev.goals] }));
-            toast({ title: 'Success', description: 'Goal set successfully.' });
-        }
-        setIsSubmitting(false);
-        setIsGoalDialogOpen(false);
-    }, 500);
-  };
-
-  const handleDeleteGoal = (id: number) => {
-    setPatient(prev => ({ ...prev, goals: prev.goals.filter(g => g.id !== id) }));
-    toast({ title: 'Deleted', description: 'Goal removed.' });
   };
 
   const handleSaveClinical = () => {
@@ -477,66 +441,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         </div>
                     </div>
                 ) : <p className="text-center text-muted-foreground py-4">No nutrition data recorded.</p>}
-              </CardContent>
-            </Card>
-
-            {/* Goals */}
-            <Card className="border-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Target className="w-6 h-6 text-primary" />
-                    <div>
-                        <CardTitle>Activation Goals</CardTitle>
-                        <CardDescription>Target outcomes and discussion</CardDescription>
-                    </div>
-                </div>
-                <Dialog open={isGoalDialogOpen} onOpenChange={(open) => { setIsGoalDialogOpen(open); if (!open) setGoalForm({}); }}>
-                    <DialogTrigger asChild><Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>Set Goal</Button></DialogTrigger>
-                    <DialogContent className="max-w-md border-primary/20">
-                        <DialogHeader><DialogTitle className="text-primary">{goalForm.id ? 'Edit' : 'New'} Health Goal</DialogTitle></DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold">Discussion Findings</Label><Textarea value={goalForm.discussion || ''} onChange={e => setGoalForm({...goalForm, discussion: e.target.value})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Target Goal</Label><Textarea value={goalForm.goal || ''} onChange={e => setGoalForm({...goalForm, goal: e.target.value})}/></div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" className="dark:text-foreground" onClick={() => setIsGoalDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleSaveGoal} disabled={isSubmitting}>
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Goal
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                {patient.goals.length > 0 ? (
-                    <div className="space-y-4">
-                        {patient.goals.map(g => (
-                            <div key={g.id} className="p-4 border border-primary/10 rounded-xl bg-primary/5 space-y-3 group relative">
-                                <div className="absolute top-3 right-3 flex gap-1">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10" onClick={() => { setGoalForm(g); setIsGoalDialogOpen(true); }}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDeleteGoal(g.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Target Goal</p>
-                                        <p className="text-sm font-semibold pr-16 text-foreground">{g.goal}</p>
-                                    </div>
-                                </div>
-                                <Separator className="bg-primary/10" />
-                                <div>
-                                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Discussion</p>
-                                    <p className="text-sm text-muted-foreground">{g.discussion}</p>
-                                </div>
-                                <p className="text-[10px] text-muted-foreground pt-2 italic">Set on {new Date(g.created_at).toLocaleDateString()}</p>
-                            </div>
-                        ))}
-                    </div>
-                ) : <p className="text-center text-muted-foreground py-4">No goals defined.</p>}
               </CardContent>
             </Card>
 

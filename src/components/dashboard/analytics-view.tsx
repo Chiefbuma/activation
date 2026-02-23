@@ -43,7 +43,7 @@ import {
   startOfWeek,
   endOfWeek
 } from 'date-fns';
-import { Calculator, CalendarRange, Users2 } from 'lucide-react';
+import { Calculator, CalendarRange } from 'lucide-react';
 
 interface AnalyticsViewProps {
   patients: Registration[];
@@ -59,7 +59,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     const totalActive = patients.filter(p => 
         p.vitals.length > 0 || 
         p.nutritions.length > 0 || 
-        p.goals.length > 0 || 
         p.clinicals.length > 0
     ).length;
     const maleCount = patients.filter(p => p.sex === 'Male').length;

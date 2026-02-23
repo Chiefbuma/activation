@@ -6,7 +6,6 @@ import {
     corporates as mockCorporates,
     vitals as mockVitals,
     nutritions as mockNutritions,
-    goals as mockGoals,
     clinicals as mockClinicals
 } from './mock-data';
 
@@ -17,7 +16,6 @@ export async function fetchPatients(): Promise<Registration[]> {
         const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
         const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const regGoals = mockGoals.filter(g => g.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
         return {
@@ -25,7 +23,6 @@ export async function fetchPatients(): Promise<Registration[]> {
             corporate_name: corporate?.name,
             vitals: regVitals,
             nutritions: regNutritions,
-            goals: regGoals,
             clinicals: regClinicals,
             status: 'Active' // Participants are active once registered
         } as Registration;
@@ -46,7 +43,6 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
     const corporate = mockCorporates.find(c => c.id === reg.corporate_id);
     const regVitals = mockVitals.filter(v => v.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const regNutritions = mockNutritions.filter(n => n.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const regGoals = mockGoals.filter(g => g.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const regClinicals = mockClinicals.filter(c => c.registration_id === reg.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return {
@@ -54,7 +50,6 @@ export async function fetchPatientById(id: string): Promise<Registration | null>
         corporate_name: corporate?.name,
         vitals: regVitals,
         nutritions: regNutritions,
-        goals: regGoals,
         clinicals: regClinicals,
         status: 'Active'
     } as Registration;

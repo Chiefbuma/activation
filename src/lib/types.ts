@@ -45,15 +45,6 @@ export type Nutrition = {
   created_at: string;
 };
 
-export type Goal = {
-  id: number;
-  registration_id: number;
-  user_id: number | null;
-  discussion: string | null;
-  goal: string | null;
-  created_at: string;
-};
-
 export type Clinical = {
   id: number;
   registration_id: number;
@@ -90,7 +81,6 @@ export type Registration = {
   corporate_name?: string;
   vitals: Vital[];
   nutritions: Nutrition[];
-  goals: Goal[];
   clinicals: Clinical[];
   
   // UI helper

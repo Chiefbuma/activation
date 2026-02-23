@@ -1,4 +1,4 @@
-import type { User, Corporate, Registration, Vital, Nutrition, Goal, Clinical } from './types';
+import type { User, Corporate, Registration, Vital, Nutrition, Clinical } from './types';
 
 export const users: User[] = [
     { id: 1, name: 'Taria Admin', email: 'admin@superadmin.com', role: 'admin', password: 'password' },
@@ -11,7 +11,7 @@ export const corporates: Corporate[] = [
     { id: 5, name: 'NCBA', wellness_date: '2026-02-02' }
 ];
 
-export const registrations: Omit<Registration, 'vitals' | 'nutritions' | 'goals' | 'clinicals' | 'status'>[] = [
+export const registrations: Omit<Registration, 'vitals' | 'nutritions' | 'clinicals' | 'status'>[] = [
     {
         id: 2,
         first_name: 'Tom',
@@ -88,20 +88,14 @@ export const nutritions: Nutrition[] = [
     { id: 7, registration_id: 5, height: 45, weight: 23, bmi: 113.6, visceral_fat: 45, body_fat_percent: 12, meal_plan: 'Not Recommended', notes_nutritionist: 'Nutritionist Notes', user_id: null, created_at: '2026-02-01 06:45:27' }
 ];
 
-export const goals: Goal[] = [
-    { id: 2, registration_id: 2, user_id: 1, discussion: 'Patient is concerned about his high blood pressure reading and wants to manage it better.', goal: 'Reduce daily sodium intake to under 2,300mg. Monitor blood pressure at home weekly and keep a log.', created_at: '2026-01-31 14:03:10' },
-    { id: 4, registration_id: 3, user_id: 1, discussion: 'Regular checkup discussion', goal: 'Maintain healthy lifestyle', created_at: '2026-02-01 06:43:48' },
-    { id: 5, registration_id: 5, user_id: 1, discussion: 'Discussion', goal: 'Goal', created_at: '2026-02-01 06:45:49' }
-];
-
 export const clinicals: Clinical[] = [
     { 
         id: 2, 
         registration_id: 2, 
         counselling_sessions: 'Recommended', 
-        conclusion: 'Medical Review recommended', 
+        conclusion: 'Medical Review recommended for raised blood pressure', 
         doctor_notes: 'Diagnosed with Stage 1 Hypertension. Follow up in 1 month.', 
-        wellness_check_type: 'Hypertension', 
+        wellness_check_type: 'None', 
         user_id: 1, 
         created_at: '2026-01-31 14:03:10' 
     },
@@ -121,7 +115,7 @@ export const clinicals: Clinical[] = [
         counselling_sessions: 'Recommended', 
         conclusion: 'Healthy lifestyle changes recommended', 
         doctor_notes: 'Encouraged more physical activity.', 
-        wellness_check_type: 'Diabetes', 
+        wellness_check_type: 'None', 
         user_id: 1, 
         created_at: '2026-02-01 06:45:58' 
     }

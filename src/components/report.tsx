@@ -19,7 +19,6 @@ function getDaySuffix(day: number) {
 export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
-  const latestGoal = patient.goals?.[0];
   const latestClinical = patient.clinicals?.[0];
 
   const wellnessDate = patient.wellness_date ? new Date(patient.wellness_date) : null;
@@ -107,16 +106,6 @@ export default function Report({ patient, corporate }: ReportProps) {
                       {clinicalDetails.map((detail, index) => (
                           <div key={index} className="content-item">{detail}</div>
                       ))}
-                  </div>
-              </>
-          )}
-
-          {latestGoal && (
-               <>
-                  <div className="section-heading min-space-before">Health Goals</div>
-                  <div className="content-section">
-                      {latestGoal.discussion && <div className="content-item">{latestGoal.discussion}</div>}
-                      {latestGoal.goal && <div className="target-text keep-together">Target: {latestGoal.goal}</div>}
                   </div>
               </>
           )}

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -26,7 +25,6 @@ const ViewActivationButton = ({ registration }: { registration: Registration }) 
     const isNewlyRegistered = 
         (!registration.vitals || registration.vitals.length === 0) && 
         (!registration.nutritions || registration.nutritions.length === 0) && 
-        (!registration.goals || registration.goals.length === 0) && 
         (!registration.clinicals || registration.clinicals.length === 0);
 
     return (

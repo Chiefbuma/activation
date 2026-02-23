@@ -1,10 +1,8 @@
-
 'use client';
 import type { Registration } from '@/lib/types';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Target, ClipboardCheck } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ClipboardCheck } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
@@ -44,17 +42,11 @@ export default function PatientCard({ patient, index }: { patient: Registration,
                     <Badge variant="outline">{patient.corporate_name || 'Individual'}</Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-4 mb-4">
                     <div className="space-y-2">
-                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><Target className="w-4 h-4"/>Goals</h4>
-                        <div className="space-y-1 text-sm">
-                            <div className="flex justify-between"><span className="text-muted-foreground">Count:</span> <span className="font-bold">{patient.goals.length}</span></div>
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><ClipboardCheck className="w-4 h-4"/>Vitals</h4>
+                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><ClipboardCheck className="w-4 h-4"/>Assessments</h4>
                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between"><span className="text-muted-foreground">Recorded:</span> <span className="font-bold">{patient.vitals.length}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Total Records:</span> <span className="font-bold">{patient.vitals.length + patient.nutritions.length + patient.clinicals.length}</span></div>
                         </div>
                     </div>
                 </div>
