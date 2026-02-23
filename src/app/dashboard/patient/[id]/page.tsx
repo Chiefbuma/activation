@@ -12,13 +12,13 @@ async function getPatientData(id: string) {
     }
 }
 
-export default async function PatientPage({ params }: { params: { id: string } }) {
-  const patient = await getPatientData(params.id);
+export default async function PatientPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+  const patient = await getPatientData(id);
   
   if (!patient) {
     notFound();
   }
   
-  // Directly return the details page as self-onboarding is removed
   return <PatientDetailsPage initialPatient={patient} />;
 }

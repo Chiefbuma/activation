@@ -6,12 +6,11 @@ import type { Registration, User, Corporate } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { fetchCorporates } from '@/lib/data';
+import { getCorporates } from '@/lib/serve';
 import PatientHeader from './patient-header';
 
 interface OnboardingFormProps {
@@ -31,7 +30,7 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const corpData = await fetchCorporates();
+                const corpData = await getCorporates();
                 setCorporates(corpData);
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to load necessary data.' });
@@ -58,11 +57,11 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
         e.preventDefault();
         setIsSubmitting(true);
         
-        await new Promise(resolve => setTimeout(resolve, 500));
-
+        // This form is now primarily for updating registration info
+        // Real activation happens when vitals are added
         toast({
-            title: 'Activation Complete (Mock)',
-            description: `${patient.first_name} is now activated. This will not persist on page refresh.`,
+            title: 'Info',
+            description: `Registration details updated. Please add assessments to fully activate the participant.`,
         });
         
         router.push(`/dashboard/patient/${patient.id}`);
@@ -72,10 +71,10 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <PatientHeader patient={patient} />
+            <PatientHeader patient={patient as any} />
             <form onSubmit={handleSubmit}>
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="dark:border-primary/40">
                         <CardHeader className="items-center">
                             <div className="bg-muted px-4 py-2 rounded-lg">
                                 <CardTitle className="text-center text-primary">Participant Information</CardTitle>
@@ -84,26 +83,26 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="first_name">First Name</Label>
-                                <Input id="first_name" value={formData.first_name || ''} onChange={handleInputChange} required />
+                                <Label htmlFor="first_name" className="text-primary font-bold">First Name</Label>
+                                <Input id="first_name" value={formData.first_name || ''} onChange={handleInputChange} required className="dark:border-primary/40" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="middle_name">Middle Name</Label>
-                                <Input id="middle_name" value={formData.middle_name || ''} onChange={handleInputChange} />
+                                <Label htmlFor="middle_name" className="text-primary font-bold">Middle Name</Label>
+                                <Input id="middle_name" value={formData.middle_name || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="surname">Surname</Label>
-                                <Input id="surname" value={formData.surname || ''} onChange={handleInputChange} />
+                                <Label htmlFor="surname" className="text-primary font-bold">Surname</Label>
+                                <Input id="surname" value={formData.surname || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="age">Age</Label>
-                                    <Input id="age" type="number" value={formData.age || ''} onChange={handleInputChange} />
+                                    <Label htmlFor="age" className="text-primary font-bold">Age</Label>
+                                    <Input id="age" type="number" value={formData.age || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="sex">Sex</Label>
+                                    <Label htmlFor="sex" className="text-primary font-bold">Sex</Label>
                                     <Select value={formData.sex || ''} onValueChange={(value) => handleSelectChange('sex', value)}>
-                                        <SelectTrigger><SelectValue placeholder="Select sex" /></SelectTrigger>
+                                        <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select sex" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="Male">Male</SelectItem>
                                             <SelectItem value="Female">Female</SelectItem>
@@ -115,7 +114,7 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="dark:border-primary/40">
                         <CardHeader className="items-center">
                              <div className="bg-muted px-4 py-2 rounded-lg">
                                 <CardTitle className="text-center text-primary">Contact & Corporate</CardTitle>
@@ -123,17 +122,17 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Phone Number</Label>
-                                <Input id="phone" type="tel" value={formData.phone || ''} onChange={handleInputChange} />
+                                <Label htmlFor="phone" className="text-primary font-bold">Phone Number</Label>
+                                <Input id="phone" type="tel" value={formData.phone || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" type="email" value={formData.email || ''} onChange={handleInputChange} />
+                                <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
+                                <Input id="email" type="email" value={formData.email || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor="corporate_id">Assign Corporate</Label>
+                                <Label htmlFor="corporate_id" className="text-primary font-bold">Assign Corporate</Label>
                                 <Select value={String(formData.corporate_id || 'null')} onValueChange={(value) => handleSelectChange('corporate_id', value)}>
-                                    <SelectTrigger><SelectValue placeholder="Select a corporate" /></SelectTrigger>
+                                    <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select a corporate" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="null">None</SelectItem>
                                         {corporates.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
@@ -141,8 +140,8 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="wellness_date">Wellness Date</Label>
-                                <Input id="wellness_date" type="date" value={formData.wellness_date || ''} onChange={handleInputChange} />
+                                <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
+                                <Input id="wellness_date" type="date" value={formData.wellness_date || ''} onChange={handleInputChange} className="dark:border-primary/40" />
                             </div>
                         </CardContent>
                     </Card>
@@ -150,7 +149,7 @@ export default function OnboardingForm({ patient }: OnboardingFormProps) {
                     <div className="flex justify-end gap-4">
                         <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Complete Activation
+                            Update Details
                         </Button>
                     </div>
                 </div>

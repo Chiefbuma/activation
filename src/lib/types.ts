@@ -35,13 +35,13 @@ export type Nutrition = {
   id: number;
   registration_id: number;
   height: number | null;
-  weight: decimal(5,2) | null;
-  bmi: decimal(5,2) | null;
-  llw: decimal(5,2) | null;
-  ulw: decimal(5,2) | null;
-  excess_weight: decimal(5,2) | null;
-  visceral_fat: int(11) | null;
-  body_fat_percent: decimal(5,2) | null;
+  weight: number | null;
+  bmi: number | null;
+  llw: number | null;
+  ulw: number | null;
+  excess_weight: number | null;
+  visceral_fat: number | null;
+  body_fat_percent: number | null;
   meal_plan: 'Recommended' | 'Not Recommended' | null;
   weight_loss_period: string | null;
   user_id: number | null;
@@ -52,7 +52,7 @@ export type Clinical = {
   id: number;
   registration_id: number;
   counselling_sessions: 'Recommended' | 'Not Recommended' | null;
-  verbal_stress_rating: int(11) | null;
+  verbal_stress_rating: number | null;
   conclusion: 
     | 'All results within healthy range' 
     | 'Healthy lifestyle changes recommended' 
@@ -60,7 +60,7 @@ export type Clinical = {
     | 'Medical Review recommended for raised blood pressure' 
     | 'Medical Review recommended for raised blood sugar' 
     | null;
-  doctor_notes: text | null;
+  doctor_notes: string | null;
   user_id: number | null;
   created_at: string;
 };

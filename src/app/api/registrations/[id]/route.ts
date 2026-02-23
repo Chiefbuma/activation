@@ -2,9 +2,9 @@ import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 import type { Vital, Nutrition, Clinical } from '@/lib/types';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
     try {
-        const id = params.id;
+        const { id } = await props.params;
         const [rows] = await db.query(`
             SELECT r.*, c.name as corporate_name 
             FROM registrations r 
@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             status: (vitals as any[]).length > 0 ? 'Active' : 'Pending'
         });
     } catch (error) {
-        console.error('GET Registration Error:', error);
+        console.error('GET Registration API Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 }
