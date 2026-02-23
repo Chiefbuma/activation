@@ -40,7 +40,6 @@ import {
   isSameMonth, 
   isWithinInterval,
   subMonths,
-  startOfWeek,
   endOfWeek
 } from 'date-fns';
 import { Calculator, CalendarRange } from 'lucide-react';
@@ -117,12 +116,22 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
       const male = weekPatients.filter(p => p.sex === 'Male').length;
       const female = weekPatients.filter(p => p.sex === 'Female').length;
 
+      const recommendedMealPlans = weekPatients.filter(p => 
+        p.nutritions.some(n => n.meal_plan === 'Recommended')
+      ).length;
+      
+      const recommendedCounselling = weekPatients.filter(p => 
+        p.clinicals.some(c => c.counselling_sessions === 'Recommended')
+      ).length;
+
       return {
         weekLabel: `Week ${idx + 1}`,
         registrations: weekPatients.length,
         male,
         female,
-        corporates: uniqueCorps
+        corporates: uniqueCorps,
+        recommendedMealPlans,
+        recommendedCounselling
       };
     });
   }, [patients, selectedMonth]);
@@ -264,10 +273,22 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
                       <TableCell key={w.weekLabel} className="text-center text-sm">{w.male}</TableCell>
                     ))}
                   </TableRow>
-                  <TableRow className="hover:bg-primary/5 transition-colors border-none">
+                  <TableRow className="hover:bg-primary/5 transition-colors">
                     <TableCell className="font-semibold text-muted-foreground px-8">— Female</TableCell>
                     {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center text-sm">{w.female}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-semibold text-muted-foreground">Recommended Meal Plans</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold text-teal-600">{w.recommendedMealPlans}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5 transition-colors border-none">
+                    <TableCell className="font-semibold text-muted-foreground">Recommended Counselling</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold text-teal-600">{w.recommendedCounselling}</TableCell>
                     ))}
                   </TableRow>
                 </TableBody>
