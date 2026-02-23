@@ -278,7 +278,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button asChild variant="outline" size="icon">
+            <Button asChild variant="outline" size="icon" className="dark:text-foreground">
               <Link href="/dashboard">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
@@ -345,14 +345,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <DialogContent className="max-w-md border-primary/20">
                         <DialogHeader><DialogTitle className="text-primary">{vitalsForm.id ? 'Edit' : 'New'} Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Temp (Optional °C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">RBS (mmol/L) - Optional</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})}/></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Systolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_systolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_systolic: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Diastolic (mmHg)</Label><Input type="number" value={vitalsForm.bp_diastolic || ''} onChange={e => setVitalsForm({...vitalsForm, bp_diastolic: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Pulse (bpm)</Label><Input type="number" value={vitalsForm.pulse || ''} onChange={e => setVitalsForm({...vitalsForm, pulse: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Temp (Optional °C)</Label><Input type="number" step="0.1" value={vitalsForm.temp || ''} onChange={e => setVitalsForm({...vitalsForm, temp: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">RBS (mmol/L) - Optional</Label><Input value={vitalsForm.rbs || ''} onChange={e => setVitalsForm({...vitalsForm, rbs: e.target.value})} className="dark:border-primary/40" /></div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">FBS (mmol/L) - Optional</Label>
-                                <Input value={vitalsForm.fbs || ''} placeholder="Below 5.6" onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})}/>
+                                <Input value={vitalsForm.fbs || ''} onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})} className="dark:border-primary/40" />
                                 <p className="text-[10px] text-muted-foreground">Range Below 5.6mmol/l</p>
                             </div>
                         </div>
@@ -422,10 +422,10 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <DialogContent className="max-w-md border-primary/20">
                         <DialogHeader><DialogTitle className="text-primary">{nutritionForm.id ? 'Edit' : 'New'} Nutrition Record</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
-                            <div className="space-y-2"><Label className="text-primary font-bold">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})}/></div>
-                            <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})}/></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: parseInt(e.target.value)})} className="dark:border-primary/40" /></div>
+                            <div className="space-y-2"><Label className="text-primary font-bold">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: parseFloat(e.target.value)})} className="dark:border-primary/40" /></div>
                             
                             <div className="col-span-2 p-3 bg-muted/50 rounded-lg space-y-1 text-xs">
                                 <p className="font-bold text-primary">Calculation Insights:</p>
@@ -437,7 +437,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
 
                             <div className="col-span-2 space-y-2">
                                 <Label className="text-primary font-bold">Rec. Period for Weight Loss (Years)</Label>
-                                <Input value={nutritionResults.weight_loss_period || ''} readOnly className="bg-muted/30" />
+                                <Input value={nutritionResults.weight_loss_period || ''} readOnly className="bg-muted/30 dark:border-primary/40" />
                                 <p className="text-[10px] text-muted-foreground italic">Automated based on excess weight / 12.</p>
                             </div>
                         </div>
@@ -509,7 +509,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                         <div className="flex flex-col gap-6 py-4">
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Verbal Stress Rating (1-10)</Label>
-                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} placeholder="Scale 1-10" onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})}/>
+                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: parseInt(e.target.value)})} className="dark:border-primary/40" />
                                 <p className="text-[10px] text-muted-foreground italic">Counselling status will automate based on this rating (&gt;7 triggers recommendation).</p>
                             </div>
                             <div className="space-y-2">
@@ -517,13 +517,13 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <Input 
                                     value={clinicalForm.verbal_stress_rating ? (Number(clinicalForm.verbal_stress_rating) > 7 ? 'Recommended' : 'Not Recommended') : 'N/A'} 
                                     readOnly 
-                                    className="bg-muted/30 font-bold" 
+                                    className="bg-muted/30 font-bold dark:border-primary/40" 
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Wellness Check Conclusion</Label>
                                 <Select value={clinicalForm.conclusion || ''} onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select conclusion" /></SelectTrigger>
+                                    <SelectTrigger className="dark:border-primary/40"><SelectValue placeholder="Select conclusion" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All results within healthy range">All results within healthy range</SelectItem>
                                         <SelectItem value="Healthy lifestyle changes recommended">Healthy lifestyle changes recommended</SelectItem>
@@ -535,7 +535,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold">Doctor's Notes</Label>
-                                <Textarea className="min-h-[120px]" value={clinicalForm.doctor_notes || ''} placeholder="Enter observations and professional notes..." onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})}/>
+                                <Textarea className="min-h-[120px] dark:border-primary/40" value={clinicalForm.doctor_notes || ''} onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})}/>
                             </div>
                         </div>
                         <DialogFooter>
@@ -608,28 +608,28 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
                     <div className="space-y-2">
                         <Label htmlFor="first_name" className="text-primary font-bold">First Name</Label>
-                        <Input id="first_name" value={editFormData.first_name || ''} onChange={(e) => setEditFormData({...editFormData, first_name: e.target.value})} required />
+                        <Input id="first_name" value={editFormData.first_name || ''} onChange={(e) => setEditFormData({...editFormData, first_name: e.target.value})} required className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="middle_name" className="text-primary font-bold">Middle Name</Label>
-                        <Input id="middle_name" value={editFormData.middle_name || ''} onChange={(e) => setEditFormData({...editFormData, middle_name: e.target.value})} />
+                        <Input id="middle_name" value={editFormData.middle_name || ''} onChange={(e) => setEditFormData({...editFormData, middle_name: e.target.value})} className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="surname" className="text-primary font-bold">Surname</Label>
-                        <Input id="surname" value={editFormData.surname || ''} onChange={(e) => setEditFormData({...editFormData, surname: e.target.value})} required />
+                        <Input id="surname" value={editFormData.surname || ''} onChange={(e) => setEditFormData({...editFormData, surname: e.target.value})} required className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="dob" className="text-primary font-bold">Date of Birth</Label>
-                        <Input id="dob" type="date" value={editFormData.dob || ''} onChange={(e) => setEditFormData({...editFormData, dob: e.target.value})} />
+                        <Input id="dob" type="date" value={editFormData.dob || ''} onChange={(e) => setEditFormData({...editFormData, dob: e.target.value})} className="dark:border-primary/40" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="age" className="text-primary font-bold">Age</Label>
-                        <Input id="age" type="number" value={editFormData.age || ''} onChange={(e) => setEditFormData({...editFormData, age: parseInt(e.target.value)})} />
+                        <Input id="age" type="number" value={editFormData.age || ''} onChange={(e) => setEditFormData({...editFormData, age: parseInt(e.target.value)})} className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="sex" className="text-primary font-bold">Sex</Label>
                         <Select value={editFormData.sex || ''} onValueChange={(value) => setEditFormData({...editFormData, sex: value as any})}>
-                            <SelectTrigger id="sex"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                            <SelectTrigger id="sex" className="dark:border-primary/40"><SelectValue placeholder="Select sex" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Male">Male</SelectItem>
                                 <SelectItem value="Female">Female</SelectItem>
@@ -639,20 +639,20 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     </div>
                     <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="email" className="text-primary font-bold">Email</Label>
-                        <Input id="email" type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} />
+                        <Input id="email" type="email" value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="phone" className="text-primary font-bold">Phone</Label>
-                        <Input id="phone" type="tel" value={editFormData.phone || ''} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} />
+                        <Input id="phone" type="tel" value={editFormData.phone || ''} onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})} className="dark:border-primary/40" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
-                        <Input id="wellness_date" type="date" value={editFormData.wellness_date || ''} onChange={(e) => setEditFormData({...editFormData, wellness_date: e.target.value})} />
+                        <Input id="wellness_date" type="date" value={editFormData.wellness_date || ''} onChange={(e) => setEditFormData({...editFormData, wellness_date: e.target.value})} className="dark:border-primary/40" />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="corporate_id" className="text-primary font-bold">Corporate</Label>
                         <Select value={String(editFormData.corporate_id || 'null')} onValueChange={(value) => setEditFormData({...editFormData, corporate_id: value === 'null' ? null : parseInt(value)})}>
-                            <SelectTrigger id="corporate_id"><SelectValue placeholder="Select corporate" /></SelectTrigger>
+                            <SelectTrigger id="corporate_id" className="dark:border-primary/40"><SelectValue placeholder="Select corporate" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="null">None</SelectItem>
                                 {corporates.map((corporate) => (
