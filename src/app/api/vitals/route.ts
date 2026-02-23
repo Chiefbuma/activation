@@ -5,6 +5,7 @@ export async function POST(request: Request) {
     try {
         const data = await request.json();
         
+        // Format ISO date to MySQL format
         const mysqlDate = data.measured_at 
             ? new Date(data.measured_at).toISOString().slice(0, 19).replace('T', ' ')
             : new Date().toISOString().slice(0, 19).replace('T', ' ');

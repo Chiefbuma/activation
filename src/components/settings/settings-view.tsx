@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Corporate, User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import CorporateManagement from './corporate-management';
@@ -19,11 +19,22 @@ export default function SettingsView({
   users,
   onUsersUpdate
 }: SettingsViewProps) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('loggedInUser');
+    if (stored) {
+      setCurrentUser(JSON.parse(stored));
+    }
+  }, []);
+
+  const isAdmin = currentUser?.role === 'admin';
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="dark:border-teal-500/30">
+        <Card className="dark:border-primary/40">
             <CardHeader>
-            <CardTitle className="text-teal-600 dark:text-teal-400">Corporate Partners</CardTitle>
+            <CardTitle className="text-primary">Corporate Partners</CardTitle>
             <CardDescription>
                 Manage corporate entities and their scheduled wellness dates.
             </CardDescription>
@@ -35,20 +46,23 @@ export default function SettingsView({
             />
             </CardContent>
         </Card>
-        <Card className="dark:border-teal-500/30">
-            <CardHeader>
-            <CardTitle className="text-teal-600 dark:text-teal-400">User Accounts</CardTitle>
-            <CardDescription>
-                Manage system users, roles, and access credentials.
-            </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <UserManagement 
-                    initialUsers={users}
-                    onUsersUpdate={onUsersUpdate}
-                />
-            </CardContent>
-        </Card>
+        
+        {isAdmin && (
+            <Card className="dark:border-primary/40">
+                <CardHeader>
+                <CardTitle className="text-primary">User Accounts</CardTitle>
+                <CardDescription>
+                    Manage system users, roles, and access credentials.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <UserManagement 
+                        initialUsers={users}
+                        onUsersUpdate={onUsersUpdate}
+                    />
+                </CardContent>
+            </Card>
+        )}
     </div>
   );
 }

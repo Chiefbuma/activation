@@ -1,11 +1,6 @@
--- Taria Health - Production Database Schema
--- Use this file to initialize your gledcapi_activation database.
+-- Taria Health - Production Schema Alignment
+-- Includes all clinical parameters and performance indexes
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
--- 1. Users Table (Authentication)
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -16,19 +11,17 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 2. Corporates Table
 CREATE TABLE IF NOT EXISTS `corporates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `wellness_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `idx_wellness_date` (`wellness_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  INDEX `idx_corp_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Registrations (Participants)
 CREATE TABLE IF NOT EXISTS `registrations` (
   `id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(100) NOT NULL,
@@ -46,11 +39,10 @@ CREATE TABLE IF NOT EXISTS `registrations` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`corporate_id`) REFERENCES `corporates`(`id`) ON DELETE SET NULL,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
-  INDEX `idx_corporate` (`corporate_id`),
-  INDEX `idx_created_at` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  INDEX `idx_reg_created` (`created_at`),
+  INDEX `idx_reg_name` (`first_name`, `surname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Vitals Table
 CREATE TABLE IF NOT EXISTS `vitals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
@@ -65,11 +57,10 @@ CREATE TABLE IF NOT EXISTS `vitals` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE,
-  INDEX `idx_registration_vitals` (`registration_id`),
-  INDEX `idx_measured_at` (`measured_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  INDEX `idx_vitals_reg` (`registration_id`),
+  INDEX `idx_vitals_measured` (`measured_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 5. Nutritions Table
 CREATE TABLE IF NOT EXISTS `nutritions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
@@ -80,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `nutritions` (
   `ulw` decimal(5,2) DEFAULT NULL,
   `excess_weight` decimal(5,2) DEFAULT NULL,
   `visceral_fat` int DEFAULT NULL,
-  `body_fat_percent` decimal(5,2) DEFAULT NULL,
+  `body_fat_percent` decimal(4,1) DEFAULT NULL,
   `meal_plan` enum('Recommended','Not Recommended') DEFAULT NULL,
   `weight_loss_period` varchar(50) DEFAULT NULL,
   `notes_nutritionist` text DEFAULT NULL,
@@ -88,10 +79,9 @@ CREATE TABLE IF NOT EXISTS `nutritions` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE,
-  INDEX `idx_registration_nutri` (`registration_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  INDEX `idx_nutri_reg` (`registration_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Clinicals Table
 CREATE TABLE IF NOT EXISTS `clinicals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `registration_id` int NOT NULL,
@@ -99,15 +89,14 @@ CREATE TABLE IF NOT EXISTS `clinicals` (
   `verbal_stress_rating` int DEFAULT NULL,
   `conclusion` varchar(255) DEFAULT NULL,
   `doctor_notes` text DEFAULT NULL,
-  `wellness_check_type` varchar(100) DEFAULT 'None',
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`registration_id`) REFERENCES `registrations`(`id`) ON DELETE CASCADE,
-  INDEX `idx_registration_clinical` (`registration_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  INDEX `idx_clinical_reg` (`registration_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- INITIAL SEED DATA
+-- Initial Seed Data
 INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
 ('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
 
@@ -115,5 +104,3 @@ INSERT INTO `corporates` (`name`, `wellness_date`) VALUES
 ('Bio Food Products', '2025-09-29'),
 ('Taria', '2025-10-01'),
 ('NCBA', '2026-02-02');
-
-COMMIT;

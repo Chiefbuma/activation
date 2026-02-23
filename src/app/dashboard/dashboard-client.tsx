@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Registration, User, Corporate } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Users, SlidersHorizontal } from 'lucide-react';
@@ -19,11 +19,20 @@ export default function DashboardClient({
   initialCorporates: Corporate[],
   initialUsers: User[],
 }) {
-  const [patients, setPatients] = useState(initialPatients);
+  const [patients] = useState(initialPatients);
   const [corporates, setCorporates] = useState(initialCorporates);
   const [users, setUsers] = useState(initialUsers);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  
   // Default to activations as requested
   const [activeView, setActiveView] = useState<View>('activations');
+
+  useEffect(() => {
+    const stored = localStorage.getItem('loggedInUser');
+    if (stored) {
+      setCurrentUser(JSON.parse(stored));
+    }
+  }, []);
 
   const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
     setCorporates(updatedCorporates);
@@ -49,6 +58,8 @@ export default function DashboardClient({
     }
   };
 
+  const isAdmin = currentUser?.role === 'admin';
+
   return (
     <div className="space-y-8">
        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -60,7 +71,7 @@ export default function DashboardClient({
                     {getViewSubtitle()}
                 </p>
             </div>
-            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit shadow-sm">
+            <div className="flex items-center gap-2 p-1 bg-muted rounded-xl border w-fit shadow-sm dark:border-primary/20">
                 <NavButton 
                     label="Dashboard" 
                     icon={<LayoutDashboard className="h-4 w-4" />} 
@@ -73,12 +84,14 @@ export default function DashboardClient({
                     isActive={activeView === 'activations'}
                     onClick={() => setActiveView('activations')}
                 />
-                <NavButton 
-                    label="Settings" 
-                    icon={<SlidersHorizontal className="h-4 w-4" />} 
-                    isActive={activeView === 'settings'}
-                    onClick={() => setActiveView('settings')}
-                />
+                {isAdmin && (
+                    <NavButton 
+                        label="Settings" 
+                        icon={<SlidersHorizontal className="h-4 w-4" />} 
+                        isActive={activeView === 'settings'}
+                        onClick={() => setActiveView('settings')}
+                    />
+                )}
             </div>
        </div>
       
@@ -99,7 +112,7 @@ export default function DashboardClient({
                 <PatientList patients={patients as any} />
             </div>
           )}
-          {activeView === 'settings' && (
+          {activeView === 'settings' && isAdmin && (
             <SettingsView 
                 corporates={corporates} 
                 onCorporatesUpdate={handleUpdateCorporates}
