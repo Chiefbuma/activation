@@ -35,8 +35,8 @@ export async function POST(request: Request) {
             toNum(data.bp_diastolic), 
             toNum(data.pulse), 
             toNum(data.temp), 
-            data.rbs ? String(data.rbs) : null, 
-            data.fbs ? String(data.fbs) : null, 
+            (data.rbs !== undefined && data.rbs !== null && data.rbs !== '') ? String(data.rbs) : null, 
+            (data.fbs !== undefined && data.fbs !== null && data.fbs !== '') ? String(data.fbs) : null, 
             toNum(data.user_id), 
             mysqlDate
         ]);
@@ -64,8 +64,8 @@ export async function PUT(request: Request) {
             toNum(data.bp_diastolic), 
             toNum(data.pulse), 
             toNum(data.temp), 
-            data.rbs ? String(data.rbs) : null, 
-            data.fbs ? String(data.fbs) : null, 
+            (data.rbs !== undefined && data.rbs !== null && data.rbs !== '') ? String(data.rbs) : null, 
+            (data.fbs !== undefined && data.fbs !== null && data.fbs !== '') ? String(data.fbs) : null, 
             mysqlDate, 
             toNum(data.id)
         ]);

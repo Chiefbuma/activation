@@ -212,8 +212,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // STABLE SELECTION CALLBACK (FIX FOR ERROR #185)
-  // We use a ref to track the last selection state string to prevent recursive loops
+  // FIXED: Prevent infinite render loops by comparing selection keys before calling callback
   const lastSelectionKeys = React.useRef<string>('')
   
   React.useEffect(() => {

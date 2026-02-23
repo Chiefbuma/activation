@@ -24,12 +24,9 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
-const safeSplitLines = (val: any): string[] => {
-    if (!val) return [];
-    return String(val)
-        .split('\n')
-        .map(line => line.trim())
-        .filter(Boolean);
+const safeString = (val: any): string => {
+    if (val === undefined || val === null) return '';
+    return String(val);
 };
 
 export default function Report({ patient, corporate }: ReportProps) {
@@ -148,7 +145,7 @@ export default function Report({ patient, corporate }: ReportProps) {
               <div className="content-section">
                 {discussionParagraphs.map((para, idx) => (
                   <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
-                    {para}
+                    {safeString(para)}
                   </div>
                 ))}
               </div>

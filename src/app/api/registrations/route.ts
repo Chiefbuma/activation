@@ -24,9 +24,9 @@ export async function GET() {
 
         const enriched = registrations.map(reg => ({
             ...reg,
-            vitals: (vitals as Vital[]).filter(v => v.registration_id === reg.id),
-            nutritions: (nutritions as Nutrition[]).filter(n => n.registration_id === reg.id),
-            clinicals: (clinicals as Clinical[]).filter(c => c.registration_id === reg.id),
+            vitals: (vitals as Vital[]).filter(v => v.registration_id === reg.id) || [],
+            nutritions: (nutritions as Nutrition[]).filter(n => n.registration_id === reg.id) || [],
+            clinicals: (clinicals as Clinical[]).filter(c => c.registration_id === reg.id) || [],
             status: (vitals as Vital[]).some(v => v.registration_id === reg.id) ? 'Active' : 'Pending'
         }));
 
