@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     try {
         const data = await request.json();
         await db.query(`
-            INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, user_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, notes_nutritionist, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             toNum(data.registration_id), 
             toNum(data.height), 
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
             toNum(data.visceral_fat),
             toNum(data.body_fat_percent),
             data.meal_plan || null, 
-            data.weight_loss_period || null, 
+            data.weight_loss_period || null,
+            data.notes_nutritionist || null,
             toNum(data.user_id)
         ]);
         return NextResponse.json({ success: true });
@@ -38,7 +39,7 @@ export async function PUT(request: Request) {
     try {
         const data = await request.json();
         await db.query(`
-            UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?
+            UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?, notes_nutritionist=?
             WHERE id=?
         `, [
             toNum(data.height), 
@@ -47,10 +48,11 @@ export async function PUT(request: Request) {
             toNum(data.llw), 
             toNum(data.ulw), 
             toNum(data.excess_weight), 
-            toNum(data.visceral_fat),
-            toNum(data.body_fat_percent),
+            toNum(data.visceral_fat), 
+            toNum(data.body_fat_percent), 
             data.meal_plan || null, 
             data.weight_loss_period || null, 
+            data.notes_nutritionist || null,
             toNum(data.id)
         ]);
         return NextResponse.json({ success: true });

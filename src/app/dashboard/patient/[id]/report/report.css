@@ -7,7 +7,6 @@
         padding: 2.5rem;
         background: white;
         box-shadow: 0 0 15px rgba(0,0,0,0.15);
-        color: #333;
     }
 }
 
@@ -17,13 +16,12 @@
     margin: 0.5in 0.75in 0.5in 0.75in;
 }
 
-body {
-    font-family: "Calibri", sans-serif;
+.report-body-container {
+    font-family: "Calibri", "Helvetica", "Arial", sans-serif;
     font-size: 11pt;
     line-height: 1.3;
-    color: #333;
-    margin: 0;
-    padding: 0;
+    color: #888888;
+    background: white;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
@@ -34,9 +32,7 @@ body {
         max-width: none;
         margin: 0;
         padding: 0;
-        background: transparent;
         box-shadow: none;
-        color: #000;
     }
 }
 
@@ -44,14 +40,14 @@ body {
 .header {
     text-align: center;
     border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
     break-after: avoid;
 }
 
 .logo {
-    width: 450px;
-    max-height: 60px;
+    width: 350px;
+    max-height: 40px;
     margin: 0 auto;
     display: block;
 }
@@ -66,6 +62,7 @@ body {
     break-inside: auto;
 }
 
+/* ================= TITLE AND DATE ================= */
 .title-container {
     display: flex;
     justify-content: space-between;
@@ -85,29 +82,33 @@ body {
 
 .report-date {
     font-size: 11pt;
-    color: #17a2b8; /* Teal */
+    color: #1E5DFF;
     white-space: nowrap;
     text-align: right;
 }
 
 .patient-info {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 20px;
     break-after: avoid;
 }
 
 .patient-name {
     font-weight: bold;
-    font-size: 12pt;
+    color: #000;
 }
 
 .section-heading {
     font-size: 12pt;
     font-weight: 600;
-    color: #17a2b8; /* Teal */
+    color: #1E5DFF;
     text-decoration: underline;
     margin: 25px 0 10px 0;
     padding-top: 10px;
+    break-before: auto;
     break-after: avoid;
+    break-inside: avoid;
 }
 
 .body-text {
@@ -116,50 +117,35 @@ body {
     margin: 0;
 }
 
-/* ================= INFORMATIONAL BLOCK ================= */
-.guidance-box {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: rgba(23, 162, 184, 0.12); /* Slightly stronger teal fill */
-    border-left: 5px solid #17a2b8;
-    border-radius: 4px;
+.guidance-text {
+    color: #33CCCC;
+    margin: 6px 0;
     break-inside: avoid;
-}
-
-.guidance-title {
-    font-weight: bold;
-    color: #17a2b8;
-    font-size: 10pt;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.guidance-content {
-    font-size: 10pt;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.font-bold {
-    font-weight: bold;
-    color: #000;
 }
 
 .content-item {
     margin-bottom: 12px;
     line-height: 1.5;
     text-align: justify;
+    orphans: 3;
+    widows: 3;
     break-inside: avoid;
+}
+
+.target-text {
+    margin-top: 15px;
+    line-height: 1.5;
+    text-align: justify;
+    break-before: avoid;
+    color: #000;
 }
 
 .doctor-signature {
     font-size: 12pt;
-    color: #17a2b8;
-    margin-top: 30px;
+    color: #1E5DFF;
+    margin-top: 25px;
     padding-top: 10px;
+    break-before: avoid;
     break-inside: avoid;
 }
 
@@ -167,72 +153,50 @@ body {
     font-weight: normal;
 }
 
-/* ================= FOOTER ================= */
-.report-footer {
-    margin-top: auto;
-    padding-top: 20px;
-    padding-bottom: 10px;
-}
-
-.footer-line {
-    height: 1px;
-    background-color: #f0f0f0;
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-.footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.footer-logo {
-    width: 250px;
-    max-height: 35px;
-    opacity: 0.6;
-    filter: grayscale(100%);
-}
-
-.footer-text {
-    font-size: 9pt;
-    color: #999;
-    font-style: italic;
-    margin: 0;
-}
-
-/* ================= PRINT OPTIMIZATION ================= */
-@media print {
-    body {
-        font-size: 11pt;
-    }
-    
-    .section-heading {
-        page-break-after: avoid;
-    }
-    
-    .screening-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        page-break-inside: avoid;
-    }
-    
-    .keep-together {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-}
-
+/* ================= SCREENING GRID ================= */
 .screening-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: 60% 40%;
+    gap: 5px;
     margin: 15px 0;
     break-inside: avoid;
 }
 
+.screening-left, .screening-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
 .screening-item {
     margin-bottom: 6px;
+}
+
+.section-assessor {
+    font-size: 10pt;
+    color: #888888;
+    font-style: italic;
+    margin: 15px 0 8px 0;
+    padding: 0;
+    line-height: 1.5;
+    text-align: left;
+    break-inside: avoid;
+}
+
+.end-spacer {
+    height: 20px;
+}
+
+/* Ensure screening text doesn't get justified */
+.screening-grid .body-text {
+    text-align: left !important;
+    color: #888888;
+}
+
+.keep-together {
+    break-inside: avoid;
+}
+
+.min-space-before {
+    margin-top: 15px;
 }

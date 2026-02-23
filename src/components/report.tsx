@@ -1,5 +1,7 @@
+'use client';
+
 import type { Registration, Corporate } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 type ReportProps = {
   patient: Registration;
@@ -20,126 +22,161 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
   const latestClinical = patient.clinicals?.[0];
+  const latestGoal = patient.goals?.[0];
 
-  const wellnessDate = patient.wellness_date ? new Date(patient.wellness_date) : null;
-
-  let formattedDate: string;
-  if (wellnessDate && !isNaN(wellnessDate.getTime())) {
-    const day = wellnessDate.getDate();
-    const suffix = getDaySuffix(day);
-    formattedDate = `${format(wellnessDate, 'eeee, ')}${day}${suffix}${format(wellnessDate, ' MMMM yyyy')}`;
-  } else {
-    formattedDate = 'Date Not Available';
+  // Logic: Determine Report Date based on Priority
+  let reportDate: Date = new Date();
+  if (patient.wellness_date) {
+    reportDate = parseISO(patient.wellness_date);
+  } else if (latestClinical?.created_at) {
+    reportDate = new Date(latestClinical.created_at);
+  } else if (latestNutrition?.created_at) {
+    reportDate = new Date(latestNutrition.created_at);
+  } else if (latestVital?.created_at) {
+    reportDate = new Date(latestVital.created_at);
+  } else if (patient.created_at) {
+    reportDate = new Date(patient.created_at);
   }
 
-  const clinicalDetails = [
-    latestClinical?.conclusion && `Conclusion: ${latestClinical.conclusion}`,
-    latestClinical?.counselling_sessions && `Counselling Status: ${latestClinical.counselling_sessions}${latestClinical.verbal_stress_rating ? ` (Stress Rating: ${latestClinical.verbal_stress_rating}/10)` : ''}`,
-    latestClinical?.doctor_notes && `Observations: ${latestClinical.doctor_notes}`,
+  const day = reportDate.getDate();
+  const suffix = getDaySuffix(day);
+  const formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(reportDate, ' MMMM yyyy')}`;
+
+  // Discussion Summary Logic
+  const discussionParagraphs = [
+    latestClinical?.doctor_notes?.trim(),
+    latestClinical?.notes_psychologist?.trim(),
+    latestNutrition?.notes_nutritionist?.trim()
   ].filter(Boolean) as string[];
 
-  // Calculate dynamic weight range based on BMI 18.5 - 25 if height is available
+  // Calculation for Weight Guidance
   const heightM = latestNutrition?.height ? latestNutrition.height / 100 : null;
-  const weightRangeStr = heightM 
-    ? `${(18.5 * heightM * heightM).toFixed(1)}kgs - ${(25 * heightM * heightM).toFixed(1)}kgs`
-    : '53.3kgs - 74.0kgs';
+  const lowerWeight = heightM ? (18.5 * heightM * heightM).toFixed(1) : '53.3';
+  const upperWeight = heightM ? (25 * heightM * heightM).toFixed(1) : '74.0';
+
+  // Assessor Logic
+  const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
 
   return (
-    <div className="report-body-container bg-white text-gray-800 flex flex-col min-h-screen">
-      <div className="flex-grow">
-        <div className="header">
-            <img src="https://picsum.photos/seed/taria/450/60" alt="Taria Health Logo" className="logo" data-ai-hint="healthcare logo" />
-        </div>
-        <div className="content-wrapper">
-          <div className="content-area">
-            <div className="title-container keep-together">
-              <div className="report-title">INDIVIDUAL ACTIVATION REPORT:</div>
-              <div className="report-date">{formattedDate}</div>
+    <div className="report-body-container">
+      {/* HEADER */}
+      <div className="header">
+        <img src="https://picsum.photos/seed/taria/350/40" alt="Taria Health Logo" className="logo" />
+      </div>
+
+      {/* CONTENT AREA */}
+      <div className="content-wrapper">
+        <div className="content-area">
+          
+          {/* Title and Date */}
+          <div className="title-container keep-together">
+            <div className="report-title">INDIVIDUAL WELLNESS REPORT:</div>
+            <div className="report-date">{formattedDate}</div>
+          </div>
+
+          {/* Patient Info */}
+          <div className="patient-info keep-together">
+            <span className="patient-name">{`${patient.first_name} ${patient.surname || ''}`}</span>
+            <span className="patient-email">{patient.email || ''}</span>
+          </div>
+
+          {/* Screening Results Section */}
+          <div className="section-heading min-space-before">Screening Results</div>
+          
+          <div className="screening-grid force-together">
+            <div className="screening-left">
+              {latestVital?.bp_systolic && latestVital?.bp_diastolic && (
+                <div className="body-text screening-item">
+                  Blood Pressure: {latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg
+                </div>
+              )}
+              {latestVital?.pulse && (
+                <div className="body-text screening-item">Pulse: {latestVital.pulse} bpm</div>
+              )}
+              {latestVital?.temp && (
+                <div className="body-text screening-item">Temperature: {latestVital.temp} °C</div>
+              )}
+              {latestNutrition?.weight && (
+                <div className="body-text screening-item">Weight: {latestNutrition.weight} kgs</div>
+              )}
+              {latestNutrition?.height && (
+                <div className="body-text screening-item">Height: {latestNutrition.height} cm</div>
+              )}
+              {latestNutrition?.visceral_fat && (
+                <div className="body-text screening-item">Visceral Fat: {latestNutrition.visceral_fat}</div>
+              )}
             </div>
-
-            <div className="patient-info keep-together">
-              <span className="patient-name">
-                {`${patient.first_name} ${patient.surname || ''}`}
-                {patient.email && ` : ${patient.email}`}
-              </span>
+            
+            <div className="screening-right">
+              {latestNutrition?.bmi && (
+                <div className="body-text screening-item">BMI: {latestNutrition.bmi.toFixed(1)}</div>
+              )}
+              {latestVital?.rbs && (
+                <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs} mmol/L</div>
+              )}
+              {latestVital?.fbs && (
+                <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs} mmol/L</div>
+              )}
+              {latestNutrition?.body_fat_percent && (
+                <div className="body-text screening-item">Body fat percentage: {latestNutrition.body_fat_percent}%</div>
+              )}
             </div>
+          </div>
 
-            <div className="section-heading min-space-before">Screening Results</div>
+          {/* Clinical Guidance Text */}
+          <div className="keep-together">
+            <div className="guidance-text body-text">
+              Healthy weight for height range (kgs): {lowerWeight}kgs - {upperWeight}kgs
+            </div>
+            <div className="guidance-text body-text">Healthy Body fat % ranges: Men 18-24%, Women 24-31%</div>
+            <div className="guidance-text body-text">Visceral fat range: Under 12</div>
+            <div className="guidance-text body-text">Random Blood Sugar normal range: 6.9 - 7.8 mmol/L</div>
+            <div className="guidance-text body-text">
+              Fasting Blood Sugar: Below 5.6 mmol/L (Normal), 5.6-6.9 mmol/L (Prediabetes), Above 6.9 mmol/L (Diabetes range)
+            </div>
+          </div>
 
-            <div className="screening-grid force-together">
-              <div className="screening-left">
-                {latestVital?.bp_systolic && latestVital?.bp_diastolic && (
-                  <div className="body-text screening-item">
-                    Blood Pressure: {latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg
+          {/* Assessor Attribution */}
+          <div className="section-assessor min-space-before">Assessed by: {mainAssessor}</div>
+
+          {/* Discussion Summary */}
+          {discussionParagraphs.length > 0 && (
+            <>
+              <div className="section-heading min-space-before">Discussion Summary</div>
+              <div className="content-section">
+                {discussionParagraphs.map((para, idx) => (
+                  <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
+                    {para}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Personalized Health Goal */}
+          {latestGoal && (
+            <>
+              <div className="section-heading min-space-before">Personalized Health Goal</div>
+              <div className="content-section">
+                {latestGoal.discussion && (
+                  <div className="content-item">{latestGoal.discussion}</div>
+                )}
+                {latestGoal.goal && (
+                  <div className="target-text keep-together">
+                    Target: {latestGoal.goal.replace(/^target\s*:\s*/i, '')}
                   </div>
                 )}
-                {latestVital?.pulse && (
-                  <div className="body-text screening-item">Pulse: {latestVital.pulse} bpm</div>
-                )}
-                {latestVital?.temp && (
-                  <div className="body-text screening-item">Temperature: {latestVital.temp}°C</div>
-                )}
-                 {latestNutrition?.weight && (
-                  <div className="body-text screening-item">Weight: {latestNutrition.weight} kgs</div>
-                )}
-                {latestNutrition?.height && (
-                  <div className="body-text screening-item">Height: {latestNutrition.height} cm</div>
-                )}
               </div>
-              <div className="screening-right">
-                {latestNutrition?.bmi && (
-                    <div className="body-text screening-item">BMI: {latestNutrition.bmi}</div>
-                )}
-                {latestVital?.rbs && (
-                    <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs}</div>
-                )}
-                {latestVital?.fbs && (
-                    <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs}</div>
-                )}
-                {latestNutrition?.body_fat_percent && (
-                    <div className="body-text screening-item">Body fat: {latestNutrition.body_fat_percent}%</div>
-                )}
-                {latestNutrition?.meal_plan && (
-                    <div className="body-text screening-item">Meal Plan: {latestNutrition.meal_plan}</div>
-                )}
-              </div>
-            </div>
+            </>
+          )}
 
-            {/* Informational Guidance Section */}
-            <div className="guidance-box keep-together">
-                <p className="guidance-title">Target Health Indicators Reference:</p>
-                <div className="guidance-content">
-                    <p>• Healthy weight for height range: <span className="font-bold">{weightRangeStr}</span></p>
-                    <p>• Healthy Body fat % ranges: Men <span className="font-bold">18-24%</span>, Women <span className="font-bold">24-31%</span></p>
-                    <p>• Visceral fat range: <span className="font-bold">Under 12</span></p>
-                </div>
-            </div>
-
-            {clinicalDetails.length > 0 && (
-                <>
-                    <div className="section-heading min-space-before">Clinical Summary</div>
-                    <div className="content-section">
-                        {clinicalDetails.map((detail, index) => (
-                            <div key={index} className="content-item">{detail}</div>
-                        ))}
-                    </div>
-                </>
-            )}
-          
-            <div className="doctor-signature keep-together min-space-before">
-                <span className="doctor-prefix">Assessed by Taria Clinical Team</span>
-            </div>
+          {/* Doctor Signature */}
+          <div className="doctor-signature keep-together min-space-before">
+            <span className="doctor-prefix">Dr.</span> {mainAssessor}
           </div>
+
+          <div className="end-spacer"></div>
         </div>
-      </div>
-      
-      {/* Report Footer */}
-      <div className="report-footer keep-together min-space-before">
-          <div className="footer-line"></div>
-          <div className="footer-content">
-              <img src="https://picsum.photos/seed/taria/450/60" alt="Taria Health Logo" className="footer-logo" data-ai-hint="healthcare logo" />
-              <p className="footer-text">Official Wellness Activation Report &copy; {new Date().getFullYear()} Taria Health</p>
-          </div>
       </div>
     </div>
   );

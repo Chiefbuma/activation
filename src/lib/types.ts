@@ -49,6 +49,14 @@ export type Nutrition = {
   created_at: string;
 };
 
+export type Goal = {
+  id: number;
+  registration_id: number;
+  goal: string;
+  discussion: string | null;
+  created_at: string;
+};
+
 export type Clinical = {
   id: number;
   registration_id: number;
@@ -62,6 +70,7 @@ export type Clinical = {
     | 'Medical Review recommended for raised blood sugar' 
     | null;
   doctor_notes: string | null;
+  notes_psychologist?: string | null;
   wellness_check_type?: string | null;
   user_id: number | null;
   created_at: string;
@@ -86,6 +95,7 @@ export type Registration = {
   vitals: Vital[];
   nutritions: Nutrition[];
   clinicals: Clinical[];
+  goals: Goal[];
   
   // UI helper fields
   corporate_name?: string;
