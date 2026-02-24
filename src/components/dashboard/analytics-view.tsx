@@ -52,12 +52,13 @@ interface AnalyticsViewProps {
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
+  // SAFE PARSING: Uses Regex matching instead of .split() to prevent crashes
   const safeSplitDate = (dateStr: string | undefined | null): string[] => {
     if (!dateStr) return [];
     try {
       return String(dateStr).match(/[^-]+/g) || [];
     } catch (error) {
-      console.error('Error splitting date:', error);
+      console.error('Error matching date:', error);
       return [];
     }
   };

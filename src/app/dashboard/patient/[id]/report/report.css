@@ -70,8 +70,8 @@
 }
 
 .logo {
-    width: 280px;
-    max-height: 40px;
+    width: 350px; /* Increased size as requested */
+    max-height: 60px;
     margin: 0 auto;
     display: block;
 }

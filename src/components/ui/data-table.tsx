@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) => column.toggleVisibility(!!value)}
                   >
-                    {column.id.match(/[^-]+/g)?.join(' ') || column.id}
+                    {column.id.match(/\b\w/g)?.join(' ') || column.id}
                   </DropdownMenuCheckboxItem>
                 )
               })}
@@ -212,6 +212,8 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
+  // STABILIZATION GUARD: Prevents React Error #185 by only triggering
+  // the callback when the actual set of IDs has changed.
   const lastSelectionRef = React.useRef<string>('')
   
   React.useEffect(() => {
@@ -229,7 +231,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <DataTableToolbar table={table} />
-        <div className="relative w-full overflow-auto rounded-xl border dark:border-primary/20">
+        <div className="relative w-full overflow-auto rounded-xl border dark:border-primary/20 bg-background">
             <Table>
             <TableHeader className="bg-muted/50">
                 {table.getHeaderGroups().map((headerGroup) => (

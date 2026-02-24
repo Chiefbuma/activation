@@ -56,6 +56,15 @@ export async function getUsers(): Promise<User[]> {
 
 // --- Mutations ---
 
+export async function updateRegistration(data: Partial<Registration>): Promise<void> {
+    const res = await fetch(`${API_BASE}/registrations`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw await getErrorFromResponse(res);
+}
+
 export async function saveVital(data: Partial<Vital>): Promise<void> {
     const res = await fetch(`${API_BASE}/vitals`, {
         method: data.id ? 'PUT' : 'POST',

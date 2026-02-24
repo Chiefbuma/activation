@@ -74,6 +74,36 @@ export async function POST(request: Request) {
     }
 }
 
+export async function PUT(request: Request) {
+    try {
+        const data = await request.json();
+        if (!data.id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        await db.query(`
+            UPDATE registrations 
+            SET first_name=?, middle_name=?, surname=?, sex=?, dob=?, age=?, phone=?, email=?, corporate_id=?, wellness_date=?
+            WHERE id=?
+        `, [
+            data.first_name, 
+            data.middle_name || null, 
+            data.surname, 
+            data.sex || null, 
+            toDate(data.dob), 
+            toNum(data.age), 
+            data.phone || null, 
+            data.email || null, 
+            toNum(data.corporate_id), 
+            toDate(data.wellness_date), 
+            toNum(data.id)
+        ]);
+        
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('PUT Registration Error:', error);
+        return NextResponse.json({ error: 'Failed to update participant' }, { status: 500 });
+    }
+}
+
 export async function DELETE(request: Request) {
     try {
         const { searchParams } = new URL(request.url);

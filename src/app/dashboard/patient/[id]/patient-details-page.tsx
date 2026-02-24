@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Registration, User, Vital, Nutrition, Clinical } from '@/lib/types';
+import type { Registration, User, Vital, Nutrition, Clinical, Corporate } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -38,6 +38,7 @@ import {
   Trash2,
   Edit,
   Loader2,
+  CalendarDays,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -53,7 +54,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
-import { saveVital, saveNutrition, saveClinical, deleteAssessment, getRegistrationById } from '@/lib/serve';
+import { saveVital, saveNutrition, saveClinical, deleteAssessment, getRegistrationById, getCorporates, updateRegistration } from '@/lib/serve';
 
 const DetailItem = ({
   label,
@@ -84,7 +85,9 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const router = useRouter();
   const [patient, setPatient] = useState<Registration>(initialPatient);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [corporates, setCorporates] = useState<Corporate[]>([]);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isVitalsDialogOpen, setIsVitalsDialogOpen] = useState(false);
@@ -94,12 +97,14 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const [vitalsForm, setVitalsForm] = useState<Partial<Vital>>({});
   const [nutritionForm, setNutritionForm] = useState<Partial<Nutrition>>({});
   const [clinicalForm, setClinicalForm] = useState<Partial<Clinical>>({});
+  const [editForm, setEditForm] = useState<Partial<Registration>>({});
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
     }
+    getCorporates().then(setCorporates).catch(console.error);
   }, []);
 
   const refreshData = async () => {
@@ -109,6 +114,28 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
       } catch (err) {
           console.error("Refresh Error:", err);
       }
+  };
+
+  const handleOpenEdit = () => {
+      setEditForm({
+          ...patient,
+          dob: patient.dob ? new Date(patient.dob).toISOString().match(/[^\T]+/g)?.[0] : '',
+          wellness_date: patient.wellness_date ? new Date(patient.wellness_date).toISOString().match(/[^\T]+/g)?.[0] : '',
+      });
+      setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+      setIsSubmitting(true);
+      try {
+          await updateRegistration(editForm);
+          toast({ title: 'Success', description: 'Patient details updated.' });
+          setIsEditModalOpen(false);
+          refreshData();
+      } catch (err: any) {
+          toast({ variant: 'destructive', title: 'Error', description: err.message });
+      }
+      setIsSubmitting(false);
   };
 
   const handleSaveVitals = async () => {
@@ -256,6 +283,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <DetailItem icon={UserIcon} label="Full Name" value={`${patient.first_name} ${patient.middle_name || ''} ${patient.surname || ''}`} />
                   <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : 'N/A'} />
+                  <DetailItem icon={CalendarDays} label="Wellness Date" value={patient.wellness_date ? new Date(patient.wellness_date).toLocaleDateString() : 'N/A'} />
                   <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age || 'N/A'} / ${patient.sex}`} />
                   <DetailItem icon={Phone} label="Phone" value={patient.phone} />
                   <DetailItem icon={Mail} label="Email" value={patient.email} />
@@ -267,6 +295,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10 bg-primary/5">
               <CardHeader><CardTitle className="text-lg">Actions</CardTitle></CardHeader>
               <CardContent className="flex flex-col gap-2">
+                <Button variant="outline" onClick={handleOpenEdit} className="justify-start"><Edit className="mr-2 h-4 w-4" /> Edit Patient Details</Button>
                 <Button onClick={() => setIsReportModalOpen(true)} className="justify-start"><FileText className="mr-2 h-4 w-4" /> Generate Report</Button>
               </CardContent>
             </Card>
@@ -498,6 +527,54 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
           </div>
         </div>
       </div>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                  <DialogTitle className="text-primary">Edit Patient Details</DialogTitle>
+                  <DialogDescription>Update demographic and administrative information.</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                  <div className="space-y-2"><Label className="font-bold text-xs">First Name</Label><Input value={editForm.first_name || ''} onChange={e => setEditForm({...editForm, first_name: e.target.value})} /></div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Middle Name</Label><Input value={editForm.middle_name || ''} onChange={e => setEditForm({...editForm, middle_name: e.target.value})} /></div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Surname</Label><Input value={editForm.surname || ''} onChange={e => setEditForm({...editForm, surname: e.target.value})} /></div>
+                  <div className="space-y-2">
+                      <Label className="font-bold text-xs">Sex</Label>
+                      <Select value={editForm.sex || ''} onValueChange={v => setEditForm({...editForm, sex: v as any})}>
+                          <SelectTrigger><SelectValue placeholder="Select sex" /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Age</Label><Input type="number" value={editForm.age || ''} onChange={e => setEditForm({...editForm, age: Number(e.target.value)})} /></div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Date of Birth</Label><Input type="date" value={editForm.dob || ''} onChange={e => setEditForm({...editForm, dob: e.target.value})} /></div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Phone</Label><Input type="tel" value={editForm.phone || ''} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Email</Label><Input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
+                  <div className="space-y-2">
+                      <Label className="font-bold text-xs">Corporate</Label>
+                      <Select value={String(editForm.corporate_id || 'null')} onValueChange={v => setEditForm({...editForm, corporate_id: v === 'null' ? null : Number(v)})}>
+                          <SelectTrigger><SelectValue placeholder="Select corporate" /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="null">None</SelectItem>
+                              {corporates.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="space-y-2"><Label className="font-bold text-xs">Wellness Date</Label><Input type="date" value={editForm.wellness_date || ''} onChange={e => setEditForm({...editForm, wellness_date: e.target.value})} /></div>
+              </div>
+              <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSaveEdit} disabled={isSubmitting}>
+                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save Changes
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
        {isReportModalOpen && (
         <ReportViewer
           isOpen={isReportModalOpen}
