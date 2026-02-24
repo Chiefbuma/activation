@@ -24,10 +24,9 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
-// FIXED: Safe splitting using Regex to avoid .split() TypeError
+// SAFE splitting using Regular Expression to avoid .split() TypeErrors
 const safeSplitLines = (val: any): string[] => {
     if (!val) return [];
-    // Convert to string and match non-newline sequences using regex
     return String(val).match(/[^\r\n]+/g) || [];
 };
 
@@ -54,6 +53,7 @@ export default function Report({ patient, corporate }: ReportProps) {
 
   const discussionParagraphs = [
     latestClinical?.doctor_notes?.trim(),
+    latestClinical?.notes_psychologist?.trim(),
     latestNutrition?.notes_nutritionist?.trim()
   ].filter(Boolean) as string[];
 

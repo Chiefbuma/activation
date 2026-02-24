@@ -52,11 +52,10 @@ interface AnalyticsViewProps {
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
-  // SAFE split helper using Regex to replace .split() and prevent TypeError
+  // SAFE split helper using Regular Expression instead of .split() to prevent TypeErrors
   const safeSplitDate = (dateStr: string | undefined | null): string[] => {
     if (!dateStr) return [];
     try {
-      // Use regex to match all sequences of non-hyphen characters
       return String(dateStr).match(/[^-]+/g) || [];
     } catch (error) {
       console.error('Error splitting date:', error);
@@ -103,7 +102,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
         monthValue = format(new Date(), 'yyyy-MM');
       }
       
-      // Using regex splitting method to be extremely safe
       const parts = safeSplitDate(monthValue);
       if (parts.length !== 2) return [];
       
@@ -305,7 +303,7 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
                   </TableRow>
                   <TableRow className="hover:bg-primary/5">
                     <TableCell className="font-semibold pl-8">— Female</TableCell>
-                    {weeklyTrackeratData.map(w => (
+                    {weeklyTrackerData.map(w => (
                       <TableCell key={w.weekLabel} className="text-center">{w.female}</TableCell>
                     ))}
                   </TableRow>
