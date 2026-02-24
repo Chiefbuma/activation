@@ -44,6 +44,9 @@ export default function Report({ patient, corporate }: ReportProps) {
     formattedDate = format(new Date(), 'eeee, do MMMM yyyy');
   }
 
+  const isCounsellingRecommended = latestClinical?.counselling_sessions === 'Recommended';
+  const isMealPlanRecommended = latestNutrition?.meal_plan === 'Recommended';
+
   const discussionParagraphs = [
     ...(latestClinical?.doctor_notes ? safeSplitLines(latestClinical.doctor_notes) : []),
     ...(latestClinical?.notes_psychologist ? safeSplitLines(latestClinical.notes_psychologist) : []),
@@ -54,7 +57,7 @@ export default function Report({ patient, corporate }: ReportProps) {
   return (
     <div className="report-body-container bg-white text-gray-800">
       <div className="header">
-          <img src="/images/taria-logo.png" alt="Taria Health" className="logo" />
+          <img src="/images/wide2-logo.png" alt="Taria Health" className="logo" />
       </div>
       <div className="content-wrapper">
         <div className="content-area">
@@ -111,7 +114,12 @@ export default function Report({ patient, corporate }: ReportProps) {
               )}
               {latestVital?.rbs && (
                   <div className="body-text screening-item">
-                      Blood sugar: {latestVital.rbs} mmol/L
+                      Random blood sugar: {latestVital.rbs} mmol/L
+                  </div>
+              )}
+              {latestVital?.fbs && (
+                  <div className="body-text screening-item">
+                      Fasting blood sugar: {latestVital.fbs} mmol/L
                   </div>
               )}
               {latestNutrition?.body_fat_percent && (
@@ -128,19 +136,36 @@ export default function Report({ patient, corporate }: ReportProps) {
           
           <div className="section-assessor min-space-before">Assessed by: {mainDoctor}</div>
 
-          {discussionParagraphs.length > 0 && (
-              <>
-                  <div className="section-heading min-space-before">Discussion Summary</div>
-                  <div className="content-section">
+          <div className="section-heading min-space-before">Discussion Summary</div>
+          <div className="content-section">
+              {isCounsellingRecommended && (
+                  <div className="content-item font-bold">Recommends physiological counselling</div>
+              )}
+              {isMealPlanRecommended && (
+                  <div className="content-item font-bold">Recommends Nutritional meal plan</div>
+              )}
+              
+              {discussionParagraphs.length > 0 && (
+                  <div className="mt-4">
+                      <div className="font-bold underline mb-2">doctor note</div>
                       {discussionParagraphs.map((paragraph, index) => (
-                          <div key={index} className={`content-item ${index > 0 ? 'min-space-before' : ''}`}>{paragraph}</div>
+                          <div key={index} className="content-item italic">{paragraph}</div>
                       ))}
                   </div>
-              </>
-          )}
+              )}
+              
+              <div className="mt-6 p-3 bg-gray-50 border border-gray-100 rounded text-[9pt] italic text-gray-500">
+                  Disclaimer: This screening provides a snapshot of your health at the time of assessment and is not a diagnostic evaluation.
+              </div>
+          </div>
         
           <div className="doctor-signature keep-together min-space-before">
               <span className="doctor-prefix">Dr.</span> {mainDoctor}
+          </div>
+
+          <div className="footer-container">
+              <img src="/images/wide2-logo.png" alt="Taria Health" className="logo" />
+              <div className="footer-text">© {new Date().getFullYear()} Taria Health - Wellness Assessment System</div>
           </div>
 
           <div className="end-spacer"></div>

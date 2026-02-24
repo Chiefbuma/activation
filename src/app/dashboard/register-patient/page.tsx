@@ -76,7 +76,7 @@ export default function RegisterParticipantPage() {
   }
 
   return (
-    <div className="container mx-auto flex justify-center items-start py-8">
+    <div className="container mx-auto flex justify-center items-start py-8 px-4">
       <Card className="w-full max-w-4xl border-primary/20 shadow-lg dark:border-primary/40">
         <CardHeader className="text-center bg-muted/30 pb-8">
           <CardTitle className="text-2xl text-primary font-bold">New Participant Registration</CardTitle>
@@ -87,15 +87,15 @@ export default function RegisterParticipantPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="first_name" className="text-primary font-bold">First Name *</Label>
-                <Input id="first_name" required value={formData.first_name} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="first_name" required value={formData.first_name} onChange={handleInputChange} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="middle_name" className="text-primary font-bold">Middle Name</Label>
-                <Input id="middle_name" value={formData.middle_name} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="middle_name" value={formData.middle_name} onChange={handleInputChange} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="surname" className="text-primary font-bold">Surname *</Label>
-                <Input id="surname" required value={formData.surname} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="surname" required value={formData.surname} onChange={handleInputChange} />
               </div>
             </div>
 
@@ -103,7 +103,7 @@ export default function RegisterParticipantPage() {
               <div className="space-y-2">
                 <Label htmlFor="sex" className="text-primary font-bold">Sex *</Label>
                 <Select value={formData.sex} onValueChange={(v) => handleSelectChange('sex', v)} required>
-                  <SelectTrigger className="dark:border-primary/40"><SelectValue /></SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
@@ -113,18 +113,18 @@ export default function RegisterParticipantPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="age" className="text-primary font-bold">Age</Label>
-                <Input id="age" type="number" value={formData.age} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="age" type="number" value={formData.age} onChange={handleInputChange} />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-primary font-bold">Email Address</Label>
-                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-primary font-bold">Phone Number</Label>
-                <Input id="phone" value={formData.phone} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="phone" value={formData.phone} onChange={handleInputChange} />
               </div>
             </div>
 
@@ -132,7 +132,7 @@ export default function RegisterParticipantPage() {
               <div className="space-y-2">
                 <Label htmlFor="corporate_id" className="text-primary font-bold">Corporate Partner</Label>
                 <Select value={formData.corporate_id} onValueChange={(v) => handleSelectChange('corporate_id', v)}>
-                  <SelectTrigger className="dark:border-primary/40"><SelectValue /></SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
                     {corporates.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
@@ -141,12 +141,12 @@ export default function RegisterParticipantPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
-                <Input id="wellness_date" type="date" value={formData.wellness_date} onChange={handleInputChange} className="dark:border-primary/40" />
+                <Input id="wellness_date" type="date" value={formData.wellness_date} onChange={handleInputChange} />
               </div>
             </div>
 
             <div className="pt-6 flex flex-col-reverse sm:flex-row justify-between gap-4 w-full px-0">
-              <Button variant="outline" asChild className="dark:text-foreground border-primary/20 hover:border-primary/50 w-full sm:w-auto">
+              <Button variant="outline" asChild className="border-primary/20 hover:border-primary/50 w-full sm:w-auto">
                 <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Link>
               </Button>
               <Button type="submit" disabled={loading} className="px-8 shadow-sm w-full sm:w-auto">
