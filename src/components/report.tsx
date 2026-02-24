@@ -57,7 +57,7 @@ export default function Report({ patient, corporate }: ReportProps) {
   return (
     <div className="report-body-container bg-white text-gray-800">
       <div className="header">
-          <img src="/images/wide2-logo.png" alt="Taria Health" className="logo" />
+          <img src="/images/taria-logo.png" alt="Taria Health" className="logo" />
       </div>
       <div className="content-wrapper">
         <div className="content-area">
@@ -145,6 +145,13 @@ export default function Report({ patient, corporate }: ReportProps) {
                   <div className="content-item font-bold">Recommends Nutritional meal plan</div>
               )}
               
+              {latestClinical?.conclusion && (
+                  <div className="mt-4">
+                      <div className="font-bold underline mb-1">Wellness Check Conclusion</div>
+                      <div className="content-item font-semibold text-primary">{latestClinical.conclusion}</div>
+                  </div>
+              )}
+
               {discussionParagraphs.length > 0 && (
                   <div className="mt-4">
                       <div className="font-bold underline mb-2">doctor note</div>

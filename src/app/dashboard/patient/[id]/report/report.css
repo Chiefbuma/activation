@@ -7,6 +7,8 @@
         padding: 2.5rem;
         background: white;
         box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        position: relative;
+        min-height: 1120px; /* Standard A4 ratio */
     }
 }
 
@@ -34,6 +36,20 @@
         padding: 0;
         box-shadow: none;
     }
+    
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    
+    .footer-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
 }
 
 /* ================= HEADER & FOOTER ================= */
@@ -54,7 +70,7 @@
 }
 
 .logo {
-    width: 350px;
+    width: 280px;
     max-height: 40px;
     margin: 0 auto;
     display: block;
@@ -68,7 +84,7 @@
 
 /* ================= CONTENT ================= */
 .content-wrapper {
-    padding: 0;
+    padding: 60px 0; /* Space for fixed header/footer */
 }
 
 .content-area {
@@ -159,7 +175,7 @@
     color: #1E5DFF;
     margin-top: 25px;
     padding-top: 10px;
-    break-before: avoid;
+    break-before: auto;
     break-inside: avoid;
 }
 
