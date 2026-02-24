@@ -54,7 +54,6 @@ export default function Report({ patient, corporate }: ReportProps) {
 
   const discussionParagraphs = [
     latestClinical?.doctor_notes?.trim(),
-    latestClinical?.notes_psychologist?.trim(),
     latestNutrition?.notes_nutritionist?.trim()
   ].filter(Boolean) as string[];
 

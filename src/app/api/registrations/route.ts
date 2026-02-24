@@ -50,9 +50,17 @@ export async function POST(request: Request) {
             INSERT INTO registrations (first_name, middle_name, surname, sex, dob, age, phone, email, corporate_id, wellness_date, user_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            data.first_name, data.middle_name, data.surname, data.sex, 
-            data.dob || null, toNum(data.age), data.phone, data.email, 
-            toNum(data.corporate_id), data.wellness_date || null, toNum(data.user_id)
+            data.first_name, 
+            data.middle_name || null, 
+            data.surname, 
+            data.sex || null, 
+            data.dob || null, 
+            toNum(data.age), 
+            data.phone || null, 
+            data.email || null, 
+            toNum(data.corporate_id), 
+            data.wellness_date || null, 
+            toNum(data.user_id)
         ]);
         
         return NextResponse.json({ id: (result as any).insertId });

@@ -212,17 +212,17 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // FIXED: Prevent infinite render loops by comparing selection keys before calling callback
-  const lastSelectionKeys = React.useRef<string>('')
+  // FIXED: Prevent infinite render loops (Error #185) by comparing sorted selection IDs before triggering callback
+  const lastSelectionIds = React.useRef<string>('')
   
   React.useEffect(() => {
-    // Only trigger if selection keys actually change
-    const currentKeys = Object.keys(rowSelection).sort().join(',')
-    if (currentKeys !== lastSelectionKeys.current) {
-      lastSelectionKeys.current = currentKeys
+    const currentSelectedRows = table.getFilteredSelectedRowModel().rows
+    const currentIds = currentSelectedRows.map(r => (r.original as any).id).sort().join(',')
+    
+    if (currentIds !== lastSelectionIds.current) {
+      lastSelectionIds.current = currentIds
       if (onSelectionChange) {
-        const selectedRows = table.getFilteredSelectedRowModel().rows.map(r => r.original)
-        onSelectionChange(selectedRows.length, selectedRows)
+        onSelectionChange(currentSelectedRows.length, currentSelectedRows.map(r => r.original))
       }
     }
   }, [rowSelection, table, onSelectionChange])

@@ -92,3 +92,6 @@ export type Registration = {
   corporate_name?: string;
   status: 'Active' | 'Pending';
 };
+
+// Type alias for backward compatibility and semantic clarity
+export type Patient = Registration;

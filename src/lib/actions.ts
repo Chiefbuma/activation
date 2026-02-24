@@ -7,6 +7,7 @@ import type { Registration, Vital, Nutrition, Clinical } from './types';
 
 /**
  * Server Actions for data mutations.
+ * Hardened with robust type checking to prevent Internal Server Errors (500).
  */
 
 const toNum = (val: any) => {
@@ -44,9 +45,17 @@ export async function registerParticipant(data: Partial<Registration>) {
             INSERT INTO registrations (first_name, middle_name, surname, sex, dob, age, phone, email, corporate_id, wellness_date, user_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            data.first_name, data.middle_name, data.surname, data.sex, 
-            data.dob || null, data.age, data.phone, data.email, 
-            data.corporate_id || null, data.wellness_date || null, data.user_id || null
+            data.first_name, 
+            data.middle_name || null, 
+            data.surname, 
+            data.sex || null, 
+            data.dob || null, 
+            toNum(data.age), 
+            data.phone || null, 
+            data.email || null, 
+            toNum(data.corporate_id), 
+            data.wellness_date || null, 
+            toNum(data.user_id)
         ]);
         
         revalidatePath('/dashboard');
@@ -63,7 +72,7 @@ export async function saveVital(data: Partial<Vital>) {
             await db.query(`
                 UPDATE vitals SET bp_systolic=?, bp_diastolic=?, pulse=?, temp=?, rbs=?, fbs=?, measured_at=?
                 WHERE id=?
-            `, [toNum(data.bp_systolic), toNum(data.bp_diastolic), toNum(data.pulse), toNum(data.temp), data.rbs || null, data.fbs || null, data.measured_at, data.id]);
+            `, [toNum(data.bp_systolic), toNum(data.bp_diastolic), toNum(data.pulse), toNum(data.temp), data.rbs || null, data.fbs || null, data.measured_at, toNum(data.id)]);
         } else {
             await db.query(`
                 INSERT INTO vitals (registration_id, bp_systolic, bp_diastolic, pulse, temp, rbs, fbs, user_id, measured_at)
@@ -83,7 +92,7 @@ export async function saveNutrition(data: Partial<Nutrition>) {
             await db.query(`
                 UPDATE nutritions SET height=?, weight=?, bmi=?, llw=?, ulw=?, excess_weight=?, visceral_fat=?, body_fat_percent=?, meal_plan=?, weight_loss_period=?, notes_nutritionist=?
                 WHERE id=?
-            `, [toNum(data.height), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, data.id]);
+            `, [toNum(data.height), toNum(data.weight), toNum(data.bmi), toNum(data.llw), toNum(data.ulw), toNum(data.excess_weight), toNum(data.visceral_fat), toNum(data.body_fat_percent), data.meal_plan || null, data.weight_loss_period || null, data.notes_nutritionist || null, toNum(data.id)]);
         } else {
             await db.query(`
                 INSERT INTO nutritions (registration_id, height, weight, bmi, llw, ulw, excess_weight, visceral_fat, body_fat_percent, meal_plan, weight_loss_period, notes_nutritionist, user_id)
@@ -103,12 +112,12 @@ export async function saveClinical(data: Partial<Clinical>) {
             await db.query(`
                 UPDATE clinicals SET counselling_sessions=?, verbal_stress_rating=?, conclusion=?, doctor_notes=?
                 WHERE id=?
-            `, [data.counselling_sessions, toNum(data.verbal_stress_rating), data.conclusion, data.doctor_notes, data.id]);
+            `, [data.counselling_sessions || null, toNum(data.verbal_stress_rating), data.conclusion || null, data.doctor_notes || null, toNum(data.id)]);
         } else {
             await db.query(`
                 INSERT INTO clinicals (registration_id, counselling_sessions, verbal_stress_rating, conclusion, doctor_notes, user_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            `, [toNum(data.registration_id), data.counselling_sessions, toNum(data.verbal_stress_rating), data.conclusion, data.doctor_notes, toNum(data.user_id)]);
+            `, [toNum(data.registration_id), data.counselling_sessions || null, toNum(data.verbal_stress_rating), data.conclusion || null, data.doctor_notes || null, toNum(data.user_id)]);
         }
         revalidatePath(`/dashboard/patient/${data.registration_id}`);
         return { success: true };
