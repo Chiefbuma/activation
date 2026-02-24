@@ -1,10 +1,8 @@
-'use client';
-
-import type { Registration, Corporate } from '@/lib/types';
-import { format, parseISO, isValid } from 'date-fns';
+import type { Patient, Corporate } from '@/lib/types';
+import { format } from 'date-fns';
 
 type ReportProps = {
-  patient: Registration;
+  patient: Patient;
   corporate: Corporate | null;
 };
 
@@ -18,15 +16,13 @@ function getDaySuffix(day: number) {
   }
 }
 
-const safeToFixed = (val: any, digits: number = 1) => {
-    if (val === undefined || val === null || val === '') return '-';
-    const n = parseFloat(val);
-    return isNaN(n) ? '-' : n.toFixed(digits);
-};
-
-const safeSplitLines = (val: any): string[] => {
-    if (!val) return [];
-    return String(val).match(/[^\r\n]+/g) || [];
+const safeSplitLines = (text: string | null | undefined): string[] => {
+    if (!text) return [];
+    try {
+        return String(text).match(/[^\r\n]+/g) || [];
+    } catch {
+        return [];
+    }
 };
 
 export default function Report({ patient, corporate }: ReportProps) {
@@ -34,44 +30,32 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestNutrition = patient.nutritions?.[0];
   const latestClinical = patient.clinicals?.[0];
 
-  let reportDate: Date = new Date();
-  if (corporate?.wellness_date && isValid(parseISO(corporate.wellness_date))) {
-    reportDate = parseISO(corporate.wellness_date);
-  } else if (latestClinical?.created_at) {
-    reportDate = new Date(latestClinical.created_at);
-  } else if (latestNutrition?.created_at) {
-    reportDate = new Date(latestNutrition.created_at);
-  } else if (latestVital?.created_at) {
-    reportDate = new Date(latestVital.created_at);
+  const reportDate = patient.wellness_date ? new Date(patient.wellness_date) : null;
+
+  let formattedDate: string;
+  if (reportDate && !isNaN(reportDate.getTime())) {
+    const day = reportDate.getDate();
+    const suffix = getDaySuffix(day);
+    formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(
+      reportDate,
+      ' MMMM yyyy'
+    )}`;
+  } else {
+    formattedDate = format(new Date(), 'eeee, do MMMM yyyy');
   }
 
-  const day = reportDate.getDate();
-  const suffix = getDaySuffix(day);
-  const formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(reportDate, ' MMMM yyyy')}`;
-
   const discussionParagraphs = [
-    latestClinical?.doctor_notes?.trim(),
-    latestClinical?.notes_psychologist?.trim(),
-    latestNutrition?.notes_nutritionist?.trim()
-  ].filter(Boolean) as string[];
+    ...(latestClinical?.doctor_notes ? safeSplitLines(latestClinical.doctor_notes) : []),
+    ...(latestClinical?.notes_psychologist ? safeSplitLines(latestClinical.notes_psychologist) : []),
+  ];
 
-  const lowerWeight = latestNutrition?.llw ? safeToFixed(latestNutrition.llw) : '53.3';
-  const upperWeight = latestNutrition?.ulw ? safeToFixed(latestNutrition.ulw) : '74.0';
-
-  const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
-
-  const isProd = typeof window !== 'undefined' && 
-                 window.location.hostname !== 'localhost' && 
-                 !window.location.hostname.match(/127\.0\.0\.1/);
-                 
-  const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
+  const mainDoctor = "Emily Carter"; 
 
   return (
-    <div className="report-body-container">
+    <div className="report-body-container bg-white text-gray-800">
       <div className="header">
-        <img src={logoPath} alt="Taria Health Logo" className="logo" />
+          <img src="/images/taria-logo.png" alt="Taria Health" className="logo" />
       </div>
-
       <div className="content-wrapper">
         <div className="content-area">
           <div className="title-container keep-together">
@@ -80,12 +64,16 @@ export default function Report({ patient, corporate }: ReportProps) {
           </div>
 
           <div className="patient-info keep-together">
-            <span className="patient-name">{`${patient.first_name} ${patient.surname || ''}`}</span>
-            <span className="patient-email">{patient.email || ''}</span>
+            <span className="patient-name">
+              {`${patient.first_name} ${patient.surname || ''}`}
+              {patient.email && ` : ${patient.email}`}
+            </span>
           </div>
 
-          <div className="section-heading min-space-before">Screening Results</div>
-          
+          <div className="section-heading min-space-before">
+            Screening Results
+          </div>
+
           <div className="screening-grid force-together">
             <div className="screening-left">
               {latestVital?.bp_systolic && latestVital?.bp_diastolic && (
@@ -94,73 +82,67 @@ export default function Report({ patient, corporate }: ReportProps) {
                 </div>
               )}
               {latestVital?.pulse && (
-                <div className="body-text screening-item">Pulse: {latestVital.pulse} bpm</div>
+                <div className="body-text screening-item">
+                  Pulse: {latestVital.pulse} bpm
+                </div>
               )}
               {latestVital?.temp && (
-                <div className="body-text screening-item">Temperature: {latestVital.temp} °C</div>
+                <div className="body-text screening-item">
+                  Temperature: {latestVital.temp}°C
+                </div>
               )}
-              {latestNutrition?.weight && (
-                <div className="body-text screening-item">Weight: {latestNutrition.weight} kgs</div>
+               {latestNutrition?.weight && (
+                <div className="body-text screening-item">
+                  Weight: {latestNutrition.weight} kgs
+                </div>
               )}
               {latestNutrition?.height && (
-                <div className="body-text screening-item">Height: {latestNutrition.height} cm</div>
+                <div className="body-text screening-item">
+                  Height: {latestNutrition.height} cm
+                </div>
               )}
-              {latestNutrition?.visceral_fat && (
-                <div className="body-text screening-item">Visceral Fat: {latestNutrition.visceral_fat}</div>
+               {latestNutrition?.visceral_fat && (
+                  <div className="body-text screening-item">Visceral Fat: {latestNutrition.visceral_fat}</div>
               )}
             </div>
-            
             <div className="screening-right">
               {latestNutrition?.bmi && (
-                <div className="body-text screening-item">BMI: {safeToFixed(latestNutrition.bmi)}</div>
+                  <div className="body-text screening-item">BMI: {latestNutrition.bmi}</div>
               )}
               {latestVital?.rbs && (
-                <div className="body-text screening-item">Random Blood Sugar: {latestVital.rbs} mmol/L</div>
-              )}
-              {latestVital?.fbs && (
-                <div className="body-text screening-item">Fasting Blood Sugar: {latestVital.fbs} mmol/L</div>
+                  <div className="body-text screening-item">
+                      Blood sugar: {latestVital.rbs} mmol/L
+                  </div>
               )}
               {latestNutrition?.body_fat_percent && (
-                <div className="body-text screening-item">Body fat percentage: {latestNutrition.body_fat_percent}%</div>
+                  <div className="body-text screening-item">Body fat percentage: {latestNutrition.body_fat_percent}%</div>
               )}
             </div>
           </div>
 
           <div className="keep-together">
-            <div className="guidance-text body-text">
-              Healthy weight for height range (kgs): {lowerWeight}kgs - {upperWeight}kgs
-            </div>
-            <div className="guidance-text body-text">Healthy Body fat % ranges: Men 18-24%, Women 24-31%</div>
-            <div className="guidance-text body-text">Visceral fat range: Under 12</div>
-            <div className="guidance-text body-text">Random Blood Sugar normal range: 6.9 - 7.8 mmol/L</div>
-            <div className="guidance-text body-text">
-              Fasting Blood Sugar: Below 5.6 mmol/L (Normal), 5.6-6.9 mmol/L (Prediabetes), Above 6.9 mmol/L (Diabetes range)
-            </div>
+              <div className="guidance-text body-text">Healthy weight for height range (kgs): 51.0kgs - 71.0kgs</div>
+              <div className="guidance-text body-text">Healthy Body fat % ranges: Men 18-24%, Women 24-31%</div>
+              <div className="guidance-text body-text">Visceral fat range: Under 12</div>
           </div>
-
-          <div className="section-assessor min-space-before">Assessed by: {mainAssessor}</div>
+          
+          <div className="section-assessor min-space-before">Assessed by: {mainDoctor}</div>
 
           {discussionParagraphs.length > 0 && (
-            <>
-              <div className="section-heading min-space-before">Discussion Summary</div>
-              <div className="content-section">
-                {discussionParagraphs.map((para, idx) => (
-                  <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
-                    {safeSplitLines(para).join(' ')}
+              <>
+                  <div className="section-heading min-space-before">Discussion Summary</div>
+                  <div className="content-section">
+                      {discussionParagraphs.map((paragraph, index) => (
+                          <div key={index} className={`content-item ${index > 0 ? 'min-space-before' : ''}`}>{paragraph}</div>
+                      ))}
                   </div>
-                ))}
-              </div>
-            </>
+              </>
           )}
-
+        
           <div className="doctor-signature keep-together min-space-before">
-            <span className="doctor-prefix">Dr.</span> {mainAssessor}
+              <span className="doctor-prefix">Dr.</span> {mainDoctor}
           </div>
 
-          <div className="footer-container min-space-before">
-            <img src={logoPath} alt="Taria Health Footer" className="logo footer-logo" />
-            <div className="footer-text">© {new Date().getFullYear()} Taria Health. All rights reserved.</div>
-          </div>
           <div className="end-spacer"></div>
         </div>
       </div>

@@ -17,7 +17,7 @@ import Report from '@/components/report';
 import type { Patient, Corporate } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Printer, Mail, XCircle, Loader2 } from 'lucide-react';
-import '../app/patient/[id]/report/report.css';
+import '../app/dashboard/patient/[id]/report/report.css';
 
 type ReportViewerProps = {
   isOpen: boolean;
@@ -48,7 +48,7 @@ export default function ReportViewer({
     setIsDownloading(true);
     try {
       const canvas = await html2canvas(reportElement as HTMLElement, {
-        scale: 2, // Higher scale for better quality
+        scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
 
@@ -89,25 +89,24 @@ export default function ReportViewer({
   const handleEmail = () => {
     toast({
       title: 'Email Functionality',
-      description:
-        'Emailing reports requires backend integration and is not yet implemented.',
+      description: 'Emailing reports requires backend integration and is not yet implemented.',
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="report-print-container max-w-5xl h-[95vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-2 no-print">
+      <DialogContent className="report-print-container max-w-5xl h-[95vh] flex flex-col p-0 border-none">
+        <DialogHeader className="p-6 pb-2 no-print border-b bg-background">
           <DialogTitle>Patient Wellness Report</DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-hidden bg-muted/50">
+        <div className="flex-1 overflow-hidden bg-muted/20">
           <ScrollArea className="h-full">
-            <div className="py-8">
+            <div className="py-8 px-4 sm:px-8">
               <Report patient={patient} corporate={corporate} />
             </div>
           </ScrollArea>
         </div>
-        <DialogFooter className="p-6 pt-4 bg-background/95 border-t sm:justify-between no-print">
+        <DialogFooter className="p-6 pt-4 bg-background border-t sm:justify-between no-print">
           <DialogClose asChild>
             <Button type="button" variant="outline">
               <XCircle className="mr-2 h-4 w-4" />

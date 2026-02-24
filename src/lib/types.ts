@@ -83,15 +83,12 @@ export type Registration = {
   user_id: number | null;
   created_at: string;
   
-  // Related assessments
   vitals: Vital[];
   nutritions: Nutrition[];
   clinicals: Clinical[];
   
-  // UI helper fields
   corporate_name?: string;
   status: 'Active' | 'Pending';
 };
 
-// Type alias for backward compatibility and semantic clarity
 export type Patient = Registration;

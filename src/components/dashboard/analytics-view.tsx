@@ -52,7 +52,6 @@ interface AnalyticsViewProps {
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
 
-  // SAFE split helper using Regex to prevent split() crashes
   const safeSplitDate = (dateStr: string | undefined | null): string[] => {
     if (!dateStr) return [];
     try {

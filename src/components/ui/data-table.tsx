@@ -212,7 +212,6 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // Guard against Maximum update depth exceeded error
   const lastSelectionRef = React.useRef<string>('')
   
   React.useEffect(() => {
