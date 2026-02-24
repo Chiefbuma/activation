@@ -516,7 +516,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                     </div>
                                     <div>
                                         <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Doctor's Notes</Label>
-                                        <p className="text-xs italic text-muted-foreground line-clamp-3">{c.doctor_notes}</p>
+                                        <p className="text-xs text-muted-foreground line-clamp-3">{c.doctor_notes}</p>
                                     </div>
                                 </div>
                             </div>

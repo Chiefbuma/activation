@@ -152,9 +152,9 @@ export default function Report({ patient, corporate }: ReportProps) {
           <div className="section-heading min-space-before">Discussion Summary</div>
           <div className="content-section">
               {doctorNotes.length > 0 ? doctorNotes.map((paragraph, index) => (
-                  <div key={index} className="body-text content-item italic">{paragraph}</div>
+                  <div key={index} className="body-text content-item">{paragraph}</div>
               )) : (
-                  <div className="body-text content-item italic">No additional notes recorded.</div>
+                  <div className="body-text content-item">No additional notes recorded.</div>
               )}
               
               <div className="mt-8 p-4 bg-gray-50 border border-gray-100 rounded text-[9pt] italic text-gray-500">
