@@ -70,7 +70,7 @@
 }
 
 .logo {
-    width: 350px; /* Increased size as requested */
+    width: 350px; 
     max-height: 60px;
     margin: 0 auto;
     display: block;
