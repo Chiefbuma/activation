@@ -24,9 +24,9 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
-// SAFE splitting using Regular Expression to avoid .split() TypeErrors
 const safeSplitLines = (val: any): string[] => {
     if (!val) return [];
+    // Use regex match instead of split to ensure string logic is robust
     return String(val).match(/[^\r\n]+/g) || [];
 };
 
@@ -35,7 +35,6 @@ export default function Report({ patient, corporate }: ReportProps) {
   const latestNutrition = patient.nutritions?.[0];
   const latestClinical = patient.clinicals?.[0];
 
-  // Date Priority Logic
   let reportDate: Date = new Date();
   if (corporate?.wellness_date && isValid(parseISO(corporate.wellness_date))) {
     reportDate = parseISO(corporate.wellness_date);
@@ -62,10 +61,9 @@ export default function Report({ patient, corporate }: ReportProps) {
 
   const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
 
-  // Environment-Aware Branding
   const isProd = typeof window !== 'undefined' && 
                  window.location.hostname !== 'localhost' && 
-                 !window.location.hostname.includes('127.0.0.1');
+                 !window.location.hostname.match(/127\.0\.0\.1/);
                  
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
 

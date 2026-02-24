@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) => column.toggleVisibility(!!value)}
                   >
-                    {column.id.replace(/_/g, ' ')}
+                    {column.id.match(/[^-]+/g)?.join(' ')}
                   </DropdownMenuCheckboxItem>
                 )
               })}
@@ -212,17 +212,16 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // FIXED: Prevent infinite render loops by comparing sorted selection IDs before triggering callback
-  const lastSelectionIds = React.useRef<string>('')
+  const lastSelectionRef = React.useRef<string>('')
   
   React.useEffect(() => {
-    const currentSelectedRows = table.getFilteredSelectedRowModel().rows
-    const currentIds = currentSelectedRows.map(r => (r.original as any).id || r.id).sort().join(',')
+    const selectedRows = table.getFilteredSelectedRowModel().rows
+    const currentSelectionIds = selectedRows.map(r => (r.original as any).id || r.id).sort().join(',')
     
-    if (currentIds !== lastSelectionIds.current) {
-      lastSelectionIds.current = currentIds
+    if (currentSelectionIds !== lastSelectionRef.current) {
+      lastSelectionRef.current = currentSelectionIds
       if (onSelectionChange) {
-        onSelectionChange(currentSelectedRows.length, currentSelectedRows.map(r => r.original))
+        onSelectionChange(selectedRows.length, selectedRows.map(r => r.original))
       }
     }
   }, [rowSelection, table, onSelectionChange])

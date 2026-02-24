@@ -5,15 +5,15 @@ import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import type { Registration, Vital, Nutrition, Clinical } from './types';
 
-/**
- * Server Actions for data mutations.
- * Hardened with robust type checking to prevent Internal Server Errors (500).
- */
-
 const toNum = (val: any) => {
     if (val === undefined || val === null || val === '') return null;
     const n = parseFloat(val);
     return isNaN(n) ? null : n;
+};
+
+const toDate = (val: any) => {
+    if (!val || val === '') return null;
+    return val;
 };
 
 export async function loginUser(email: string, password: string) {
@@ -49,12 +49,12 @@ export async function registerParticipant(data: Partial<Registration>) {
             data.middle_name || null, 
             data.surname, 
             data.sex || null, 
-            data.dob || null, 
+            toDate(data.dob), 
             toNum(data.age), 
             data.phone || null, 
             data.email || null, 
             toNum(data.corporate_id), 
-            data.wellness_date || null, 
+            toDate(data.wellness_date), 
             toNum(data.user_id)
         ]);
         

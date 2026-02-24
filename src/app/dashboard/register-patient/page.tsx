@@ -145,11 +145,11 @@ export default function RegisterParticipantPage() {
               </div>
             </div>
 
-            <div className="pt-4 flex justify-between gap-4">
-              <Button variant="outline" asChild className="dark:text-foreground border-primary/20 hover:border-primary/50">
+            <div className="pt-6 flex flex-col-reverse sm:flex-row justify-between gap-4 w-full">
+              <Button variant="outline" asChild className="dark:text-foreground border-primary/20 hover:border-primary/50 w-full sm:w-auto">
                 <Link href="/dashboard"><ArrowLeft className="mr-2 h-4 w-4" /> Cancel</Link>
               </Button>
-              <Button type="submit" disabled={loading} className="px-8 shadow-sm">
+              <Button type="submit" disabled={loading} className="px-8 shadow-sm w-full sm:w-auto">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Register Participant
               </Button>

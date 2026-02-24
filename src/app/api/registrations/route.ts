@@ -8,6 +8,11 @@ const toNum = (val: any) => {
     return isNaN(n) ? null : n;
 };
 
+const toDate = (val: any) => {
+    if (!val || val === '') return null;
+    return val;
+};
+
 export async function GET() {
     try {
         const [rows] = await db.query(`
@@ -23,7 +28,6 @@ export async function GET() {
 
         const ids = registrations.map(r => r.id);
 
-        // Optimized Bulk Fetch
         const [vitals] = await db.query('SELECT * FROM vitals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [nutritions] = await db.query('SELECT * FROM nutritions WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [clinicals] = await db.query('SELECT * FROM clinicals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
@@ -54,12 +58,12 @@ export async function POST(request: Request) {
             data.middle_name || null, 
             data.surname, 
             data.sex || null, 
-            data.dob || null, 
+            toDate(data.dob), 
             toNum(data.age), 
             data.phone || null, 
             data.email || null, 
             toNum(data.corporate_id), 
-            data.wellness_date || null, 
+            toDate(data.wellness_date), 
             toNum(data.user_id)
         ]);
         

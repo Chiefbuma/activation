@@ -1,7 +1,7 @@
 'use client';
 
 import type { User } from '@/lib/types';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ export default function Header({ user }: { user: User }) {
 
   const getInitials = (name: any) => {
       if (!name || typeof name !== 'string') return 'U';
-      // Use regular expression to safely find first letters of words
+      // Use regex match instead of split
       const matches = String(name).match(/\b\w/g) || [];
       return matches.join('').toUpperCase().slice(0, 2) || 'U';
   };
