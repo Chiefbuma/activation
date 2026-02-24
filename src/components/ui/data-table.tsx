@@ -216,6 +216,7 @@ export function DataTable<TData, TValue>({
   const lastSelectionKeys = React.useRef<string>('')
   
   React.useEffect(() => {
+    // Only trigger if selection keys actually change
     const currentKeys = Object.keys(rowSelection).sort().join(',')
     if (currentKeys !== lastSelectionKeys.current) {
       lastSelectionKeys.current = currentKeys

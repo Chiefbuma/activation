@@ -24,9 +24,11 @@ const safeToFixed = (val: any, digits: number = 1) => {
     return isNaN(n) ? '-' : n.toFixed(digits);
 };
 
-const safeString = (val: any): string => {
-    if (val === undefined || val === null) return '';
-    return String(val);
+// FIXED: Safe splitting using Regex to avoid .split() TypeError
+const safeSplitLines = (val: any): string[] => {
+    if (!val) return [];
+    // Convert to string and match non-newline sequences using regex
+    return String(val).match(/[^\r\n]+/g) || [];
 };
 
 export default function Report({ patient, corporate }: ReportProps) {
@@ -62,7 +64,10 @@ export default function Report({ patient, corporate }: ReportProps) {
   const mainAssessor = patient.clinicals?.[0]?.user_id ? 'Taria Clinical Team' : 'Clinical Team';
 
   // Environment-Aware Branding
-  const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+  const isProd = typeof window !== 'undefined' && 
+                 window.location.hostname !== 'localhost' && 
+                 !window.location.hostname.includes('127.0.0.1');
+                 
   const logoPath = isProd ? '/images/wide2-wide2-logo.png' : '/images/wide2-logo.png';
 
   return (
@@ -145,7 +150,7 @@ export default function Report({ patient, corporate }: ReportProps) {
               <div className="content-section">
                 {discussionParagraphs.map((para, idx) => (
                   <div key={idx} className={`content-item ${idx > 0 ? 'min-space-before' : ''}`}>
-                    {safeString(para)}
+                    {safeSplitLines(para).join(' ')}
                   </div>
                 ))}
               </div>

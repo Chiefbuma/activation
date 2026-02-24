@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Registration, Corporate } from '@/lib/types';
 import {
   Card,
@@ -13,8 +13,17 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   PieChart,
   Pie,
@@ -23,7 +32,17 @@ import {
   Tooltip as RechartsTooltip,
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { Calculator } from 'lucide-react';
+import { Calculator, CalendarRange } from 'lucide-react';
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  eachWeekOfInterval, 
+  isSameMonth, 
+  isWithinInterval,
+  subMonths,
+  endOfWeek
+} from 'date-fns';
 
 interface AnalyticsViewProps {
   patients: Registration[];
@@ -31,6 +50,30 @@ interface AnalyticsViewProps {
 }
 
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+
+  // SAFE regex split helper to replace .split()
+  const safeSplitDate = (dateStr: string | undefined | null): string[] => {
+    if (!dateStr) return [];
+    try {
+      // Use regex to match all sequences of non-hyphen characters
+      return String(dateStr).match(/[^-]+/g) || [];
+    } catch (error) {
+      console.error('Error splitting date:', error);
+      return [];
+    }
+  };
+
+  const monthOptions = useMemo(() => {
+    return Array.from({ length: 6 }).map((_, i) => {
+      const date = subMonths(new Date(), i);
+      return {
+        label: format(date, 'MMMM yyyy'),
+        value: format(date, 'yyyy-MM'),
+      };
+    });
+  }, []);
+
   const summary = useMemo(() => {
     const totalReg = patients.length;
     const totalActive = patients.filter(p => 
@@ -52,6 +95,66 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
 
     return { totalReg, totalActive, totalCorps, maleCount, femaleCount, recommendedMealPlan, recommendedCounselling };
   }, [patients, corporates]);
+
+  const weeklyTrackerData = useMemo(() => {
+    try {
+      let monthValue = selectedMonth;
+      if (!monthValue) {
+        monthValue = format(new Date(), 'yyyy-MM');
+      }
+      
+      // Using regex splitting method
+      const parts = safeSplitDate(monthValue);
+      if (parts.length !== 2) return [];
+      
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      
+      if (isNaN(year) || isNaN(month)) return [];
+
+      const targetDate = new Date(year, month - 1, 1);
+      const monthStart = startOfMonth(targetDate);
+      const monthEnd = endOfMonth(targetDate);
+
+      const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+      
+      return weeks.slice(0, 5).map((weekStart, idx) => {
+        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+        const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+
+        const interval = { start: weekStart, end: effectiveEnd };
+        const weekPatients = patients.filter(p => {
+          const created = new Date(p.created_at);
+          return isWithinInterval(created, interval) && isSameMonth(created, monthStart);
+        });
+
+        const uniqueCorps = new Set(weekPatients.filter(p => p.corporate_id).map(p => p.corporate_id)).size;
+        const male = weekPatients.filter(p => p.sex === 'Male').length;
+        const female = weekPatients.filter(p => p.sex === 'Female').length;
+
+        const recommendedMealPlans = weekPatients.filter(p => 
+          p.nutritions?.some(n => n.meal_plan === 'Recommended')
+        ).length;
+        
+        const recommendedCounselling = weekPatients.filter(p => 
+          p.clinicals?.some(c => c.counselling_sessions === 'Recommended')
+        ).length;
+
+        return {
+          weekLabel: `Week ${idx + 1}`,
+          registrations: weekPatients.length,
+          male,
+          female,
+          corporates: uniqueCorps,
+          recommendedMealPlans,
+          recommendedCounselling
+        };
+      });
+    } catch (error) {
+      console.error('Error in weeklyTrackerData:', error);
+      return [];
+    }
+  }, [patients, selectedMonth]);
 
   const genderChartData = [
     { name: 'Male', value: summary.maleCount, color: 'hsl(var(--primary))' },
@@ -146,6 +249,87 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
             </div>
         </Card>
       </div>
+
+      {weeklyTrackerData.length > 0 && (
+        <Card className="border-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <div>
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <CalendarRange className="h-5 w-5 text-primary" />
+                Monthly Weekly Tracker
+              </CardTitle>
+              <CardDescription>Metrics breakdown by week</CardDescription>
+            </div>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[180px] bg-background border-primary/20">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-xl border border-primary/10 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="font-bold text-primary w-[150px]">Metric</TableHead>
+                    {weeklyTrackerData.map(w => (
+                      <TableHead key={w.weekLabel} className="text-center font-bold text-primary">
+                        {w.weekLabel}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold">Active Corporates</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold">{w.corporates}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold">Total Registrations</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold text-lg">{w.registrations}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold pl-8">— Male</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center">{w.male}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold pl-8">— Female</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center">{w.female}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold">Recommended Meal Plans</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold text-teal-600">{w.recommendedMealPlans}</TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow className="hover:bg-primary/5">
+                    <TableCell className="font-semibold">Recommended Counselling</TableCell>
+                    {weeklyTrackerData.map(w => (
+                      <TableCell key={w.weekLabel} className="text-center font-bold text-teal-600">{w.recommendedCounselling}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-4 italic">
+              * Tracker shows registrations and unique active corporate partners for the selected month.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

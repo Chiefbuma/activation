@@ -26,9 +26,9 @@ export default function Header({ user }: { user: User }) {
 
   const getInitials = (name: any) => {
       if (!name || typeof name !== 'string') return 'U';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 0 || !parts[0]) return 'U';
-      return parts.map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+      // Use regex to find first letters of words instead of split() to avoid TypeError
+      const matches = name.match(/\b\w/g) || [];
+      return matches.join('').toUpperCase().slice(0, 2) || 'U';
   };
 
   const initials = getInitials(user?.name);

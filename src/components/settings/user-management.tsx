@@ -152,7 +152,8 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
         cell: ({ row }) => {
             const user = row.original;
             const nameStr = String(user.name || 'U');
-            const initials = nameStr.trim().split(/\s+/).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            // Use regex match for initials to avoid .split() TypeError
+            const initials = nameStr.match(/\b\w/g)?.join('').toUpperCase().slice(0, 2) || 'U';
             return (
                 <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">

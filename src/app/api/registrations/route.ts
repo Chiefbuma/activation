@@ -2,6 +2,12 @@ import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 import type { Vital, Nutrition, Clinical } from '@/lib/types';
 
+const toNum = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const n = parseFloat(val);
+    return isNaN(n) ? null : n;
+};
+
 export async function GET() {
     try {
         const [rows] = await db.query(`
@@ -45,8 +51,8 @@ export async function POST(request: Request) {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             data.first_name, data.middle_name, data.surname, data.sex, 
-            data.dob || null, data.age, data.phone, data.email, 
-            data.corporate_id || null, data.wellness_date || null, data.user_id || null
+            data.dob || null, toNum(data.age), data.phone, data.email, 
+            toNum(data.corporate_id), data.wellness_date || null, toNum(data.user_id)
         ]);
         
         return NextResponse.json({ id: (result as any).insertId });
