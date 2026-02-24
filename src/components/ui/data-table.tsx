@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) => column.toggleVisibility(!!value)}
                   >
-                    {column.id.match(/[^-]+/g)?.join(' ')}
+                    {column.id.match(/[^-]+/g)?.join(' ') || column.id}
                   </DropdownMenuCheckboxItem>
                 )
               })}
@@ -212,7 +212,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
   })
 
-  // FIX: Maximum update depth exceeded guard
+  // Guard against Maximum update depth exceeded error
   const lastSelectionRef = React.useRef<string>('')
   
   React.useEffect(() => {

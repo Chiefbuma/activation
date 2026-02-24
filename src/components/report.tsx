@@ -26,7 +26,6 @@ const safeToFixed = (val: any, digits: number = 1) => {
 
 const safeSplitLines = (val: any): string[] => {
     if (!val) return [];
-    // Use Regex match instead of split to be safer
     return String(val).match(/[^\r\n]+/g) || [];
 };
 
