@@ -12,56 +12,53 @@ export async function GET() {
     try {
         await ensureCorporateExpectedParticipantsColumn();
         const [rows] = await db.query(`
-            SELECT id, name, wellness_date, expected_participants, created_at, updated_at
+            SELECT id, name, wellness_date, expected_participants
             FROM corporates
             ORDER BY name ASC
         `);
         return NextResponse.json(rows);
     } catch (error) {
-        const [rows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
+        const [rows] = await db.query('SELECT id, name, wellness_date, expected_participants FROM corporates ORDER BY name ASC');
         return NextResponse.json(rows);
     }
 }
 
 export async function POST(request: Request) {
-    const data = await request.json();
     try {
+        const data = await request.json();
         await ensureCorporateExpectedParticipantsColumn();
         await db.query(
             'INSERT INTO corporates (name, wellness_date, expected_participants) VALUES (?, ?, ?)',
             [data.name, data.wellness_date, toNum(data.expected_participants)]
         );
+        return NextResponse.json({ success: true });
     } catch (error: any) {
-        if (error?.code === 'ER_BAD_FIELD_ERROR') {
-            await db.query('INSERT INTO corporates (name, wellness_date) VALUES (?, ?)', [data.name, data.wellness_date]);
-        } else {
-            throw error;
-        }
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ success: true });
 }
 
 export async function PUT(request: Request) {
-    const data = await request.json();
     try {
+        const data = await request.json();
         await ensureCorporateExpectedParticipantsColumn();
         await db.query(
             'UPDATE corporates SET name=?, wellness_date=?, expected_participants=? WHERE id=?',
             [data.name, data.wellness_date, toNum(data.expected_participants), data.id]
         );
+        return NextResponse.json({ success: true });
     } catch (error: any) {
-        if (error?.code === 'ER_BAD_FIELD_ERROR') {
-            await db.query('UPDATE corporates SET name=?, wellness_date=? WHERE id=?', [data.name, data.wellness_date, data.id]);
-        } else {
-            throw error;
-        }
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ success: true });
 }
 
 export async function DELETE(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    await db.query('DELETE FROM corporates WHERE id=?', [id]);
-    return NextResponse.json({ success: true });
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+        await db.query('DELETE FROM corporates WHERE id=?', [id]);
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 }

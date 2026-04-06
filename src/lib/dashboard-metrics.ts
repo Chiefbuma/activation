@@ -3,8 +3,208 @@ import type { Clinical, Corporate, Nutrition, Registration, Vital } from './type
 export type DistributionRow = {
   label: string;
   count: number;
+  maleCount: number;
+  femaleCount: number;
   color: string;
 };
+
+export type PassportDistributions = {
+  ageRange: DistributionRow[];
+  bloodPressure: DistributionRow[];
+  bloodSugar: DistributionRow[];
+  bmi: DistributionRow[];
+  pulse: DistributionRow[];
+  temperature: DistributionRow[];
+  stress: DistributionRow[];
+  visceralFat: DistributionRow[];
+  bodyFat: DistributionRow[];
+  nutritionalOutcomes: DistributionRow[];
+  psychosocialOutcomes: DistributionRow[];
+  conclusionCounts: DistributionRow[];
+};
+
+const PALETTE = {
+  Green: '#16a34a',
+  Amber: '#f59e0b',
+  Orange: '#f97316',
+  Red: '#dc2626',
+  DarkRed: '#991b1b',
+  Blue: '#3b82f6',
+  Purple: '#7c3aed',
+  Teal: '#0f766e',
+  Slate: '#64748b',
+};
+
+const latestVital = (p: Registration) => p.vitals?.[0];
+const latestNutrition = (p: Registration) => p.nutritions?.[0];
+const latestClinical = (p: Registration) => p.clinicals?.[0];
+
+function classifyAge(p: Registration) {
+  const age = p.age ?? 0;
+  return age > 40 ? 'Above 40' : 'Below or Equal 40';
+}
+
+function classifyBP(p: Registration) {
+  const v = latestVital(p);
+  if (!v?.bp_systolic || !v?.bp_diastolic) return null;
+  const { bp_systolic: s, bp_diastolic: d } = v;
+  if (s >= 180 || d >= 120) return 'Hypertensive Crisis';
+  if (s >= 140 || d >= 90) return 'Hypertension Stage 2';
+  if (s >= 130 || d >= 80) return 'Hypertensive (Stage 1)';
+  if (s >= 120 && d < 80) return 'Elevated';
+  return 'Normal';
+}
+
+function classifySugar(p: Registration) {
+  const v = latestVital(p);
+  const val = parseFloat(v?.fbs || v?.rbs || '');
+  if (isNaN(val)) return null;
+  if (val < 5.6) return 'Normal';
+  if (val < 7.0) return 'Prediabetic';
+  return 'Diabetic';
+}
+
+function classifyBMI(p: Registration) {
+  const n = latestNutrition(p);
+  if (!n?.bmi) return null;
+  if (n.bmi < 18.5) return 'Underweight';
+  if (n.bmi < 25) return 'Normal';
+  if (n.bmi < 30) return 'Overweight';
+  return 'Obese';
+}
+
+function classifyPulse(p: Registration) {
+  const v = latestVital(p);
+  if (!v?.pulse) return null;
+  if (v.pulse < 60) return 'Bradycardia';
+  if (v.pulse <= 100) return 'Normal';
+  return 'Tachycardia';
+}
+
+function classifyTemp(p: Registration) {
+  const v = latestVital(p);
+  if (!v?.temp) return null;
+  if (v.temp < 36) return 'Below Normal';
+  if (v.temp <= 37.5) return 'Normal';
+  return 'Fever';
+}
+
+function classifyVisceral(p: Registration) {
+  const n = latestNutrition(p);
+  if (n?.visceral_fat === null || n?.visceral_fat === undefined) return null;
+  if (n.visceral_fat < 12) return 'Healthy';
+  if (n.visceral_fat <= 15) return 'Borderline';
+  return 'High';
+}
+
+function classifyBodyFat(p: Registration) {
+  const n = latestNutrition(p);
+  if (!n?.body_fat_percent || !p.sex || p.sex === 'Other') return null;
+  const min = p.sex === 'Male' ? 18 : 24;
+  const max = p.sex === 'Male' ? 24 : 31;
+  if (n.body_fat_percent < min) return 'Below Range';
+  if (n.body_fat_percent <= max) return 'Healthy Range';
+  return 'Above Range';
+}
+
+function classifyStress(p: Registration) {
+  const c = latestClinical(p);
+  if (c?.verbal_stress_rating === null || c?.verbal_stress_rating === undefined) return null;
+  if (c.verbal_stress_rating <= 3) return 'Mild';
+  if (c.verbal_stress_rating <= 7) return 'Moderate';
+  return 'High';
+}
+
+function buildGenderDist(
+  patients: Registration[],
+  labels: string[],
+  classifier: (p: Registration) => string | null,
+  colorMap: Record<string, string>
+): DistributionRow[] {
+  return labels.map(label => {
+    const matches = patients.filter(p => classifier(p) === label);
+    return {
+      label,
+      count: matches.length,
+      maleCount: matches.filter(p => p.sex === 'Male').length,
+      femaleCount: matches.filter(p => p.sex === 'Female').length,
+      color: colorMap[label] || PALETTE.Slate
+    };
+  });
+}
+
+export function getPassportDistributions(patients: Registration[]): PassportDistributions {
+  return {
+    ageRange: buildGenderDist(patients, ['Below or Equal 40', 'Above 40'], classifyAge, {
+      'Below or Equal 40': PALETTE.Blue,
+      'Above 40': PALETTE.Teal
+    }),
+    bloodPressure: buildGenderDist(patients, ['Normal', 'Elevated', 'Hypertensive (Stage 1)', 'Hypertension Stage 2', 'Hypertensive Crisis'], classifyBP, {
+      'Normal': PALETTE.Green,
+      'Elevated': PALETTE.Amber,
+      'Hypertensive (Stage 1)': PALETTE.Orange,
+      'Hypertension Stage 2': PALETTE.Red,
+      'Hypertensive Crisis': PALETTE.DarkRed
+    }),
+    bloodSugar: buildGenderDist(patients, ['Normal', 'Prediabetic', 'Diabetic'], classifySugar, {
+      'Normal': PALETTE.Green,
+      'Prediabetic': PALETTE.Amber,
+      'Diabetic': PALETTE.Red
+    }),
+    bmi: buildGenderDist(patients, ['Underweight', 'Normal', 'Overweight', 'Obese'], classifyBMI, {
+      'Underweight': PALETTE.Blue,
+      'Normal': PALETTE.Green,
+      'Overweight': PALETTE.Amber,
+      'Obese': PALETTE.Red
+    }),
+    pulse: buildGenderDist(patients, ['Bradycardia', 'Normal', 'Tachycardia'], classifyPulse, {
+      'Bradycardia': PALETTE.Blue,
+      'Normal': PALETTE.Green,
+      'Tachycardia': PALETTE.Red
+    }),
+    temperature: buildGenderDist(patients, ['Below Normal', 'Normal', 'Fever'], classifyTemp, {
+      'Below Normal': PALETTE.Blue,
+      'Normal': PALETTE.Green,
+      'Fever': PALETTE.Red
+    }),
+    stress: buildGenderDist(patients, ['Mild', 'Moderate', 'High'], classifyStress, {
+      'Mild': PALETTE.Green,
+      'Moderate': PALETTE.Amber,
+      'High': PALETTE.Red
+    }),
+    visceralFat: buildGenderDist(patients, ['Healthy', 'Borderline', 'High'], classifyVisceral, {
+      'Healthy': PALETTE.Green,
+      'Borderline': PALETTE.Amber,
+      'High': PALETTE.Red
+    }),
+    bodyFat: buildGenderDist(patients, ['Below Range', 'Healthy Range', 'Above Range'], classifyBodyFat, {
+      'Below Range': PALETTE.Blue,
+      'Healthy Range': PALETTE.Green,
+      'Above Range': PALETTE.Red
+    }),
+    nutritionalOutcomes: buildGenderDist(patients, ['Recommended', 'Not Recommended'], p => latestNutrition(p)?.meal_plan ?? null, {
+      'Recommended': PALETTE.Red,
+      'Not Recommended': PALETTE.Green
+    }),
+    psychosocialOutcomes: buildGenderDist(patients, ['Recommended', 'Not Recommended'], p => latestClinical(p)?.counselling_sessions ?? null, {
+      'Recommended': PALETTE.Red,
+      'Not Recommended': PALETTE.Green
+    }),
+    conclusionCounts: buildGenderDist(patients, [
+      'All results within healthy range',
+      'Healthy lifestyle changes recommended',
+      'Comprehensive check recommended',
+      'Medical Review recommended for raised blood pressure',
+      'Medical Review recommended for raised blood sugar'
+    ], p => latestClinical(p)?.conclusion ?? null, {
+      'All results within healthy range': PALETTE.Green,
+      'Healthy lifestyle changes recommended': PALETTE.Amber,
+      'Comprehensive check recommended': PALETTE.Teal,
+      'Medical Review recommended for raised blood pressure': PALETTE.Red,
+      'Medical Review recommended for raised blood sugar': PALETTE.Purple
+    })
+  };
+}
 
 export type PartnerSnapshotMetrics = {
   corporate: Corporate;
@@ -22,340 +222,32 @@ export type PartnerSnapshotMetrics = {
   screeningsCompleted: number;
 };
 
-const BLOOD_PRESSURE_COLORS = {
-  Normal: '#16a34a',
-  Elevated: '#f59e0b',
-  'Hypertensive (Stage 1)': '#f97316',
-  'Hypertension Stage 2': '#ef4444',
-  'Hypertensive Crisis': '#991b1b',
-} as const;
-
-const BLOOD_SUGAR_COLORS = {
-  Normal: '#16a34a',
-  Prediabetic: '#f59e0b',
-  Diabetic: '#dc2626',
-} as const;
-
-const BMI_COLORS = {
-  Underweight: '#3b82f6',
-  Normal: '#16a34a',
-  Overweight: '#f59e0b',
-  Obese: '#dc2626',
-} as const;
-
-const PULSE_COLORS = {
-  Bradycardia: '#3b82f6',
-  Normal: '#16a34a',
-  Tachycardia: '#dc2626',
-} as const;
-
-const TEMPERATURE_COLORS = {
-  'Below Normal': '#3b82f6',
-  Normal: '#16a34a',
-  Fever: '#dc2626',
-} as const;
-
-const VISCERAL_FAT_COLORS = {
-  Healthy: '#16a34a',
-  Borderline: '#f59e0b',
-  High: '#dc2626',
-} as const;
-
-const BODY_FAT_COLORS = {
-  'Below Range': '#3b82f6',
-  'Healthy Range': '#16a34a',
-  'Above Range': '#dc2626',
-} as const;
-
-const STRESS_COLORS = {
-  Mild: '#16a34a',
-  Moderate: '#f59e0b',
-  High: '#dc2626',
-} as const;
-
-const OUTCOME_COLORS = {
-  'Recommended': '#dc2626',
-  'Not Recommended': '#16a34a',
-} as const;
-
-const parseNumeric = (value: string | number | null | undefined) => {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const latestVital = (patient: Registration): Vital | undefined => patient.vitals?.[0];
-const latestNutrition = (patient: Registration): Nutrition | undefined => patient.nutritions?.[0];
-const latestClinical = (patient: Registration): Clinical | undefined => patient.clinicals?.[0];
-
-export function getScreenedParticipants(patients: Registration[]) {
-  return patients.filter(
-    (patient) =>
-      patient.vitals.length > 0 || patient.nutritions.length > 0 || patient.clinicals.length > 0
-  );
-}
-
-export function buildDistribution(labels: readonly string[], values: Array<string | null>, palette: Record<string, string>) {
-  return labels.map((label) => ({
-    label,
-    count: values.filter((value) => value === label).length,
-    color: palette[label] ?? '#64748b',
-  }));
-}
-
-export function classifyBloodPressure(vital?: Vital) {
-  const systolic = vital?.bp_systolic ?? null;
-  const diastolic = vital?.bp_diastolic ?? null;
-
-  if (systolic === null || diastolic === null) return null;
-  if (systolic >= 180 || diastolic >= 120) return 'Hypertensive Crisis';
-  if (systolic >= 140 || diastolic >= 90) return 'Hypertension Stage 2';
-  if (systolic >= 130 || diastolic >= 80) return 'Hypertensive (Stage 1)';
-  if (systolic >= 120 && diastolic < 80) return 'Elevated';
-  if (systolic < 120 && diastolic < 80) return 'Normal';
-  return null;
-}
-
-export function classifyBloodSugar(vital?: Vital) {
-  const fbs = parseNumeric(vital?.fbs);
-  const rbs = parseNumeric(vital?.rbs);
-
-  if (fbs !== null) {
-    if (fbs < 5.6) return 'Normal';
-    if (fbs < 7) return 'Prediabetic';
-    return 'Diabetic';
-  }
-
-  if (rbs !== null) {
-    if (rbs < 7.8) return 'Normal';
-    if (rbs < 11.1) return 'Prediabetic';
-    return 'Diabetic';
-  }
-
-  return null;
-}
-
-export function classifyBmi(nutrition?: Nutrition) {
-  const bmi = nutrition?.bmi ?? null;
-  if (bmi === null) return null;
-  if (bmi < 18.5) return 'Underweight';
-  if (bmi < 25) return 'Normal';
-  if (bmi < 30) return 'Overweight';
-  return 'Obese';
-}
-
-export function classifyPulse(vital?: Vital) {
-  const pulse = vital?.pulse ?? null;
-  if (pulse === null) return null;
-  if (pulse < 60) return 'Bradycardia';
-  if (pulse <= 100) return 'Normal';
-  return 'Tachycardia';
-}
-
-export function classifyTemperature(vital?: Vital) {
-  const temp = vital?.temp ?? null;
-  if (temp === null) return null;
-  if (temp < 36) return 'Below Normal';
-  if (temp <= 37.5) return 'Normal';
-  return 'Fever';
-}
-
-export function classifyVisceralFat(nutrition?: Nutrition) {
-  const visceralFat = nutrition?.visceral_fat ?? null;
-  if (visceralFat === null) return null;
-  if (visceralFat < 12) return 'Healthy';
-  if (visceralFat <= 15) return 'Borderline';
-  return 'High';
-}
-
-export function classifyBodyFat(nutrition: Nutrition | undefined, sex: Registration['sex']) {
-  const bodyFat = nutrition?.body_fat_percent ?? null;
-  if (bodyFat === null || !sex || sex === 'Other') return null;
-
-  const healthyMin = sex === 'Male' ? 18 : 24;
-  const healthyMax = sex === 'Male' ? 24 : 31;
-
-  if (bodyFat < healthyMin) return 'Below Range';
-  if (bodyFat <= healthyMax) return 'Healthy Range';
-  return 'Above Range';
-}
-
-export function classifyStress(clinical?: Clinical) {
-  const rating = clinical?.verbal_stress_rating ?? null;
-  if (rating === null) return null;
-  if (rating <= 3) return 'Mild';
-  if (rating <= 7) return 'Moderate';
-  return 'High';
-}
-
-export function getPassportOverview(patients: Registration[]) {
-  const screenedParticipants = getScreenedParticipants(patients);
-
-  return {
-    screenedParticipants: screenedParticipants.length,
-    bloodPressureCaptured: patients.filter((patient) => classifyBloodPressure(latestVital(patient)) !== null).length,
-    bloodSugarCaptured: patients.filter((patient) => classifyBloodSugar(latestVital(patient)) !== null).length,
-    bmiCaptured: patients.filter((patient) => classifyBmi(latestNutrition(patient)) !== null).length,
-    clinicalReviewed: patients.filter((patient) => latestClinical(patient)).length,
-    recommendedMealPlans: patients.filter(
-      (patient) => latestNutrition(patient)?.meal_plan === 'Recommended'
-    ).length,
-    recommendedCounselling: patients.filter(
-      (patient) => latestClinical(patient)?.counselling_sessions === 'Recommended'
-    ).length,
-  };
-}
-
-export function getPassportDistributions(patients: Registration[]) {
-  return {
-    bloodPressure: buildDistribution(
-      Object.keys(BLOOD_PRESSURE_COLORS),
-      patients.map((patient) => classifyBloodPressure(latestVital(patient))),
-      BLOOD_PRESSURE_COLORS
-    ),
-    bloodSugar: buildDistribution(
-      Object.keys(BLOOD_SUGAR_COLORS),
-      patients.map((patient) => classifyBloodSugar(latestVital(patient))),
-      BLOOD_SUGAR_COLORS
-    ),
-    bmi: buildDistribution(
-      Object.keys(BMI_COLORS),
-      patients.map((patient) => classifyBmi(latestNutrition(patient))),
-      BMI_COLORS
-    ),
-    pulse: buildDistribution(
-      Object.keys(PULSE_COLORS),
-      patients.map((patient) => classifyPulse(latestVital(patient))),
-      PULSE_COLORS
-    ),
-    temperature: buildDistribution(
-      Object.keys(TEMPERATURE_COLORS),
-      patients.map((patient) => classifyTemperature(latestVital(patient))),
-      TEMPERATURE_COLORS
-    ),
-    visceralFat: buildDistribution(
-      Object.keys(VISCERAL_FAT_COLORS),
-      patients.map((patient) => classifyVisceralFat(latestNutrition(patient))),
-      VISCERAL_FAT_COLORS
-    ),
-    bodyFat: buildDistribution(
-      Object.keys(BODY_FAT_COLORS),
-      patients.map((patient) => classifyBodyFat(latestNutrition(patient), patient.sex)),
-      BODY_FAT_COLORS
-    ),
-    stress: buildDistribution(
-      Object.keys(STRESS_COLORS),
-      patients.map((patient) => classifyStress(latestClinical(patient))),
-      STRESS_COLORS
-    ),
-    nutritionalOutcomes: buildDistribution(
-      ['Recommended', 'Not Recommended'],
-      patients.map(p => latestNutrition(p)?.meal_plan ?? null),
-      OUTCOME_COLORS
-    ),
-    psychosocialOutcomes: buildDistribution(
-      ['Recommended', 'Not Recommended'],
-      patients.map(p => latestClinical(p)?.counselling_sessions ?? null),
-      OUTCOME_COLORS
-    ),
-    conclusionCounts: [
-      {
-        label: 'Healthy',
-        count: patients.filter(
-          (patient) => latestClinical(patient)?.conclusion === 'All results within healthy range'
-        ).length,
-        color: '#16a34a',
-      },
-      {
-        label: 'Lifestyle changes',
-        count: patients.filter(
-          (patient) =>
-            latestClinical(patient)?.conclusion === 'Healthy lifestyle changes recommended'
-        ).length,
-        color: '#f59e0b',
-      },
-      {
-        label: 'Raised BP review',
-        count: patients.filter(
-          (patient) =>
-            latestClinical(patient)?.conclusion ===
-            'Medical Review recommended for raised blood pressure'
-        ).length,
-        color: '#dc2626',
-      },
-      {
-        label: 'Raised sugar review',
-        count: patients.filter(
-          (patient) =>
-            latestClinical(patient)?.conclusion ===
-            'Medical Review recommended for raised blood sugar'
-        ).length,
-        color: '#7c3aed',
-      },
-      {
-        label: 'Comprehensive check',
-        count: patients.filter(
-          (patient) =>
-            latestClinical(patient)?.conclusion === 'Comprehensive check recommended'
-        ).length,
-        color: '#0f766e',
-      },
-    ] satisfies DistributionRow[],
-  };
-}
-
-export function getPartnerSnapshotMetrics(
-  patients: Registration[],
-  corporate: Corporate
-): PartnerSnapshotMetrics {
-  const participants = patients.filter((patient) => patient.corporate_id === corporate.id);
-  const maleParticipants = participants.filter((patient) => patient.sex === 'Male');
-  const femaleParticipants = participants.filter((patient) => patient.sex === 'Female');
-  const ageValues = participants
-    .map((patient) => patient.age)
-    .filter((age): age is number => typeof age === 'number' && Number.isFinite(age));
-  const expectedParticipants =
-    typeof corporate.expected_participants === 'number' && corporate.expected_participants > 0
-      ? corporate.expected_participants
-      : null;
+export function getPartnerSnapshotMetrics(patients: Registration[], corporate: Corporate): PartnerSnapshotMetrics {
+  const participants = patients.filter(p => p.corporate_id === corporate.id);
+  const male = participants.filter(p => p.sex === 'Male');
+  const female = participants.filter(p => p.sex === 'Female');
+  const ages = participants.map(p => p.age).filter((a): a is number => typeof a === 'number');
+  const expected = corporate.expected_participants ?? null;
 
   return {
     corporate,
     participants,
     totalParticipants: participants.length,
-    expectedParticipants,
-    turnoutRate: expectedParticipants
-      ? Number(((participants.length / expectedParticipants) * 100).toFixed(1))
-      : null,
-    maleCount: maleParticipants.length,
-    femaleCount: femaleParticipants.length,
-    maleAbove40: maleParticipants.filter((patient) => (patient.age ?? 0) > 40).length,
-    maleBelowOrEqual40: maleParticipants.filter((patient) => (patient.age ?? 0) <= 40).length,
-    femaleAbove40: femaleParticipants.filter((patient) => (patient.age ?? 0) > 40).length,
-    femaleBelowOrEqual40: femaleParticipants.filter((patient) => (patient.age ?? 0) <= 40).length,
-    averageAge: ageValues.length
-      ? Number((ageValues.reduce((sum, age) => sum + age, 0) / ageValues.length).toFixed(0))
-      : null,
-    screeningsCompleted: participants.filter(
-      (patient) =>
-        patient.vitals.length > 0 || patient.nutritions.length > 0 || patient.clinicals.length > 0
-    ).length,
+    expectedParticipants: expected,
+    turnoutRate: expected ? (participants.length / expected) * 100 : null,
+    maleCount: male.length,
+    femaleCount: female.length,
+    maleAbove40: male.filter(p => (p.age ?? 0) > 40).length,
+    maleBelowOrEqual40: male.filter(p => (p.age ?? 0) <= 40).length,
+    femaleAbove40: female.filter(p => (p.age ?? 0) > 40).length,
+    femaleBelowOrEqual40: female.filter(p => (p.age ?? 0) <= 40).length,
+    averageAge: ages.length ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : null,
+    screeningsCompleted: participants.filter(p => p.vitals.length > 0 || p.nutritions.length > 0 || p.clinicals.length > 0).length
   };
 }
 
 export function buildPartnerNarrative(metrics: PartnerSnapshotMetrics) {
-  if (!metrics.expectedParticipants) {
-    return `The wellness day recorded ${metrics.totalParticipants} participants. Add the expected participant count in Settings so turnout rate can be calculated automatically for this partner snapshot.`;
-  }
-
-  const tone =
-    metrics.turnoutRate !== null && metrics.turnoutRate >= 90
-      ? 'excellent'
-      : metrics.turnoutRate !== null && metrics.turnoutRate >= 75
-        ? 'strong'
-        : metrics.turnoutRate !== null && metrics.turnoutRate >= 50
-          ? 'moderate'
-          : 'developing';
-
-  return `The wellness day achieved ${tone} participation for ${metrics.corporate.name}, with ${metrics.totalParticipants} staff taking part out of the ${metrics.expectedParticipants} expected participants.`;
+  if (!metrics.expectedParticipants) return `The wellness day recorded ${metrics.totalParticipants} participants. Set expected target in settings to calculate turnout.`;
+  const tone = (metrics.turnoutRate ?? 0) >= 90 ? 'excellent' : (metrics.turnoutRate ?? 0) >= 75 ? 'strong' : 'moderate';
+  return `The wellness day achieved ${tone} participation for ${metrics.corporate.name}, with ${metrics.totalParticipants} staff taking part out of ${metrics.expectedParticipants} expected.`;
 }

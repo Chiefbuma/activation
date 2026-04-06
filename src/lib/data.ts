@@ -6,7 +6,6 @@ import { ensureCorporateExpectedParticipantsColumn } from './corporate-schema';
 /**
  * Optimized server-side data fetching functions.
  * Implementation of Bulk Fetch & Map pattern to prevent N+1 query overhead.
- * This ensures the application remains performant with millions of rows.
  */
 
 export async function fetchPatients(): Promise<Registration[]> {
@@ -25,7 +24,6 @@ export async function fetchPatients(): Promise<Registration[]> {
 
         const ids = registrations.map(r => r.id);
 
-        // Bulk fetch all associated assessments in single queries
         const [vitalRows] = await db.query('SELECT * FROM vitals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [nutriRows] = await db.query('SELECT * FROM nutritions WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
         const [clinicalRows] = await db.query('SELECT * FROM clinicals WHERE registration_id IN (?) ORDER BY created_at DESC', [ids]);
@@ -34,7 +32,6 @@ export async function fetchPatients(): Promise<Registration[]> {
         const nutritions = nutriRows as Nutrition[];
         const clinicals = clinicalRows as Clinical[];
 
-        // Map data back to participants in memory (O(n) complexity)
         return registrations.map(reg => ({
             ...reg,
             vitals: vitals.filter(v => v.registration_id === reg.id),
@@ -95,15 +92,16 @@ export async function fetchCorporates(): Promise<Corporate[]> {
     noStore();
     try {
         await ensureCorporateExpectedParticipantsColumn();
+        // Removed created_at/updated_at as they may not exist in all schema versions
         const [rows] = await db.query(`
-            SELECT id, name, wellness_date, expected_participants, created_at, updated_at
+            SELECT id, name, wellness_date, expected_participants
             FROM corporates
             ORDER BY name ASC
         `);
         return rows as Corporate[];
     } catch (error) {
         try {
-            const [fallbackRows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
+            const [fallbackRows] = await db.query('SELECT id, name, wellness_date, expected_participants FROM corporates ORDER BY name ASC');
             return fallbackRows as Corporate[];
         } catch (fallbackError) {
             console.error('[DATABASE_FETCH_CORPORATES_ERROR]', fallbackError);

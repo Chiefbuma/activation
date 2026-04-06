@@ -8,9 +8,15 @@ const toNum = (val: any) => {
     return isNaN(n) ? null : n;
 };
 
-const toDate = (val: any) => {
-    if (!val || val === '') return null;
-    return val;
+const toSqlOnlyDate = (dateStr?: string) => {
+    if (!dateStr || dateStr === '') return null;
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return null;
+        return date.toISOString().split('T')[0];
+    } catch {
+        return null;
+    }
 };
 
 export async function GET() {
@@ -58,12 +64,12 @@ export async function POST(request: Request) {
             data.middle_name || null, 
             data.surname, 
             data.sex || null, 
-            toDate(data.dob), 
+            toSqlOnlyDate(data.dob), 
             toNum(data.age), 
             data.phone || null, 
             data.email || null, 
             toNum(data.corporate_id), 
-            toDate(data.wellness_date), 
+            toSqlOnlyDate(data.wellness_date), 
             toNum(data.user_id)
         ]);
         
@@ -88,12 +94,12 @@ export async function PUT(request: Request) {
             data.middle_name || null, 
             data.surname, 
             data.sex || null, 
-            toDate(data.dob), 
+            toSqlOnlyDate(data.dob), 
             toNum(data.age), 
             data.phone || null, 
             data.email || null, 
             toNum(data.corporate_id), 
-            toDate(data.wellness_date), 
+            toSqlOnlyDate(data.wellness_date), 
             toNum(data.id)
         ]);
         
