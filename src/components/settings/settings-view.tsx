@@ -36,7 +36,7 @@ export default function SettingsView({
             <CardHeader>
             <CardTitle className="text-primary">Corporate Partners</CardTitle>
             <CardDescription>
-                Manage corporate entities and their scheduled wellness dates.
+                Manage corporate entities, wellness dates, and expected participant targets for partner snapshot reporting.
             </CardDescription>
             </CardHeader>
             <CardContent>

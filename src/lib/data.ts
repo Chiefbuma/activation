@@ -1,6 +1,7 @@
 import db from './db';
 import type { Registration, User, Corporate, Vital, Nutrition, Clinical } from './types';
 import { unstable_noStore as noStore } from 'next/cache';
+import { ensureCorporateExpectedParticipantsColumn } from './corporate-schema';
 
 /**
  * Optimized server-side data fetching functions.
@@ -93,10 +94,20 @@ export async function fetchUsers(): Promise<User[]> {
 export async function fetchCorporates(): Promise<Corporate[]> {
     noStore();
     try {
-        const [rows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
+        await ensureCorporateExpectedParticipantsColumn();
+        const [rows] = await db.query(`
+            SELECT id, name, wellness_date, expected_participants, created_at, updated_at
+            FROM corporates
+            ORDER BY name ASC
+        `);
         return rows as Corporate[];
     } catch (error) {
-        console.error('[DATABASE_FETCH_CORPORATES_ERROR]', error);
-        return [];
+        try {
+            const [fallbackRows] = await db.query('SELECT * FROM corporates ORDER BY name ASC');
+            return fallbackRows as Corporate[];
+        } catch (fallbackError) {
+            console.error('[DATABASE_FETCH_CORPORATES_ERROR]', fallbackError);
+            return [];
+        }
     }
 }

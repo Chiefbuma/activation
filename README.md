@@ -24,6 +24,7 @@ CREATE TABLE `corporates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `wellness_date` date DEFAULT NULL,
+  `expected_participants` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 
@@ -111,10 +112,10 @@ Run this to create the initial admin user (password is `password`) and sample co
 INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES 
 ('Taria Admin', 'admin@superadmin.com', '$2a$10$CWKTgxLJJux6m6Sq6.vLnuC2WpSrqWpSrqWpSrqWpSrqWpSrqWpSr', 'admin');
 
-INSERT INTO `corporates` (`name`, `wellness_date`) VALUES 
-('Bio Food Products', '2025-09-29'),
-('Taria', '2025-10-01'),
-('NCBA', '2026-02-02');
+INSERT INTO `corporates` (`name`, `wellness_date`, `expected_participants`) VALUES 
+('Bio Food Products', '2025-09-29', 180),
+('Taria', '2025-10-01', 150),
+('NCBA', '2026-02-02', 220);
 ```
 
 ## Tech Stack

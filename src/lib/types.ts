@@ -13,6 +13,7 @@ export type Corporate = {
   id: number;
   name: string;
   wellness_date: string;
+  expected_participants?: number | null;
   created_at?: string;
   updated_at?: string;
 };

@@ -6,9 +6,9 @@ export const users: User[] = [
 ];
 
 export const corporates: Corporate[] = [
-    { id: 1, name: 'Bio Food Products', wellness_date: '2025-09-29' },
-    { id: 3, name: 'Taria', wellness_date: '2025-10-01' },
-    { id: 5, name: 'NCBA', wellness_date: '2026-02-02' }
+    { id: 1, name: 'Bio Food Products', wellness_date: '2025-09-29', expected_participants: 180 },
+    { id: 3, name: 'Taria', wellness_date: '2025-10-01', expected_participants: 150 },
+    { id: 5, name: 'NCBA', wellness_date: '2026-02-02', expected_participants: 220 }
 ];
 
 export const registrations: Omit<Registration, 'vitals' | 'nutritions' | 'clinicals' | 'status'>[] = [

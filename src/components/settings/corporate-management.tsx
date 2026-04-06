@@ -40,6 +40,7 @@ interface CorporateManagementProps {
 const emptyCorporate: Omit<Corporate, 'id'> = {
   name: '',
   wellness_date: new Date().toISOString().split('T')[0],
+  expected_participants: null,
 };
 
 export default function CorporateManagement({ initialCorporates, onCorporatesUpdate }: CorporateManagementProps) {
@@ -75,7 +76,11 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
     
     setIsSubmitting(true);
     try {
-        await saveCorporate(currentCorporate);
+        const expectedParticipantsValue = String(currentCorporate.expected_participants ?? '').trim();
+        await saveCorporate({
+          ...currentCorporate,
+          expected_participants: expectedParticipantsValue === '' ? null : Number(expectedParticipantsValue),
+        });
         toast({ title: 'Success', description: 'Corporate partner saved.' });
         handleCloseModal();
         window.location.reload(); 
@@ -140,6 +145,14 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
         cell: ({ row }) => {
             const date = row.getValue("wellness_date") as string;
             return date ? new Date(date).toLocaleDateString('en-GB') : 'N/A';
+        }
+    },
+    {
+        accessorKey: "expected_participants",
+        header: "Expected Participants",
+        cell: ({ row }) => {
+            const expectedParticipants = row.getValue("expected_participants") as number | null | undefined;
+            return expectedParticipants ?? 'N/A';
         }
     },
     {
@@ -244,6 +257,18 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
               <div className="space-y-2">
                 <Label htmlFor="wellness_date" className="text-primary font-bold">Wellness Date</Label>
                 <Input id="wellness_date" name="wellness_date" type="date" value={currentCorporate?.wellness_date || ''} onChange={handleChange} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expected_participants" className="text-primary font-bold">Expected Participants</Label>
+                <Input
+                  id="expected_participants"
+                  name="expected_participants"
+                  type="number"
+                  min="0"
+                  value={currentCorporate?.expected_participants ?? ''}
+                  onChange={handleChange}
+                  placeholder="Used to calculate turnout rate"
+                />
               </div>
             </div>
             <DialogFooter>

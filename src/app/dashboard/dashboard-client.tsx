@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import type { Registration, User, Corporate } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Users, SlidersHorizontal } from 'lucide-react';
+import { ActivitySquare, Building2, Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
 import AnalyticsView from '@/components/dashboard/analytics-view';
+import PartnerSnapshotView from '@/components/dashboard/partner-snapshot-view';
 
-type View = 'activations' | 'dashboard' | 'settings';
+type View = 'activations' | 'passport' | 'partner' | 'settings';
 
 export default function DashboardClient({ 
   initialPatients, 
@@ -45,7 +46,8 @@ export default function DashboardClient({
   const getViewTitle = () => {
     switch(activeView) {
         case 'activations': return 'Activations';
-        case 'dashboard': return 'Dashboard';
+        case 'passport': return 'Taria Passport';
+        case 'partner': return 'Partner Snapshot';
         case 'settings': return 'Settings';
     }
   };
@@ -53,7 +55,8 @@ export default function DashboardClient({
   const getViewSubtitle = () => {
     switch(activeView) {
         case 'activations': return 'Manage participant registration and assessment history';
-        case 'dashboard': return 'Overview of health program performance and corporate metrics';
+        case 'passport': return 'Overview of screening outcomes and program health metrics';
+        case 'partner': return 'Participation report by corporate partner with PDF-ready snapshot';
         case 'settings': return 'Configure application users and corporate partners';
     }
   };
@@ -79,10 +82,16 @@ export default function DashboardClient({
                     onClick={() => setActiveView('activations')}
                 />
                 <NavButton 
-                    label="Dashboard" 
-                    icon={<LayoutDashboard className="h-4 w-4" />} 
-                    isActive={activeView === 'dashboard'}
-                    onClick={() => setActiveView('dashboard')}
+                    label="Taria Passport" 
+                    icon={<ActivitySquare className="h-4 w-4" />} 
+                    isActive={activeView === 'passport'}
+                    onClick={() => setActiveView('passport')}
+                />
+                <NavButton 
+                    label="Partner Snapshot" 
+                    icon={<Building2 className="h-4 w-4" />} 
+                    isActive={activeView === 'partner'}
+                    onClick={() => setActiveView('partner')}
                 />
                 {isAdmin && (
                     <NavButton 
@@ -110,8 +119,11 @@ export default function DashboardClient({
                 <PatientList patients={patients as any} />
             </div>
           )}
-          {activeView === 'dashboard' && (
+          {activeView === 'passport' && (
             <AnalyticsView patients={patients} corporates={corporates} />
+          )}
+          {activeView === 'partner' && (
+            <PartnerSnapshotView patients={patients} corporates={corporates} />
           )}
           {activeView === 'settings' && isAdmin && (
             <SettingsView 

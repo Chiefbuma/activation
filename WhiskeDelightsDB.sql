@@ -56,6 +56,7 @@ CREATE TABLE `corporates` (
   `id` int NOT NULL,
   `name` varchar(255) NOT NULL,
   `wellness_date` date NOT NULL,
+  `expected_participants` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -64,10 +65,10 @@ CREATE TABLE `corporates` (
 -- Dumping data for table `corporates`
 --
 
-INSERT INTO `corporates` (`id`, `name`, `wellness_date`, `created_at`, `updated_at`) VALUES
-(1, 'Bio Food Products', '2025-09-29', '2026-01-31 14:03:10', '2026-01-31 14:03:10'),
-(3, 'Taria', '2025-10-01', '2026-01-31 14:03:10', '2026-01-31 14:03:10'),
-(5, 'NCBA', '2026-02-02', '2026-02-01 05:58:15', '2026-02-01 05:58:15');
+INSERT INTO `corporates` (`id`, `name`, `wellness_date`, `expected_participants`, `created_at`, `updated_at`) VALUES
+(1, 'Bio Food Products', '2025-09-29', 180, '2026-01-31 14:03:10', '2026-01-31 14:03:10'),
+(3, 'Taria', '2025-10-01', 150, '2026-01-31 14:03:10', '2026-01-31 14:03:10'),
+(5, 'NCBA', '2026-02-02', 220, '2026-02-01 05:58:15', '2026-02-01 05:58:15');
 
 -- --------------------------------------------------------
 
