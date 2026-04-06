@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Registration, User, Vital, Nutrition, Clinical, Corporate } from '@/lib/types';
 import {
@@ -17,8 +17,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +38,8 @@ import {
   Edit,
   Loader2,
   CalendarDays,
+  BrainCircuit,
+  CheckCircle2,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -56,6 +56,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
 import { saveVital, saveNutrition, saveClinical, deleteAssessment, getRegistrationById, getCorporates, updateRegistration } from '@/lib/serve';
+import { cn } from '@/lib/utils';
 
 const DetailItem = ({
   label,
@@ -80,6 +81,14 @@ const DetailItem = ({
     </div>
   </div>
 );
+
+const CLINICAL_OUTCOMES = [
+    "All results within healthy range",
+    "Healthy lifestyle changes recommended",
+    "Comprehensive check recommended",
+    "Medical Review recommended for raised blood pressure",
+    "Medical Review recommended for raised blood sugar"
+];
 
 export default function PatientDetailsPage({ initialPatient }: { initialPatient: Registration }) {
   const { toast } = useToast();
@@ -120,8 +129,8 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   const handleOpenEdit = () => {
       setEditForm({
           ...patient,
-          dob: patient.dob ? new Date(patient.dob).toISOString().match(/[^\T]+/g)?.[0] : '',
-          wellness_date: patient.wellness_date ? new Date(patient.wellness_date).toISOString().match(/[^\T]+/g)?.[0] : '',
+          dob: patient.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
+          wellness_date: patient.wellness_date ? new Date(patient.wellness_date).toISOString().split('T')[0] : '',
       });
       setIsEditModalOpen(true);
   };
@@ -168,46 +177,44 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     }
   };
 
-  const calculateNutritionResults = (form: Partial<Nutrition>) => {
-    const height = Number(form.height);
-    const weight = Number(form.weight);
-    const bodyFat = Number(form.body_fat_percent);
-    const visceralFat = Number(form.visceral_fat);
-    
-    if (!height || !weight) return { meal_plan: 'Not Recommended', weight_loss_period: 'N/A', llw: null, ulw: null, excess_weight: null, bmi: null };
+  const nutritionResults = useMemo(() => {
+    const h = Number(nutritionForm.height) || 0;
+    const w = Number(nutritionForm.weight) || 0;
+    const vf = Number(nutritionForm.visceral_fat) || 0;
+    const bf = Number(nutritionForm.body_fat_percent) || 0;
 
-    const hM = height / 100;
-    const bmi = weight / (hM * hM);
+    if (!h || !w) return { bmi: 0, llw: 0, ulw: 0, excess_weight: 0, weight_loss_period: 'N/A', meal_plan: 'Not Recommended' as const };
+
+    const hM = h / 100;
+    const bmi = w / (hM * hM);
     const llw = 18.5 * (hM * hM);
     const ulw = 25 * (hM * hM);
-    const excess = Math.max(0, weight - ulw);
-    const weight_loss_period = excess > 0 ? `${(excess / 12).toFixed(1)} Years` : '0 Years';
+    const excess = Math.max(0, w - ulw);
+    const period = excess > 0 ? `${(excess / 12).toFixed(1)} Years` : '0 Years';
 
     const isMale = patient.sex === 'Male';
-    let needsPlan = bmi > 25 || bmi < 18.5 || visceralFat >= 12;
-    
-    if (bodyFat) {
-        if (isMale && (bodyFat < 18 || bodyFat > 24)) needsPlan = true;
-        if (!isMale && (bodyFat < 24 || bodyFat > 31)) needsPlan = true;
+    let needsPlan = bmi > 25 || bmi < 18.5 || vf >= 12;
+    if (bf) {
+        if (isMale && (bf < 18 || bf > 24)) needsPlan = true;
+        if (!isMale && (bf < 24 || bf > 31)) needsPlan = true;
     }
 
     return {
-        bmi: parseFloat(bmi.toFixed(1)),
-        meal_plan: (needsPlan ? 'Recommended' : 'Not Recommended') as 'Recommended' | 'Not Recommended',
-        llw: parseFloat(llw.toFixed(1)),
-        ulw: parseFloat(ulw.toFixed(1)),
-        excess_weight: parseFloat(excess.toFixed(1)),
-        weight_loss_period
+        bmi: parseFloat(bmi.toFixed(2)),
+        llw: parseFloat(llw.toFixed(2)),
+        ulw: parseFloat(ulw.toFixed(2)),
+        excess_weight: parseFloat(excess.toFixed(2)),
+        weight_loss_period: period,
+        meal_plan: (needsPlan ? 'Recommended' : 'Not Recommended') as 'Recommended' | 'Not Recommended'
     };
-  };
+  }, [nutritionForm.height, nutritionForm.weight, nutritionForm.visceral_fat, nutritionForm.body_fat_percent, patient.sex]);
 
   const handleSaveNutrition = async () => {
     setIsSubmitting(true);
     try {
-        const results = calculateNutritionResults(nutritionForm);
         await saveNutrition({
             ...nutritionForm,
-            ...results,
+            ...nutritionResults,
             registration_id: patient.id,
             user_id: currentUser?.id
         });
@@ -221,18 +228,26 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
     setIsSubmitting(false);
   };
 
+  const toggleConclusion = (outcome: string) => {
+      const current = clinicalForm.conclusion ? clinicalForm.conclusion.split(',').filter(Boolean) : [];
+      let next;
+      if (current.includes(outcome)) {
+          next = current.filter(o => o !== outcome);
+      } else {
+          next = [...current, outcome];
+      }
+      setClinicalForm({ ...clinicalForm, conclusion: next.join(',') as any });
+  };
+
   const handleSaveClinical = async () => {
     setIsSubmitting(true);
     try {
-        const stressRating = Number(clinicalForm.verbal_stress_rating);
-        const counselling = stressRating > 7 ? 'Recommended' : 'Not Recommended';
         await saveClinical({
             ...clinicalForm,
-            counselling_sessions: counselling,
             registration_id: patient.id,
             user_id: currentUser?.id
         });
-        toast({ title: 'Success', description: `Clinical review ${clinicalForm.id ? 'updated' : 'recorded'}.` });
+        toast({ title: 'Success', description: `Review ${clinicalForm.id ? 'updated' : 'recorded'}.` });
         setIsClinicalDialogOpen(false);
         setClinicalForm({});
         refreshData();
@@ -243,7 +258,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
   };
 
   const fallback = `${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`;
-  const nutritionResults = calculateNutritionResults(nutritionForm);
 
   return (
     <div className="container mx-auto max-w-7xl py-4 px-2 md:py-6 md:px-4">
@@ -309,14 +323,13 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <HeartPulse className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Vital Signs</CardTitle>
-                        <CardDescription>Latest physiological measurements</CardDescription>
+                        <CardDescription>Physiological history (tracking all records)</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isVitalsDialogOpen} onOpenChange={(open) => {
-                    if (!open) setVitalsForm({});
-                    setIsVitalsDialogOpen(open);
-                }}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setVitalsForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Record Vitals</Button></DialogTrigger>
+                <Button size="sm" onClick={() => { setVitalsForm({}); setIsVitalsDialogOpen(true); }}>
+                    <PlusCircle className="mr-2 h-4 w-4"/>Record Vitals
+                </Button>
+                <Dialog open={isVitalsDialogOpen} onOpenChange={setIsVitalsDialogOpen}>
                     <DialogContent className="max-w-md border-primary/20 w-[95vw] sm:w-full">
                         <DialogHeader><DialogTitle className="text-primary">{vitalsForm.id ? 'Edit' : 'New'} Vital Signs</DialogTitle></DialogHeader>
                         <div className="grid grid-cols-2 gap-4 py-4">
@@ -328,7 +341,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">FBS (mmol/L)</Label><Input value={vitalsForm.fbs || ''} onChange={e => setVitalsForm({...vitalsForm, fbs: e.target.value})} /></div>
                         </div>
                         <DialogFooter className="flex-col sm:flex-row gap-2">
-                            <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsVitalsDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveVitals} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {vitalsForm.id ? 'Update Record' : 'Save Record'}
@@ -340,19 +353,19 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               <CardContent>
                 {patient.vitals.length > 0 ? (
                     <div className="overflow-x-auto rounded-xl border border-primary/10">
-                        <table className="min-w-full text-[10px] md:text-xs">
+                        <table className="min-w-full text-xs">
                             <thead className="bg-muted/50">
                                 <tr className="border-b border-primary/10">
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider">Date</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider">Value</th>
-                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase tracking-wider">Actions</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Date</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Value</th>
+                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {patient.vitals.map((v) => (
                                     <tr key={v.id} className="hover:bg-muted/30 border-b border-primary/5">
-                                        <td className="py-3 px-4">{new Date(v.created_at).toLocaleDateString()}</td>
-                                        <td className="py-3 px-4 font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse</td>
+                                        <td className="py-3 px-4">{new Date(v.measured_at).toLocaleDateString()}</td>
+                                        <td className="py-3 px-4 font-medium">{v.bp_systolic}/{v.bp_diastolic} BP, {v.pulse} Pulse, {v.temp}°C</td>
                                         <td className="py-3 px-4 text-right flex justify-end gap-1">
                                             <Button variant="ghost" size="icon" onClick={() => { setVitalsForm(v); setIsVitalsDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-7 w-7" onClick={() => handleDeleteVital(v.id)}><Trash2 className="h-3 w-3"/></Button>
@@ -372,37 +385,36 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                     <Scale className="w-6 h-6 text-primary" />
                     <div>
                         <CardTitle>Nutrition Assessment</CardTitle>
-                        <CardDescription>Body composition tracking</CardDescription>
+                        <CardDescription>Body composition (One record allowed)</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isNutritionDialogOpen} onOpenChange={(open) => {
-                    if (!open) setNutritionForm({});
-                    setIsNutritionDialogOpen(open);
-                }}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setNutritionForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition</Button></DialogTrigger>
-                    <DialogContent className="max-w-md border-primary/20 w-[95vw] sm:w-full">
+                <Button size="sm" disabled={patient.nutritions.length > 0} onClick={() => { setNutritionForm({}); setIsNutritionDialogOpen(true); }}>
+                    <PlusCircle className="mr-2 h-4 w-4"/>Record Nutrition
+                </Button>
+                <Dialog open={isNutritionDialogOpen} onOpenChange={setIsNutritionDialogOpen}>
+                    <DialogContent className="max-w-lg border-primary/20 w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto">
                         <DialogHeader><DialogTitle className="text-primary">{nutritionForm.id ? 'Edit' : 'New'} Nutrition Record</DialogTitle></DialogHeader>
-                        <div className="grid grid-cols-2 gap-4 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">Height (cm)</Label><Input type="number" value={nutritionForm.height || ''} onChange={e => setNutritionForm({...nutritionForm, height: e.target.value})} /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">Weight (kg)</Label><Input type="number" step="0.1" value={nutritionForm.weight || ''} onChange={e => setNutritionForm({...nutritionForm, weight: e.target.value})} /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">Visceral Fat</Label><Input type="number" value={nutritionForm.visceral_fat || ''} onChange={e => setNutritionForm({...nutritionForm, visceral_fat: e.target.value})} /></div>
                             <div className="space-y-2"><Label className="text-primary font-bold text-xs">Body Fat %</Label><Input type="number" step="0.1" value={nutritionForm.body_fat_percent || ''} onChange={e => setNutritionForm({...nutritionForm, body_fat_percent: e.target.value})} /></div>
                         </div>
                         {nutritionForm.height && nutritionForm.weight && (
-                            <div className="bg-muted/50 p-3 rounded-xl space-y-2 text-[10px] md:text-xs border border-primary/10">
+                            <div className="bg-muted/50 p-4 rounded-xl space-y-3 text-xs border border-primary/10">
                                 <p className="font-bold text-primary uppercase">Calculation Insights</p>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                     <p>Low Weight (BMI 18.5): <span className="font-bold">{nutritionResults.llw}kg</span></p>
                                     <p>High Weight (BMI 25): <span className="font-bold">{nutritionResults.ulw}kg</span></p>
                                     <p>Excess: <span className="font-bold">{nutritionResults.excess_weight}kg</span></p>
                                     <p>Period: <span className="font-bold">{nutritionResults.weight_loss_period}</span></p>
                                     <p>BMI: <span className="font-bold">{nutritionResults.bmi}</span></p>
-                                    <p>Plan: <span className="font-bold text-primary">{nutritionResults.meal_plan}</span></p>
+                                    <p>Plan: <span className={cn("font-bold", nutritionResults.meal_plan === 'Recommended' ? "text-primary" : "text-slate-500")}>{nutritionResults.meal_plan}</span></p>
                                 </div>
                             </div>
                         )}
-                        <DialogFooter className="flex-col sm:flex-row gap-2">
-                            <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
+                        <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
+                            <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsNutritionDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveNutrition} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {nutritionForm.id ? 'Update Record' : 'Save Record'}
@@ -414,14 +426,13 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               <CardContent>
                 {patient.nutritions.length > 0 ? (
                     <div className="overflow-x-auto rounded-xl border border-primary/10">
-                        <table className="min-w-full text-[10px] md:text-xs">
+                        <table className="min-w-full text-xs">
                             <thead className="bg-muted/50">
                                 <tr className="border-b border-primary/10">
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider">Date</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider">Value</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider">BMI</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase tracking-wider hidden md:table-cell">Meal Plan</th>
-                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase tracking-wider">Actions</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Date</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Value</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">BMI</th>
+                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -430,7 +441,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                         <td className="py-3 px-4">{new Date(n.created_at).toLocaleDateString()}</td>
                                         <td className="py-3 px-4 font-medium">{n.weight}kg, {n.height}cm</td>
                                         <td className="py-3 px-4 font-medium">{n.bmi}</td>
-                                        <td className="py-3 px-4 font-semibold hidden md:table-cell">{n.meal_plan}</td>
                                         <td className="py-3 px-4 text-right flex justify-end gap-1">
                                             <Button variant="ghost" size="icon" onClick={() => { setNutritionForm(n); setIsNutritionDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('nutritions', n.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
@@ -447,44 +457,109 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <Stethoscope className="w-6 h-6 text-primary" />
+                    <BrainCircuit className="w-6 h-6 text-primary" />
                     <div>
-                        <CardTitle>Clinical Review</CardTitle>
-                        <CardDescription>Professional observations</CardDescription>
+                        <CardTitle>Psychosocial Assessment</CardTitle>
+                        <CardDescription>Stress and emotional wellbeing</CardDescription>
                     </div>
                 </div>
-                <Dialog open={isClinicalDialogOpen} onOpenChange={(open) => {
-                    if (!open) setClinicalForm({});
-                    setIsClinicalDialogOpen(open);
-                }}>
-                    <DialogTrigger asChild><Button size="sm" className="w-full sm:w-auto" onClick={() => setClinicalForm({})}><PlusCircle className="mr-2 h-4 w-4"/>Conduct Review</Button></DialogTrigger>
-                    <DialogContent className="max-w-lg border-primary/20 w-[95vw] sm:w-full">
+              </CardHeader>
+              <CardContent>
+                {patient.clinicals.length > 0 ? (
+                    <div className="overflow-x-auto rounded-xl border border-primary/10">
+                        <table className="min-w-full text-xs">
+                            <thead className="bg-muted/50">
+                                <tr className="border-b border-primary/10">
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Date</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Stress Rating</th>
+                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Recommendation</th>
+                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {patient.clinicals.map((c) => (
+                                    <tr key={c.id} className="hover:bg-muted/30 border-b border-primary/5">
+                                        <td className="py-3 px-4">{new Date(c.created_at).toLocaleDateString()}</td>
+                                        <td className="py-3 px-4 font-medium">{c.verbal_stress_rating}/10</td>
+                                        <td className="py-3 px-4 font-semibold">{c.counselling_sessions}</td>
+                                        <td className="py-3 px-4 text-right flex justify-end gap-1">
+                                            <Button variant="ghost" size="icon" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : <p className="text-center text-muted-foreground py-4 text-sm">No review recorded.</p>}
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/10">
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <Stethoscope className="w-6 h-6 text-primary" />
+                    <div>
+                        <CardTitle>Clinical Assessment</CardTitle>
+                        <CardDescription>Professional conclusions (One review allowed)</CardDescription>
+                    </div>
+                </div>
+                <Button size="sm" disabled={patient.clinicals.length > 0} onClick={() => { setClinicalForm({}); setIsClinicalDialogOpen(true); }}>
+                    <PlusCircle className="mr-2 h-4 w-4"/>Conduct Review
+                </Button>
+                <Dialog open={isClinicalDialogOpen} onOpenChange={setIsClinicalDialogOpen}>
+                    <DialogContent className="max-w-2xl border-primary/20 w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto">
                         <DialogHeader><DialogTitle className="text-primary">{clinicalForm.id ? 'Edit' : 'New'} Clinical Review</DialogTitle></DialogHeader>
-                        <div className="flex flex-col gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label className="text-primary font-bold text-xs">Verbal Stress Rating (1-10)</Label>
-                                <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: e.target.value})} />
+                        <div className="flex flex-col gap-6 py-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-primary font-bold text-xs">Verbal Stress Rating (1-10)</Label>
+                                    <Input type="number" min="1" max="10" value={clinicalForm.verbal_stress_rating || ''} onChange={e => setClinicalForm({...clinicalForm, verbal_stress_rating: Number(e.target.value)})} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-primary font-bold text-xs">Manual Counselling Referral</Label>
+                                    <Select value={clinicalForm.counselling_sessions || undefined} onValueChange={(v) => setClinicalForm({...clinicalForm, counselling_sessions: v as any})}>
+                                        <SelectTrigger><SelectValue placeholder="Select recommendation" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Recommended">Recommended</SelectItem>
+                                            <SelectItem value="Not Recommended">Not Recommended</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label className="text-primary font-bold text-xs">Wellness Check Conclusion</Label>
-                                <Select value={clinicalForm.conclusion || undefined} onValueChange={(v) => setClinicalForm({...clinicalForm, conclusion: v as any})}>
-                                    <SelectTrigger><SelectValue placeholder="Select outcome" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All results within healthy range">All within healthy range</SelectItem>
-                                        <SelectItem value="Healthy lifestyle changes recommended">Lifestyle changes recommended</SelectItem>
-                                        <SelectItem value="Comprehensive check recommended">Comprehensive check recommended</SelectItem>
-                                        <SelectItem value="Medical Review recommended for raised blood pressure">Raise Blood Pressure Review</SelectItem>
-                                        <SelectItem value="Medical Review recommended for raised blood sugar">Raised Blood Sugar Review</SelectItem>
-                                    </SelectContent>
-                                </Select>
+
+                            <div className="space-y-3">
+                                <Label className="text-primary font-bold text-xs uppercase tracking-wider">Wellness Check Outcomes (Multi-Select)</Label>
+                                <div className="grid grid-cols-1 gap-2 border rounded-xl p-3 bg-muted/20">
+                                    {CLINICAL_OUTCOMES.map((outcome) => {
+                                        const isSelected = clinicalForm.conclusion?.split(',').includes(outcome);
+                                        return (
+                                            <Button
+                                                key={outcome}
+                                                type="button"
+                                                variant={isSelected ? "default" : "outline"}
+                                                size="sm"
+                                                className={cn(
+                                                    "justify-start h-auto py-2 px-3 text-left font-normal text-xs whitespace-normal",
+                                                    isSelected ? "bg-primary text-white" : "hover:bg-primary/5"
+                                                )}
+                                                onClick={() => toggleConclusion(outcome)}
+                                            >
+                                                {isSelected ? <CheckCircle2 className="mr-2 h-3 w-3 shrink-0" /> : <div className="mr-2 h-3 w-3 shrink-0 rounded-full border" />}
+                                                {outcome}
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
                             </div>
+
                             <div className="space-y-2">
                                 <Label className="text-primary font-bold text-xs">Doctor's Notes</Label>
-                                <Textarea value={clinicalForm.doctor_notes || ''} onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})} className="min-h-[100px]" />
+                                <Textarea value={clinicalForm.doctor_notes || ''} onChange={e => setClinicalForm({...clinicalForm, doctor_notes: e.target.value})} className="min-h-[120px]" placeholder="Add detailed observations here..." />
                             </div>
                         </div>
                         <DialogFooter className="flex-col sm:flex-row gap-2">
-                            <Button variant="outline" className="dark:text-foreground w-full sm:w-auto" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
+                            <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsClinicalDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveClinical} disabled={isSubmitting} className="w-full sm:w-auto">
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {clinicalForm.id ? 'Update Review' : 'Submit Review'}
@@ -502,27 +577,25 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Counselling</Label>
-                                            <p className="font-semibold text-sm text-foreground">{c.counselling_sessions}</p>
+                                            <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Outcomes</Label>
+                                            <p className="font-semibold text-sm text-foreground">{c.conclusion?.split(',').join(', ') || 'N/A'}</p>
                                         </div>
                                         <div className="flex gap-1">
                                             <Button variant="ghost" size="icon" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
                                             <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 h-7 w-7" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Conclusion</Label>
-                                        <p className="font-semibold text-sm text-foreground">{c.conclusion}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Doctor's Notes</Label>
-                                        <p className="text-xs text-muted-foreground line-clamp-3">{c.doctor_notes}</p>
-                                    </div>
+                                    {c.doctor_notes && (
+                                        <div>
+                                            <Label className="text-primary text-[9px] uppercase font-bold tracking-wider">Notes</Label>
+                                            <p className="text-xs text-muted-foreground line-clamp-3">{c.doctor_notes}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
-                ) : <p className="text-center text-muted-foreground py-4 text-sm">No clinical reviews found.</p>}
+                ) : <p className="text-center text-muted-foreground py-4 text-sm">No clinical conclusions found.</p>}
               </CardContent>
             </Card>
           </div>

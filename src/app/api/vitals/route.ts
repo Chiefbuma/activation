@@ -1,10 +1,11 @@
 import db from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-const formatMySQLDate = (dateStr?: string) => {
+const toSqlDate = (dateStr?: string) => {
     try {
         const date = dateStr ? new Date(dateStr) : new Date();
         if (isNaN(date.getTime())) return new Date().toISOString().slice(0, 19).replace('T', ' ');
+        // Returns YYYY-MM-DD HH:MM:SS
         return date.toISOString().slice(0, 19).replace('T', ' ');
     } catch {
         return new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -20,7 +21,7 @@ const toNum = (val: any) => {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
-        const mysqlDate = formatMySQLDate(data.measured_at);
+        const mysqlDate = toSqlDate(data.measured_at);
 
         if (!toNum(data.registration_id)) {
             return NextResponse.json({ error: 'Registration ID is required' }, { status: 400 });
@@ -43,14 +44,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Vitals POST Error:', error);
-        return NextResponse.json({ error: 'Failed to save record' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to save record: ' + error.message }, { status: 500 });
     }
 }
 
 export async function PUT(request: Request) {
     try {
         const data = await request.json();
-        const mysqlDate = formatMySQLDate(data.measured_at);
+        const mysqlDate = toSqlDate(data.measured_at);
 
         if (!toNum(data.id)) {
             return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
@@ -72,6 +73,6 @@ export async function PUT(request: Request) {
         return NextResponse.json({ success: true });
     } catch (error: any) {
         console.error('Vitals PUT Error:', error);
-        return NextResponse.json({ error: 'Failed to update record' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update record: ' + error.message }, { status: 500 });
     }
 }

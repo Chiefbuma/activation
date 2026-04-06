@@ -1,23 +1,14 @@
 'use client';
 
+import { useMemo, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import type { Corporate, Registration } from '@/lib/types';
 import ClassificationSection from './classification-section';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-  Activity,
-  Apple,
-  HeartPulse,
-  ShieldPlus,
-  Weight,
-} from 'lucide-react';
-import { getPassportDistributions, getPassportOverview } from '@/lib/dashboard-metrics';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Download, Loader2, FileText } from 'lucide-react';
+import { getPassportDistributions } from '@/lib/dashboard-metrics';
 
 interface AnalyticsViewProps {
   patients: Registration[];
@@ -25,248 +16,178 @@ interface AnalyticsViewProps {
 }
 
 export default function AnalyticsView({ patients, corporates }: AnalyticsViewProps) {
-  const overview = getPassportOverview(patients);
-  const distributions = getPassportDistributions(patients);
+  const { toast } = useToast();
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const distributions = useMemo(() => getPassportDistributions(patients), [patients]);
+
+  const handleDownloadPdf = async () => {
+    if (!reportRef.current) return;
+
+    setIsDownloading(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const ratio = canvas.width / canvas.height;
+
+      let imgWidth = pdfWidth - 20; // Margin
+      let imgHeight = imgWidth / ratio;
+
+      if (imgHeight > (pdfHeight - 20)) {
+        imgHeight = pdfHeight - 20;
+        imgWidth = imgHeight * ratio;
+      }
+
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      pdf.save(`taria-passport-summary-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('PASSPORT_PDF_ERROR', error);
+      toast({
+        variant: 'destructive',
+        title: 'Export failed',
+        description: 'Could not generate the passport PDF summary.',
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <OverviewCard
-          icon={<Activity className="h-5 w-5 text-primary" />}
-          label="Participants Screened"
-          value={overview.screenedParticipants}
-          helper="Participants with at least one screening record"
-        />
-        <OverviewCard
-          icon={<HeartPulse className="h-5 w-5 text-primary" />}
-          label="Blood Pressure Captured"
-          value={overview.bloodPressureCaptured}
-          helper="Latest systolic and diastolic values available"
-        />
-        <OverviewCard
-          icon={<Apple className="h-5 w-5 text-primary" />}
-          label="Blood Sugar Captured"
-          value={overview.bloodSugarCaptured}
-          helper="Based on latest FBS or RBS result"
-        />
-        <OverviewCard
-          icon={<Weight className="h-5 w-5 text-primary" />}
-          label="BMI Captured"
-          value={overview.bmiCaptured}
-          helper="Latest nutrition assessment with BMI"
-        />
-        <OverviewCard
-          icon={<ShieldPlus className="h-5 w-5 text-primary" />}
-          label="Clinical Reviews"
-          value={overview.clinicalReviewed}
-          helper={`${corporates.length} active corporate partners in the program`}
-        />
-      </div>
-
-      <Card className="border-primary/10">
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">Taria Passport</CardTitle>
-            <CardDescription>
-              Screening-result dashboard built from the latest vitals, nutrition, and clinical assessments per participant.
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="rounded-full px-3 py-1">
-              Meal plans recommended: {overview.recommendedMealPlans}
-            </Badge>
-            <Badge variant="secondary" className="rounded-full px-3 py-1">
-              Counselling recommended: {overview.recommendedCounselling}
-            </Badge>
-          </div>
-        </CardHeader>
-      </Card>
-
-      <div className="grid gap-6 2xl:grid-cols-2">
-        <ClassificationSection
-          title="Blood Pressure"
-          description="Counts by blood pressure category using the latest systolic and diastolic values."
-          rows={distributions.bloodPressure}
-          measuredLabel="Participants with BP"
-          note="Thresholds use standard adult cutoffs: normal, elevated, stage 1, stage 2, and hypertensive crisis."
-        />
-        <ClassificationSection
-          title="Blood Sugar"
-          description="Counts by glycaemic category using the latest fasting blood sugar, falling back to random blood sugar when fasting values are missing."
-          rows={distributions.bloodSugar}
-          measuredLabel="Participants with sugar result"
-          note="FBS cutoffs: <5.6 normal, 5.6-6.9 prediabetic, 7.0+ diabetic. RBS cutoffs: <7.8 normal, 7.8-11.0 prediabetic, 11.1+ diabetic."
-        />
-        <ClassificationSection
-          title="BMI"
-          description="Latest BMI classification from the nutrition screening results."
-          rows={distributions.bmi}
-          measuredLabel="Participants with BMI"
-          note="BMI cutoffs: underweight <18.5, normal 18.5-24.9, overweight 25-29.9, obese 30+."
-        />
-        <ClassificationSection
-          title="Pulse"
-          description="Heart-rate snapshot from the latest vital-sign measurements."
-          rows={distributions.pulse}
-          measuredLabel="Participants with pulse"
-          note="Pulse categories: bradycardia <60 bpm, normal 60-100 bpm, tachycardia above 100 bpm."
-        />
-        <ClassificationSection
-          title="Temperature"
-          description="Temperature trends from the latest vital-sign entries."
-          rows={distributions.temperature}
-          measuredLabel="Participants with temperature"
-          note="Temperature categories: below normal <36.0C, normal 36.0-37.5C, fever above 37.5C."
-        />
-        <ClassificationSection
-          title="Stress Rating"
-          description="Verbal stress ratings from the latest clinical review."
-          rows={distributions.stress}
-          measuredLabel="Participants with stress score"
-          note="Stress bands: mild 1-3, moderate 4-7, high 8-10."
-        />
-        <ClassificationSection
-          title="Visceral Fat"
-          description="Nutrition-based body composition view from recorded visceral fat values."
-          rows={distributions.visceralFat}
-          measuredLabel="Participants with visceral fat"
-          note="Suggested ranges: healthy under 12, borderline 12-15, high 16 and above."
-        />
-        <ClassificationSection
-          title="Body Fat %"
-          description="Sex-aware healthy-range comparison based on the latest body-fat percentage captured."
-          rows={distributions.bodyFat}
-          measuredLabel="Participants with body fat %"
-          note="Healthy ranges follow the current report guidance: men 18-24% and women 24-31%."
-        />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Card className="border-primary/10">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold">Clinical Recommendations</CardTitle>
-            <CardDescription>
-              Recommended interventions and medical follow-up outcomes from the latest assessments.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <RecommendationCard
-              title="Meal Plans Recommended"
-              value={overview.recommendedMealPlans}
-              helper="Participants flagged for nutrition follow-up"
-            />
-            <RecommendationCard
-              title="Counselling Recommended"
-              value={overview.recommendedCounselling}
-              helper="Participants flagged for counselling support"
-            />
-            {distributions.conclusionCounts.map((item) => (
-              <RecommendationCard
-                key={item.label}
-                title={item.label}
-                value={item.count}
-                helper="Latest clinical conclusion count"
-                accentColor={item.color}
-              />
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card className="border-primary/10">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold">Other Sections To Surface</CardTitle>
-            <CardDescription>
-              Good next sections from the current form if you want to keep expanding the passport dashboard.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SuggestionBlock
-              title="Department or location participation"
-              description="If you capture department/site during onboarding, you can show turnout by department, top-performing teams, and low-engagement teams."
-            />
-            <SuggestionBlock
-              title="Screening completion funnel"
-              description="Show how many participants completed vitals, nutrition, clinical review, and full end-to-end screening."
-            />
-            <SuggestionBlock
-              title="Risk trend by wellness date"
-              description="Add a monthly trend for blood pressure, sugar, BMI, and counselling recommendations using wellness date or registration date."
-            />
-            <SuggestionBlock
-              title="Referral outcomes"
-              description="Track follow-up referrals such as medical review, nutrition counselling, and psychology support to show intervention uptake."
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function OverviewCard({
-  icon,
-  label,
-  value,
-  helper,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  helper: string;
-}) {
-  return (
-    <Card className="border-primary/10">
-      <CardContent className="flex h-full flex-col gap-4 p-5">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-primary/10 p-2">{icon}</div>
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
-          <p className="mt-2 text-xs text-muted-foreground">{helper}</p>
+          <h2 className="text-xl font-bold text-foreground">Program Health Passport</h2>
+          <p className="text-sm text-muted-foreground">Comprehensive screening-result distribution report.</p>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RecommendationCard({
-  title,
-  value,
-  helper,
-  accentColor,
-}: {
-  title: string;
-  value: number;
-  helper: string;
-  accentColor?: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-primary/10 bg-muted/20 p-4">
-      <div className="flex items-center gap-2">
-        <span
-          className="h-2.5 w-2.5 rounded-full"
-          style={{ backgroundColor: accentColor ?? '#16a34a' }}
-        />
-        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <Button onClick={handleDownloadPdf} disabled={isDownloading} className="shadow-sm">
+          {isDownloading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="mr-2 h-4 w-4" />
+          )}
+          Download Passport PDF
+        </Button>
       </div>
-      <p className="mt-3 text-3xl font-bold">{value}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{helper}</p>
-    </div>
-  );
-}
 
-function SuggestionBlock({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-primary/10 bg-background p-4">
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      <div ref={reportRef} className="bg-white p-6 md:p-10 rounded-[24px] border shadow-sm text-slate-900 space-y-8">
+        <div className="flex items-center justify-between border-b pb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-primary/10 p-3 rounded-2xl">
+              <FileText className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-[#1e3a8a]">Taria Passport Summary</h1>
+              <p className="text-sm text-slate-500">Aggregate Screening Outcomes & Program Health Metrics</p>
+            </div>
+          </div>
+          <div className="text-right hidden sm:block">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">System Generated</p>
+            <p className="text-sm font-semibold text-slate-700">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10">
+          <ClassificationSection
+            index={1}
+            title="Blood Pressure"
+            description="Classification by latest systolic/diastolic readings."
+            rows={distributions.bloodPressure}
+            measuredLabel="Total with BP readings"
+          />
+          <ClassificationSection
+            index={2}
+            title="Blood Sugar"
+            description="Glycaemic categories (FBS/RBS combined)."
+            rows={distributions.bloodSugar}
+            measuredLabel="Total with sugar results"
+          />
+          <ClassificationSection
+            index={3}
+            title="BMI"
+            description="Body Mass Index distribution."
+            rows={distributions.bmi}
+            measuredLabel="Total with BMI calculated"
+          />
+          <ClassificationSection
+            index={4}
+            title="Pulse Rate"
+            description="Resting heart rate classifications."
+            rows={distributions.pulse}
+            measuredLabel="Total with pulse captured"
+          />
+          <ClassificationSection
+            index={5}
+            title="Body Temperature"
+            description="Recorded physiological temperature ranges."
+            rows={distributions.temperature}
+            measuredLabel="Total with temperature"
+          />
+          <ClassificationSection
+            index={6}
+            title="Stress Rating"
+            description="Verbal stress scores from clinical reviews."
+            rows={distributions.stress}
+            measuredLabel="Total stress assessments"
+          />
+          <ClassificationSection
+            index={7}
+            title="Visceral Fat"
+            description="Internal body composition view."
+            rows={distributions.visceralFat}
+            measuredLabel="Total visceral fat measurements"
+          />
+          <ClassificationSection
+            index={8}
+            title="Body Fat %"
+            description="Sex-aware body fat percentage ranges."
+            rows={distributions.bodyFat}
+            measuredLabel="Total body fat % readings"
+          />
+          <ClassificationSection
+            index={9}
+            title="Nutritional Outcomes"
+            description="Recommended meal plan interventions."
+            rows={distributions.nutritionalOutcomes}
+            measuredLabel="Total nutrition reviews"
+          />
+          <ClassificationSection
+            index={10}
+            title="Psychosocial Outcomes"
+            description="Recommended counselling support."
+            rows={distributions.psychosocialOutcomes}
+            measuredLabel="Total psychosocial reviews"
+          />
+          <ClassificationSection
+            index={11}
+            title="Clinical Conclusions"
+            description="Overall wellness screening determinations."
+            rows={distributions.conclusionCounts}
+            measuredLabel="Total clinical reviews"
+          />
+        </div>
+
+        <div className="pt-8 border-t">
+          <div className="bg-slate-50 border rounded-2xl p-4">
+            <p className="text-[10pt] text-slate-500 italic leading-relaxed">
+              Disclaimer: This dashboard provides an aggregate view of health screenings conducted within the Taria Health framework. 
+              The results are based on the latest available data per participant at the time of report generation. 
+              Thresholds follow standard clinical guidelines for general wellness screening.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

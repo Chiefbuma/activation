@@ -73,6 +73,11 @@ const STRESS_COLORS = {
   High: '#dc2626',
 } as const;
 
+const OUTCOME_COLORS = {
+  'Recommended': '#dc2626',
+  'Not Recommended': '#16a34a',
+} as const;
+
 const parseNumeric = (value: string | number | null | undefined) => {
   if (value === null || value === undefined || value === '') return null;
   const parsed = Number(value);
@@ -242,6 +247,16 @@ export function getPassportDistributions(patients: Registration[]) {
       Object.keys(STRESS_COLORS),
       patients.map((patient) => classifyStress(latestClinical(patient))),
       STRESS_COLORS
+    ),
+    nutritionalOutcomes: buildDistribution(
+      ['Recommended', 'Not Recommended'],
+      patients.map(p => latestNutrition(p)?.meal_plan ?? null),
+      OUTCOME_COLORS
+    ),
+    psychosocialOutcomes: buildDistribution(
+      ['Recommended', 'Not Recommended'],
+      patients.map(p => latestClinical(p)?.counselling_sessions ?? null),
+      OUTCOME_COLORS
     ),
     conclusionCounts: [
       {
