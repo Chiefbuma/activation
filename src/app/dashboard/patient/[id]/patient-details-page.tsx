@@ -317,6 +317,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
           </div>
 
           <div className="lg:col-span-2 space-y-6">
+            {/* Vitals Signs */}
             <Card className="border-primary/10 overflow-hidden">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -379,6 +380,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
+            {/* Nutrition Assessment */}
             <Card className="border-primary/10 overflow-hidden">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -454,6 +456,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
+            {/* Psychosocial Assessment */}
             <Card className="border-primary/10 overflow-hidden">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -495,6 +498,7 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
+            {/* Clinical Assessment */}
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">

@@ -44,6 +44,7 @@ export default function Report({ patient, corporate }: ReportProps) {
     formattedDate = format(new Date(), 'eeee, do MMMM yyyy');
   }
 
+  // Historical vitals tracking - list format
   const tempHistory = patient.vitals.map(v => v.temp).filter(Boolean).map(t => `${t}°C`).join('; ');
   const rbsHistory = patient.vitals.map(v => v.rbs).filter(Boolean).map(r => `${r} mmol/L`).join('; ');
   const fbsHistory = patient.vitals.map(v => v.fbs).filter(Boolean).map(f => `${f} mmol/L`).join('; ');
@@ -83,36 +84,36 @@ export default function Report({ patient, corporate }: ReportProps) {
               <div className="screening-grid grid grid-cols-2 gap-x-12 gap-y-2 mb-6">
                 <div className="screening-left space-y-1">
                   {latestVital?.bp_systolic && (
-                    <div className="body-text text-sm font-medium">Blood Pressure: <span className="font-bold">{latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg</span></div>
+                    <div className="body-text text-sm">Blood Pressure: <span className="font-bold">{latestVital.bp_systolic}/{latestVital.bp_diastolic} mmHg</span></div>
                   )}
                   {latestVital?.pulse && (
-                    <div className="body-text text-sm font-medium">Pulse: <span className="font-bold">{latestVital.pulse} bpm</span></div>
+                    <div className="body-text text-sm">Pulse: <span className="font-bold">{latestVital.pulse} bpm</span></div>
                   )}
                   {tempHistory && (
-                    <div className="body-text text-sm font-medium">Temperature: <span className="font-bold">{tempHistory}</span></div>
+                    <div className="body-text text-sm">Temperature: <span className="font-bold">{tempHistory};</span></div>
                   )}
                   {latestNutrition?.weight && (
-                    <div className="body-text text-sm font-medium">Weight: <span className="font-bold">{latestNutrition.weight} kgs</span></div>
+                    <div className="body-text text-sm">Weight: <span className="font-bold">{latestNutrition.weight} kgs</span></div>
                   )}
                   {latestNutrition?.height && (
-                    <div className="body-text text-sm font-medium">Height: <span className="font-bold">{latestNutrition.height} cm</span></div>
+                    <div className="body-text text-sm">Height: <span className="font-bold">{latestNutrition.height} cm</span></div>
                   )}
                 </div>
                 <div className="screening-right space-y-1">
                   {latestNutrition?.bmi && (
-                      <div className="body-text text-sm font-medium">BMI: <span className="font-bold">{latestNutrition.bmi}</span></div>
+                      <div className="body-text text-sm">BMI: <span className="font-bold">{latestNutrition.bmi}</span></div>
                   )}
                   {rbsHistory && (
-                      <div className="body-text text-sm font-medium">Random Sugar: <span className="font-bold">{rbsHistory}</span></div>
+                      <div className="body-text text-sm">Random Sugar: <span className="font-bold">{rbsHistory};</span></div>
                   )}
                   {fbsHistory && (
-                      <div className="body-text text-sm font-medium">Fasting Sugar: <span className="font-bold">{fbsHistory}</span></div>
+                      <div className="body-text text-sm">Fasting Sugar: <span className="font-bold">{fbsHistory};</span></div>
                   )}
                   {latestNutrition?.body_fat_percent && (
-                      <div className="body-text text-sm font-medium">Body Fat: <span className="font-bold">{latestNutrition.body_fat_percent}%</span></div>
+                      <div className="body-text text-sm">Body Fat: <span className="font-bold">{latestNutrition.body_fat_percent}%</span></div>
                   )}
                   {latestNutrition?.visceral_fat && (
-                      <div className="body-text text-sm font-medium">Visceral Fat: <span className="font-bold">{latestNutrition.visceral_fat}</span></div>
+                      <div className="body-text text-sm">Visceral Fat: <span className="font-bold">{latestNutrition.visceral_fat}</span></div>
                   )}
                 </div>
               </div>
@@ -130,19 +131,19 @@ export default function Report({ patient, corporate }: ReportProps) {
               <div className="section-heading text-sm font-black text-primary uppercase border-b border-primary/10 pb-2 mb-4">2. Clinical Assessment</div>
               <div className="space-y-2 mb-6">
                   {latestClinical?.counselling_sessions === 'Recommended' && (
-                      <div className="body-text text-sm font-bold text-destructive italic">• Recommended physiological counselling support</div>
+                      <div className="body-text text-sm italic text-destructive">Recommended physiological counselling support</div>
                   )}
                   {latestNutrition?.meal_plan === 'Recommended' && (
-                      <div className="body-text text-sm font-bold text-primary italic">• Recommended nutritional meal plan intervention</div>
+                      <div className="body-text text-sm italic text-primary">Recommended nutritional meal plan intervention</div>
                   )}
                   {outcomes.map((o, idx) => (
-                      <div key={idx} className="body-text text-sm font-medium text-slate-700">• {o}</div>
+                      <div key={idx} className="body-text text-sm text-slate-700">{o}</div>
                   ))}
               </div>
 
               {doctorNotes.length > 0 && (
                 <div className="mt-6">
-                  <div className="section-heading text-xs font-black text-slate-400 uppercase mb-3">Clinical Practitioner Notes</div>
+                  <div className="section-heading text-xs font-black text-slate-400 uppercase mb-3">Clinical notes</div>
                   <div className="p-4 bg-slate-50 border-l-4 border-primary rounded-r-xl">
                       {doctorNotes.map((paragraph, index) => (
                           <div key={index} className="body-text text-sm text-slate-600 leading-relaxed text-justify mb-2">{paragraph}</div>

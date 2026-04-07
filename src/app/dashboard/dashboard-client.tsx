@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { Registration, User, Corporate } from '@/lib/types';
-import { motion, AnimatePresence } from 'framer-motion';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
 import AnalyticsView from '@/components/dashboard/analytics-view';
 import PartnerSnapshotView from '@/components/dashboard/partner-snapshot-view';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function DashboardClient({ 
   initialPatients, 
@@ -48,7 +46,7 @@ export default function DashboardClient({
         case 'activations': return 'Activations';
         case 'passport': return 'Taria Passport';
         case 'partner': return 'Partner Snapshot';
-        case 'settings': return 'Settings';
+        case 'settings': return 'Settings Center';
         default: return 'Activations';
     }
   };
@@ -56,10 +54,10 @@ export default function DashboardClient({
   const getViewSubtitle = () => {
     switch(activeViewFromUrl) {
         case 'activations': return 'Manage participant registration and assessment history';
-        case 'passport': return 'Overview of screening outcomes and program health metrics';
-        case 'partner': return 'Participation report by corporate partner with PDF-ready snapshot';
-        case 'settings': return `Configure system ${subViewFromUrl}`;
-        default: return 'Manage participant registration and history';
+        case 'passport': return 'High-density aggregate screening outcome reports';
+        case 'partner': return 'Corporate participation summary and PDF-ready snapshots';
+        case 'settings': return `System configuration for ${subViewFromUrl}`;
+        default: return 'Registry';
     }
   };
 
@@ -67,29 +65,18 @@ export default function DashboardClient({
 
   return (
     <div className="space-y-8">
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-                <SidebarTrigger className="-ml-1" />
-                <div className="w-full md:w-auto">
-                    <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                        {getViewTitle()}
-                    </h1>
-                    <p className="text-sm md:text-base text-muted-foreground">
-                        {getViewSubtitle()}
-                    </p>
-                </div>
+       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-primary/10 pb-6">
+            <div className="w-full md:w-auto">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                    {getViewTitle()}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                    {getViewSubtitle()}
+                </p>
             </div>
        </div>
       
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeViewFromUrl + (activeViewFromUrl === 'settings' ? subViewFromUrl : '')}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="w-full"
-        >
+      <div className="w-full">
           {activeViewFromUrl === 'activations' && (
             <div className="max-w-full overflow-hidden">
                 <PatientList patients={patients as any} />
@@ -110,8 +97,7 @@ export default function DashboardClient({
                 defaultTab={subViewFromUrl}
             />
           )}
-        </motion.div>
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
