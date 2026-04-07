@@ -1,12 +1,12 @@
-
 'use client';
 
 import * as React from 'react';
 import {
   Users,
-  ActivitySquare,
+  LayoutDashboard,
   Building2,
-  SlidersHorizontal,
+  ActivitySquare,
+  Settings,
   Building,
   UserCog,
   ChevronRight,
@@ -16,7 +16,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -25,7 +24,6 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   Collapsible,
@@ -34,15 +32,19 @@ import {
 } from '@/components/ui/collapsible';
 import Logo from '@/components/logo';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { User } from '@/lib/types';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  activeView: string;
-  onViewChange: (view: any, sub?: any) => void;
   user: User | null;
 }
 
-export function AppSidebar({ activeView, onViewChange, user, ...props }: AppSidebarProps) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeView = searchParams.get('view') || 'activations';
+  const subView = searchParams.get('sub');
+  
   const isAdmin = user?.role === 'admin';
 
   return (
@@ -58,34 +60,48 @@ export function AppSidebar({ activeView, onViewChange, user, ...props }: AppSide
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton 
-                isActive={activeView === 'activations'} 
-                onClick={() => onViewChange('activations')}
+                asChild
+                isActive={pathname === '/dashboard' && activeView === 'activations'} 
                 tooltip="Activations"
               >
-                <Users />
-                <span>Activations</span>
+                <Link href="/dashboard?view=activations">
+                  <Users />
+                  <span>Activations</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                isActive={activeView === 'passport'} 
-                onClick={() => onViewChange('passport')}
-                tooltip="Taria Passport"
-              >
-                <ActivitySquare />
-                <span>Taria Passport</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                isActive={activeView === 'partner'} 
-                onClick={() => onViewChange('partner')}
-                tooltip="Partner Snapshot"
-              >
-                <Building2 />
-                <span>Partner Snapshot</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+
+            <Collapsible asChild defaultOpen className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip="Dashboard">
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={activeView === 'partner'}>
+                        <Link href="/dashboard?view=partner">
+                          <Building2 className="h-4 w-4 mr-2" />
+                          <span>Partners Dashboard</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={activeView === 'passport'}>
+                        <Link href="/dashboard?view=passport">
+                          <ActivitySquare className="h-4 w-4 mr-2" />
+                          <span>Taria Passport</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
 
@@ -97,7 +113,7 @@ export function AppSidebar({ activeView, onViewChange, user, ...props }: AppSide
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip="Settings">
-                      <SlidersHorizontal />
+                      <Settings />
                       <span>Settings</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
@@ -105,21 +121,19 @@ export function AppSidebar({ activeView, onViewChange, user, ...props }: AppSide
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton 
-                          onClick={() => onViewChange('settings', 'corporates')}
-                          isActive={activeView === 'settings'}
-                        >
-                          <Building className="h-4 w-4 mr-2" />
-                          <span>Corporate Partners</span>
+                        <SidebarMenuSubButton asChild isActive={activeView === 'settings' && subView === 'corporates'}>
+                          <Link href="/dashboard?view=settings&sub=corporates">
+                            <Building className="h-4 w-4 mr-2" />
+                            <span>Corporates</span>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton 
-                          onClick={() => onViewChange('settings', 'users')}
-                          isActive={activeView === 'settings'}
-                        >
-                          <UserCog className="h-4 w-4 mr-2" />
-                          <span>User Accounts</span>
+                        <SidebarMenuSubButton asChild isActive={activeView === 'settings' && subView === 'users'}>
+                          <Link href="/dashboard?view=settings&sub=users">
+                            <UserCog className="h-4 w-4 mr-2" />
+                            <span>User Accounts</span>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>

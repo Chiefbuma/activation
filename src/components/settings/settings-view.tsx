@@ -5,19 +5,22 @@ import type { Corporate, User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import CorporateManagement from './corporate-management';
 import UserManagement from './user-management';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface SettingsViewProps {
   corporates: Corporate[];
   onCorporatesUpdate: (updatedCorporates: Corporate[]) => void;
   users: User[];
   onUsersUpdate: (updatedUsers: User[]) => void;
+  defaultTab?: 'corporates' | 'users';
 }
 
 export default function SettingsView({
   corporates,
   onCorporatesUpdate,
   users,
-  onUsersUpdate
+  onUsersUpdate,
+  defaultTab = 'corporates'
 }: SettingsViewProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -30,8 +33,16 @@ export default function SettingsView({
 
   const isAdmin = currentUser?.role === 'admin';
 
+  if (!isAdmin) return null;
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <Tabs defaultValue={defaultTab} className="w-full space-y-6">
+      <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="corporates">Corporate Partners</TabsTrigger>
+        <TabsTrigger value="users">User Accounts</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="corporates">
         <Card className="dark:border-primary/40">
             <CardHeader>
             <CardTitle className="text-primary">Corporate Partners</CardTitle>
@@ -46,23 +57,24 @@ export default function SettingsView({
             />
             </CardContent>
         </Card>
-        
-        {isAdmin && (
-            <Card className="dark:border-primary/40">
-                <CardHeader>
-                <CardTitle className="text-primary">User Accounts</CardTitle>
-                <CardDescription>
-                    Manage system users, roles, and access credentials.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <UserManagement 
-                        initialUsers={users}
-                        onUsersUpdate={onUsersUpdate}
-                    />
-                </CardContent>
-            </Card>
-        )}
-    </div>
+      </TabsContent>
+
+      <TabsContent value="users">
+        <Card className="dark:border-primary/40">
+            <CardHeader>
+            <CardTitle className="text-primary">User Accounts</CardTitle>
+            <CardDescription>
+                Manage system users, roles, and access credentials.
+            </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <UserManagement 
+                    initialUsers={users}
+                    onUsersUpdate={onUsersUpdate}
+                />
+            </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
@@ -56,7 +55,7 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     try {
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
-        backgroundColor: null, // Allow transparent background for theme compatibility
+        backgroundColor: null,
         useCORS: true,
         logging: false
       });

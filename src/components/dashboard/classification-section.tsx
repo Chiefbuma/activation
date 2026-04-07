@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -58,7 +57,6 @@ export default function ClassificationSection({
       </div>
       
       <div className="p-4 grid grid-cols-1 md:grid-cols-[0.7fr_1.3fr] gap-6 items-center">
-        {/* Chart Column (Left) */}
         <div className="flex flex-col items-center justify-center">
           <div className="h-[140px] w-full max-w-[180px]">
             <ChartContainer config={chartConfig} className="h-full w-full aspect-square">
@@ -85,7 +83,6 @@ export default function ClassificationSection({
           {note && <p className="mt-2 text-[8px] text-muted-foreground italic text-center px-4">{note}</p>}
         </div>
 
-        {/* Table Column (Right) */}
         <div className="overflow-hidden rounded-xl border bg-muted/30 border-primary/5">
           <Table>
             <TableHeader className="bg-muted/50 border-b border-primary/10">

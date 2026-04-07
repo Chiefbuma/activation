@@ -1,4 +1,3 @@
-
 'use client';
 
 import type React from 'react';
@@ -11,6 +10,7 @@ import Header from '@/components/header';
 import Logo from '@/components/logo';
 import Link from 'next/link';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/dashboard/app-sidebar';
 
 export default function DashboardLayout({
   children,
@@ -47,11 +47,10 @@ export default function DashboardLayout({
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full bg-background">
-        {/* Sidebar is now injected by DashboardClient to keep state sync easy */}
+        <AppSidebar user={user} />
         <SidebarInset>
           <header className="flex h-16 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:px-8 sticky top-0 z-50 backdrop-blur-sm">
               <div className="flex items-center gap-4">
-                  {/* Sidebar Trigger will be here */}
                   <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary md:hidden">
                       <Logo className="h-8 w-auto" />
                   </Link>

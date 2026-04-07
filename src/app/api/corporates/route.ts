@@ -18,8 +18,13 @@ export async function GET() {
         `);
         return NextResponse.json(rows);
     } catch (error) {
-        const [rows] = await db.query('SELECT id, name, wellness_date, expected_participants FROM corporates ORDER BY name ASC');
-        return NextResponse.json(rows);
+        try {
+            const [rows] = await db.query('SELECT id, name, wellness_date, expected_participants FROM corporates ORDER BY name ASC');
+            return NextResponse.json(rows);
+        } catch (innerError) {
+            const [rows] = await db.query('SELECT id, name, wellness_date FROM corporates ORDER BY name ASC');
+            return NextResponse.json(rows);
+        }
     }
 }
 
