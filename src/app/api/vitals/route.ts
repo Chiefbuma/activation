@@ -5,6 +5,7 @@ const toSqlDate = (dateStr?: string) => {
     try {
         const date = dateStr ? new Date(dateStr) : new Date();
         if (isNaN(date.getTime())) return new Date().toISOString().slice(0, 19).replace('T', ' ');
+        // Strips T and Z and milliseconds for MySQL DATETIME compatibility
         return date.toISOString().slice(0, 19).replace('T', ' ');
     } catch {
         return new Date().toISOString().slice(0, 19).replace('T', ' ');

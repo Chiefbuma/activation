@@ -70,7 +70,7 @@ export default function ClassificationSection({
                   paddingAngle={2}
                   stroke="none"
                   labelLine={false}
-                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                  label={({ percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}
                 >
                   {chartData.map((row) => (
                     <Cell key={row.label} fill={row.color} />

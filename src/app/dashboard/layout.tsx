@@ -1,15 +1,12 @@
 'use client';
 
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
-    LayoutDashboard, 
-    Users, 
     LogOut,
     Search,
-    ShieldCheck,
     Bell,
     UserPlus,
     ClipboardList,
@@ -18,15 +15,14 @@ import {
     ActivitySquare,
     Building2,
     Settings,
-    Building,
-    UserCog
+    Loader2
 } from 'lucide-react';
 import type { User } from '@/lib/types';
 import Logo from '@/components/logo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/header';
 
 const NavLink = ({ href, children, isActive, title }: { href: string, children: React.ReactNode, isActive: boolean, title: string }) => {
@@ -117,20 +113,29 @@ function AppSidebarNav({ user }: { user: User }) {
                     >
                         <Settings className="h-4 w-4" />
                     </NavLink>
-                    {activeView === 'settings' && (
-                        <div className="mt-1">
-                            <SubNavLink
-                                href="/dashboard?view=settings&sub=corporates"
-                                isActive={subView === 'corporates'}
-                                title="Corporates"
-                            />
-                            <SubNavLink
-                                href="/dashboard?view=settings&sub=users"
-                                isActive={subView === 'users'}
-                                title="User Accounts"
-                            />
-                        </div>
-                    )}
+                    <AnimatePresence>
+                        {activeView === 'settings' && (
+                            <motion.div 
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="mt-1 pb-2">
+                                    <SubNavLink
+                                        href="/dashboard?view=settings&sub=corporates"
+                                        isActive={subView === 'corporates'}
+                                        title="Corporates"
+                                    />
+                                    <SubNavLink
+                                        href="/dashboard?view=settings&sub=users"
+                                        isActive={subView === 'users'}
+                                        title="User Accounts"
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </>
             )}
         </nav>
@@ -169,7 +174,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Logo className="h-5 w-auto" />
             </div>
             <div className="flex-1 overflow-y-auto pt-2">
-                <AppSidebarNav user={user} />
+                <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+                    <AppSidebarNav user={user} />
+                </Suspense>
             </div>
             <div className="p-4 border-t">
                 <Button 
@@ -200,7 +207,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <div className="h-14 flex items-center px-6 border-b">
                                 <Logo className="h-5 w-auto" />
                             </div>
-                            <AppSidebarNav user={user} />
+                            <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+                                <AppSidebarNav user={user} />
+                            </Suspense>
                         </SheetContent>
                     </Sheet>
                     
@@ -227,7 +236,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <main className="flex-1 overflow-y-auto p-6 lg:p-8 no-scrollbar bg-background/50">
                 <div className="max-w-6xl mx-auto w-full">
                     <motion.div
-                        key={pathname + useSearchParams().toString()}
+                        key={pathname}
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}

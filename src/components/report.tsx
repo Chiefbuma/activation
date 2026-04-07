@@ -44,7 +44,7 @@ export default function Report({ patient, corporate }: ReportProps) {
     formattedDate = format(new Date(), 'eeee, do MMMM yyyy');
   }
 
-  // Historical vitals tracking - list format
+  // Historical vitals tracking - semicolon list format
   const tempHistory = patient.vitals.map(v => v.temp).filter(Boolean).map(t => `${t}°C`).join('; ');
   const rbsHistory = patient.vitals.map(v => v.rbs).filter(Boolean).map(r => `${r} mmol/L`).join('; ');
   const fbsHistory = patient.vitals.map(v => v.fbs).filter(Boolean).map(f => `${f} mmol/L`).join('; ');
@@ -143,7 +143,7 @@ export default function Report({ patient, corporate }: ReportProps) {
 
               {doctorNotes.length > 0 && (
                 <div className="mt-6">
-                  <div className="section-heading text-xs font-black text-slate-400 uppercase mb-3">Clinical notes</div>
+                  <div className="section-heading text-sm font-black text-primary uppercase border-b border-primary/10 pb-2 mb-4">Clinical notes</div>
                   <div className="p-4 bg-slate-50 border-l-4 border-primary rounded-r-xl">
                       {doctorNotes.map((paragraph, index) => (
                           <div key={index} className="body-text text-sm text-slate-600 leading-relaxed text-justify mb-2">{paragraph}</div>

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import jsPDF from 'jsPDF';
 import type { Corporate, Registration } from '@/lib/types';
 import ClassificationSection from './classification-section';
 import { Button } from '@/components/ui/button';
@@ -164,9 +164,6 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
         <div className="flex flex-col items-center gap-6 border-b-2 border-primary/10 pb-8">
           <img src="/images/taria-logo.png" alt="Taria Health" className="w-[450px] h-auto dark:invert" />
           <div className="text-center">
-            <p className="text-sm text-muted-foreground font-bold tracking-wide">
-              {selectedCorporate ? `${selectedCorporate.name} • Wellness Summary` : 'Aggregate Screening Outcomes'}
-            </p>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mt-1">
               Wellness Date: {selectedCorporate?.wellness_date ? format(new Date(selectedCorporate.wellness_date), 'dd MMM yyyy') : format(new Date(), 'dd MMM yyyy')}
             </p>

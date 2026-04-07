@@ -456,48 +456,6 @@ export default function PatientDetailsPage({ initialPatient }: { initialPatient:
               </CardContent>
             </Card>
 
-            {/* Psychosocial Assessment */}
-            <Card className="border-primary/10 overflow-hidden">
-              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <BrainCircuit className="w-6 h-6 text-primary" />
-                    <div>
-                        <CardTitle>Psychosocial Assessment</CardTitle>
-                        <CardDescription>Stress and emotional wellbeing</CardDescription>
-                    </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {patient.clinicals.length > 0 ? (
-                    <div className="overflow-x-auto rounded-xl border border-primary/10">
-                        <table className="min-w-full text-xs">
-                            <thead className="bg-muted/50">
-                                <tr className="border-b border-primary/10">
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Date</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Stress Rating</th>
-                                    <th className="text-left py-3 px-4 font-bold text-primary uppercase">Recommendation</th>
-                                    <th className="text-right py-3 px-4 font-bold text-primary uppercase">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {patient.clinicals.map((c) => (
-                                    <tr key={c.id} className="hover:bg-muted/30 border-b border-primary/5">
-                                        <td className="py-3 px-4">{new Date(c.created_at).toLocaleDateString()}</td>
-                                        <td className="py-3 px-4 font-medium">{c.verbal_stress_rating}/10</td>
-                                        <td className="py-3 px-4 font-semibold">{c.counselling_sessions}</td>
-                                        <td className="py-3 px-4 text-right flex justify-end gap-1">
-                                            <Button variant="ghost" size="icon" onClick={() => { setClinicalForm(c); setIsClinicalDialogOpen(true); }} className="hover:bg-primary/10 h-7 w-7 text-primary"><Edit className="h-3 w-3"/></Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive h-7 w-7" onClick={() => deleteAssessment('clinicals', c.id).then(refreshData)}><Trash2 className="h-3 w-3"/></Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : <p className="text-center text-muted-foreground py-4 text-sm">No review recorded.</p>}
-              </CardContent>
-            </Card>
-
             {/* Clinical Assessment */}
             <Card className="border-primary/10">
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
