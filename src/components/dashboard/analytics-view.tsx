@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
@@ -55,7 +56,7 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
     try {
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
-        backgroundColor: '#ffffff',
+        backgroundColor: null, // Allow transparent background for theme compatibility
         useCORS: true,
         logging: false
       });
@@ -160,14 +161,14 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
         </Button>
       </div>
 
-      <div ref={reportRef} className="bg-white p-8 md:p-12 rounded-[24px] border shadow-xl text-slate-900 space-y-8 max-w-[1000px] mx-auto">
+      <div ref={reportRef} className="bg-card p-8 md:p-12 rounded-[24px] border shadow-xl text-foreground space-y-8 max-w-[1000px] mx-auto transition-colors">
         <div className="flex flex-col items-center gap-6 border-b-2 border-primary/10 pb-8">
-          <img src="/images/taria-logo.png" alt="Taria Health" className="w-[450px] h-auto" />
+          <img src="/images/taria-logo.png" alt="Taria Health" className="w-[450px] h-auto dark:invert" />
           <div className="text-center">
-            <p className="text-sm text-slate-500 font-bold tracking-wide">
+            <p className="text-sm text-muted-foreground font-bold tracking-wide">
               {selectedCorporate ? `${selectedCorporate.name} • Wellness Summary` : 'Aggregate Screening Outcomes'}
             </p>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mt-1">
               Wellness Date: {selectedCorporate?.wellness_date ? format(new Date(selectedCorporate.wellness_date), 'dd MMM yyyy') : format(new Date(), 'dd MMM yyyy')}
             </p>
           </div>
@@ -246,9 +247,9 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
           />
         </div>
 
-        <div className="pt-8 border-t border-slate-100">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
-            <p className="text-[10px] text-slate-500 italic leading-relaxed text-justify">
+        <div className="pt-8 border-t border-primary/10">
+          <div className="bg-muted/30 border border-primary/10 rounded-2xl p-6">
+            <p className="text-[10px] text-muted-foreground italic leading-relaxed text-justify">
               This passport provides an aggregate view of health screenings conducted within the Taria Health framework. 
               The data points reflect the latest recorded physiology for each participant at the time of export. 
               Thresholds and classifications follow standard clinical guidelines for general population wellness screening.

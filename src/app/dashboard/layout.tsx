@@ -1,3 +1,4 @@
+
 'use client';
 
 import type React from 'react';
@@ -9,6 +10,7 @@ import { placeholderImages } from '@/lib/placeholder-images';
 import Header from '@/components/header';
 import Logo from '@/components/logo';
 import Link from 'next/link';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({
   children,
@@ -43,20 +45,26 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col">
-        <header className="flex h-16 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:px-8 sticky top-0 z-50 backdrop-blur-sm">
-            <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary">
-                <Logo className="h-8 w-auto" />
-                <span className="hidden sm:inline-block">Taria Health</span>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-                <Header user={user} />
-            </div>
-        </header>
-        <main className="flex-1 container mx-auto py-6 px-4 lg:px-8">
-            {children}
-        </main>
-    </div>
+    <SidebarProvider defaultOpen={false}>
+      <div className="flex min-h-screen w-full bg-background">
+        {/* Sidebar is now injected by DashboardClient to keep state sync easy */}
+        <SidebarInset>
+          <header className="flex h-16 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:px-8 sticky top-0 z-50 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                  {/* Sidebar Trigger will be here */}
+                  <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary md:hidden">
+                      <Logo className="h-8 w-auto" />
+                  </Link>
+              </div>
+              <div className="flex items-center gap-4">
+                  <Header user={user} />
+              </div>
+          </header>
+          <main className="flex-1 container mx-auto py-6 px-4 lg:px-8">
+              {children}
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }

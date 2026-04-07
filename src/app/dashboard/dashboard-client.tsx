@@ -1,13 +1,15 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import type { Registration, User, Corporate } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ActivitySquare, Building2, Users, SlidersHorizontal } from 'lucide-react';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
 import AnalyticsView from '@/components/dashboard/analytics-view';
 import PartnerSnapshotView from '@/components/dashboard/partner-snapshot-view';
+import { AppSidebar } from '@/components/dashboard/app-sidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 type View = 'activations' | 'passport' | 'partner' | 'settings';
 
@@ -25,8 +27,8 @@ export default function DashboardClient({
   const [users, setUsers] = useState(initialUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   
-  // Activations is the first tab and default view
   const [activeView, setActiveView] = useState<View>('activations');
+  const [settingsSubView, setSettingsSubView] = useState<'corporates' | 'users'>('corporates');
 
   useEffect(() => {
     const stored = localStorage.getItem('loggedInUser');
@@ -36,11 +38,16 @@ export default function DashboardClient({
   }, []);
 
   const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
-    // Shared state management if needed
+    setCorporates(updatedCorporates);
   };
   
   const handleUpdateUsers = (updatedUsers: User[]) => {
-    // Shared state management if needed
+    setUsers(updatedUsers);
+  };
+
+  const handleViewChange = (view: View, sub?: 'corporates' | 'users') => {
+    setActiveView(view);
+    if (sub) setSettingsSubView(sub);
   };
 
   const getViewTitle = () => {
@@ -57,107 +64,65 @@ export default function DashboardClient({
         case 'activations': return 'Manage participant registration and assessment history';
         case 'passport': return 'Overview of screening outcomes and program health metrics';
         case 'partner': return 'Participation report by corporate partner with PDF-ready snapshot';
-        case 'settings': return 'Configure application users and corporate partners';
+        case 'settings': return `Configure system ${settingsSubView}`;
     }
   };
 
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <div className="space-y-8">
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="w-full md:w-auto">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                    {getViewTitle()}
-                </h1>
-                <p className="text-sm md:text-base text-muted-foreground">
-                    {getViewSubtitle()}
-                </p>
-            </div>
-            <div className="flex items-center gap-1 p-1 bg-muted rounded-xl border w-full md:w-fit shadow-sm dark:border-primary/20 overflow-x-auto">
-                <NavButton 
-                    label="Activations" 
-                    icon={<Users className="h-4 w-4" />} 
-                    isActive={activeView === 'activations'}
-                    onClick={() => setActiveView('activations')}
-                />
-                <NavButton 
-                    label="Taria Passport" 
-                    icon={<ActivitySquare className="h-4 w-4" />} 
-                    isActive={activeView === 'passport'}
-                    onClick={() => setActiveView('passport')}
-                />
-                <NavButton 
-                    label="Partner Snapshot" 
-                    icon={<Building2 className="h-4 w-4" />} 
-                    isActive={activeView === 'partner'}
-                    onClick={() => setActiveView('partner')}
-                />
-                {isAdmin && (
-                    <NavButton 
-                        label="Settings" 
-                        icon={<SlidersHorizontal className="h-4 w-4" />} 
-                        isActive={activeView === 'settings'}
-                        onClick={() => setActiveView('settings')}
-                    />
-                )}
-            </div>
-       </div>
-      
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeView}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="w-full"
-        >
-          {activeView === 'activations' && (
-            <div className="max-w-full overflow-hidden">
-                <PatientList patients={patients as any} />
-            </div>
-          )}
-          {activeView === 'passport' && (
-            <AnalyticsView patients={patients} corporates={corporates} />
-          )}
-          {activeView === 'partner' && (
-            <PartnerSnapshotView patients={patients} corporates={corporates} />
-          )}
-          {activeView === 'settings' && isAdmin && (
-            <SettingsView 
-                corporates={corporates} 
-                onCorporatesUpdate={handleUpdateCorporates}
-                users={users}
-                onUsersUpdate={handleUpdateUsers}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
+    <>
+      <AppSidebar 
+        activeView={activeView} 
+        onViewChange={handleViewChange} 
+        user={currentUser} 
+      />
+      <div className="space-y-8">
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-4">
+                  <SidebarTrigger className="-ml-1" />
+                  <div className="w-full md:w-auto">
+                      <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                          {getViewTitle()}
+                      </h1>
+                      <p className="text-sm md:text-base text-muted-foreground">
+                          {getViewSubtitle()}
+                      </p>
+                  </div>
+              </div>
+         </div>
+        
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeView + (activeView === 'settings' ? settingsSubView : '')}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            {activeView === 'activations' && (
+              <div className="max-w-full overflow-hidden">
+                  <PatientList patients={patients as any} />
+              </div>
+            )}
+            {activeView === 'passport' && (
+              <AnalyticsView patients={patients} corporates={corporates} />
+            )}
+            {activeView === 'partner' && (
+              <PartnerSnapshotView patients={patients} corporates={corporates} />
+            )}
+            {activeView === 'settings' && isAdmin && (
+              <SettingsView 
+                  corporates={corporates} 
+                  onCorporatesUpdate={handleUpdateCorporates}
+                  users={users}
+                  onUsersUpdate={handleUpdateUsers}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
-
-const NavButton = ({ label, icon, isActive, onClick }: { label: string, icon: React.ReactNode, isActive: boolean, onClick: () => void }) => {
-  return (
-    <motion.button
-      onClick={onClick}
-      className={`relative flex flex-1 md:flex-initial items-center justify-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all duration-300 whitespace-nowrap ${
-        isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-      }`}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      {isActive && (
-        <motion.div
-          layoutId="active-nav-bg"
-          className="absolute inset-0 bg-background rounded-lg shadow-sm z-0"
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        />
-      )}
-      <span className="relative z-10">{icon}</span>
-      <span className="relative z-10">{label}</span>
-    </motion.button>
-  );
-};

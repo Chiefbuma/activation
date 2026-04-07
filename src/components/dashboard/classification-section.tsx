@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -43,7 +44,7 @@ export default function ClassificationSection({
   );
 
   return (
-    <div className="border border-primary/10 rounded-2xl overflow-hidden bg-white shadow-sm page-break-inside-avoid">
+    <div className="border border-primary/10 rounded-2xl overflow-hidden bg-background shadow-sm page-break-inside-avoid transition-colors">
       <div className="bg-primary/5 px-4 py-2 border-b border-primary/10 flex items-center gap-3">
         {index && (
           <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
@@ -81,40 +82,40 @@ export default function ClassificationSection({
               </PieChart>
             </ChartContainer>
           </div>
-          {note && <p className="mt-2 text-[8px] text-slate-400 italic text-center px-4">{note}</p>}
+          {note && <p className="mt-2 text-[8px] text-muted-foreground italic text-center px-4">{note}</p>}
         </div>
 
         {/* Table Column (Right) */}
-        <div className="overflow-hidden rounded-xl border bg-slate-50/30">
+        <div className="overflow-hidden rounded-xl border bg-muted/30 border-primary/5">
           <Table>
-            <TableHeader className="bg-slate-100">
-              <TableRow className="hover:bg-transparent border-slate-200">
-                <TableHead className="h-8 text-[9px] font-bold text-slate-600 uppercase">Classification</TableHead>
-                <TableHead className="h-8 text-right text-[9px] font-bold text-slate-600 uppercase">M</TableHead>
-                <TableHead className="h-8 text-right text-[9px] font-bold text-slate-600 uppercase">F</TableHead>
-                <TableHead className="h-8 text-right text-[9px] font-bold text-slate-600 uppercase">Total</TableHead>
+            <TableHeader className="bg-muted/50 border-b border-primary/10">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="h-8 text-[9px] font-bold text-muted-foreground uppercase">Classification</TableHead>
+                <TableHead className="h-8 text-right text-[9px] font-bold text-muted-foreground uppercase">M</TableHead>
+                <TableHead className="h-8 text-right text-[9px] font-bold text-muted-foreground uppercase">F</TableHead>
+                <TableHead className="h-8 text-right text-[9px] font-bold text-muted-foreground uppercase">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.label} className="h-8 hover:bg-slate-100/50 border-slate-100">
-                  <TableCell className="py-1 px-3 text-[10px] font-medium text-slate-700">
+                <TableRow key={row.label} className="h-8 hover:bg-primary/5 border-primary/5">
+                  <TableCell className="py-1 px-3 text-[10px] font-medium">
                     <div className="flex items-center gap-2">
                       <div style={{ backgroundColor: row.color }} className="h-1.5 w-1.5 rounded-full shrink-0" />
                       {row.label}
                     </div>
                   </TableCell>
-                  <TableCell className="py-1 px-3 text-right text-[10px] font-semibold text-slate-600">{row.maleCount}</TableCell>
-                  <TableCell className="py-1 px-3 text-right text-[10px] font-semibold text-slate-600">{row.femaleCount}</TableCell>
+                  <TableCell className="py-1 px-3 text-right text-[10px] font-semibold text-muted-foreground">{row.maleCount}</TableCell>
+                  <TableCell className="py-1 px-3 text-right text-[10px] font-semibold text-muted-foreground">{row.femaleCount}</TableCell>
                   <TableCell className="py-1 px-3 text-right text-[10px] font-bold text-primary">{row.count}</TableCell>
                 </TableRow>
               ))}
-              <TableRow className="h-8 bg-slate-100/50 hover:bg-slate-100/50 border-t-2 border-slate-200">
-                <TableCell className="py-1 px-3 text-[9px] font-bold text-slate-500 uppercase">
+              <TableRow className="h-8 bg-muted/50 hover:bg-muted/50 border-t border-primary/10">
+                <TableCell className="py-1 px-3 text-[9px] font-bold text-muted-foreground uppercase">
                   {measuredLabel}
                 </TableCell>
-                <TableCell className="py-1 px-3 text-right text-[10px] font-bold text-slate-700">{totalMale}</TableCell>
-                <TableCell className="py-1 px-3 text-right text-[10px] font-bold text-slate-700">{totalFemale}</TableCell>
+                <TableCell className="py-1 px-3 text-right text-[10px] font-bold">{totalMale}</TableCell>
+                <TableCell className="py-1 px-3 text-right text-[10px] font-bold">{totalFemale}</TableCell>
                 <TableCell className="py-1 px-3 text-right text-[11px] font-black text-destructive">{total}</TableCell>
               </TableRow>
             </TableBody>
