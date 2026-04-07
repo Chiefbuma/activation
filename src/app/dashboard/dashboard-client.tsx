@@ -1,45 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { Registration, User, Corporate } from '@/lib/types';
 import PatientList from '@/components/dashboard/patient-list';
 import SettingsView from '@/components/settings/settings-view';
 import AnalyticsView from '@/components/dashboard/analytics-view';
 import PartnerSnapshotView from '@/components/dashboard/partner-snapshot-view';
+import { Loader2 } from 'lucide-react';
 
-export default function DashboardClient({ 
-  initialPatients, 
-  initialCorporates,
-  initialUsers,
+function DashboardContent({ 
+  patients, 
+  corporates, 
+  users, 
+  currentUser 
 }: { 
-  initialPatients: Registration[],
-  initialCorporates: Corporate[],
-  initialUsers: User[],
+  patients: Registration[], 
+  corporates: Corporate[], 
+  users: User[],
+  currentUser: User | null
 }) {
   const searchParams = useSearchParams();
   const activeViewFromUrl = searchParams.get('view') || 'activations';
   const subViewFromUrl = (searchParams.get('sub') as 'corporates' | 'users') || 'corporates';
-
-  const [patients] = useState(initialPatients);
-  const [corporates, setCorporates] = useState(initialCorporates);
-  const [users, setUsers] = useState(initialUsers);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('loggedInUser');
-    if (stored) {
-      setCurrentUser(JSON.parse(stored));
-    }
-  }, []);
-
-  const handleUpdateCorporates = (updatedCorporates: Corporate[]) => {
-    setCorporates(updatedCorporates);
-  };
-  
-  const handleUpdateUsers = (updatedUsers: User[]) => {
-    setUsers(updatedUsers);
-  };
 
   const getViewTitle = () => {
     switch(activeViewFromUrl) {
@@ -91,13 +74,43 @@ export default function DashboardClient({
           {activeViewFromUrl === 'settings' && isAdmin && (
             <SettingsView 
                 corporates={corporates} 
-                onCorporatesUpdate={handleUpdateCorporates}
+                onCorporatesUpdate={() => {}} 
                 users={users}
-                onUsersUpdate={handleUpdateUsers}
+                onUsersUpdate={() => {}}
                 defaultTab={subViewFromUrl}
             />
           )}
       </div>
     </div>
+  );
+}
+
+export default function DashboardClient({ 
+  initialPatients, 
+  initialCorporates,
+  initialUsers,
+}: { 
+  initialPatients: Registration[],
+  initialCorporates: Corporate[],
+  initialUsers: User[],
+}) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('loggedInUser');
+    if (stored) {
+      setCurrentUser(JSON.parse(stored));
+    }
+  }, []);
+
+  return (
+    <Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary opacity-50" /></div>}>
+        <DashboardContent 
+            patients={initialPatients} 
+            corporates={initialCorporates} 
+            users={initialUsers} 
+            currentUser={currentUser} 
+        />
+    </Suspense>
   );
 }

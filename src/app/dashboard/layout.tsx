@@ -65,7 +65,7 @@ function SidebarSection({ title }: { title: string }) {
     return <p className="mt-6 mb-2 px-5 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{title}</p>;
 }
 
-function AppSidebarNav({ user }: { user: User }) {
+function SidebarNavContent({ user }: { user: User }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const isAdmin = user.role === 'admin';
@@ -142,6 +142,14 @@ function AppSidebarNav({ user }: { user: User }) {
     );
 }
 
+function AppSidebarNav({ user }: { user: User }) {
+    return (
+        <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+            <SidebarNavContent user={user} />
+        </Suspense>
+    );
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,9 +182,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Logo className="h-5 w-auto" />
             </div>
             <div className="flex-1 overflow-y-auto pt-2">
-                <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-                    <AppSidebarNav user={user} />
-                </Suspense>
+                <AppSidebarNav user={user} />
             </div>
             <div className="p-4 border-t">
                 <Button 
@@ -207,9 +213,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <div className="h-14 flex items-center px-6 border-b">
                                 <Logo className="h-5 w-auto" />
                             </div>
-                            <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-                                <AppSidebarNav user={user} />
-                            </Suspense>
+                            <AppSidebarNav user={user} />
                         </SheetContent>
                     </Sheet>
                     

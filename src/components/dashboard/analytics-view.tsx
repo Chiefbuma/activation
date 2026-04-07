@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jsPDF';
+import jsPDF from 'jspdf';
 import type { Corporate, Registration } from '@/lib/types';
 import ClassificationSection from './classification-section';
 import { Button } from '@/components/ui/button';
