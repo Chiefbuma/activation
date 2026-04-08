@@ -26,7 +26,7 @@ const Logo = ({ className = '', ...props }: React.SVGProps<SVGSVGElement>) => (
     <text
       x="32"
       y="17"
-      fontFamily="Inter, sans-serif"
+      fontFamily="'Segoe UI', 'Segoe UI Variable', sans-serif"
       fontSize="20"
       fontWeight="600"
       fill="currentColor"
