@@ -80,3 +80,43 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+[data-pdf-export="true"] {
+  --background: 0 0% 100%;
+  --foreground: 224 71.4% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 71.4% 4.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 71.4% 4.1%;
+  --primary: 173 80% 30%;
+  --primary-foreground: 173 100% 96%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220 8.9% 46.1%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220 8.9% 46.1%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 173 80% 30%;
+  --chart-1: 173 70% 40%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  color-scheme: light;
+  background: #ffffff !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+[data-pdf-export="true"] * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+[data-pdf-export="true"] .dark\:invert,
+[data-pdf-export="true"] img.dark\:invert {
+  filter: none !important;
+}

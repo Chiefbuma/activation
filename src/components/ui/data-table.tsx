@@ -29,13 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 interface DataTableToolbarProps<TData> {
   table: ReturnType<typeof useReactTable<TData>>
@@ -94,26 +87,6 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           : `${table.getFilteredRowModel().rows.length} records`}
       </div>
       <div className="flex flex-wrap items-center gap-3 lg:gap-6">
-        <div className="flex items-center gap-2">
-          <p className="text-xs font-medium">Rows</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
-          >
-            <SelectTrigger className="h-7 w-[68px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[5, 10, 20].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         <div className="flex items-center justify-center text-xs font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
@@ -158,7 +131,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   onSelectionChange?: (count: number, selectedRows: TData[]) => void
   searchPlaceholder?: string
-  pageSize?: number
   enableRowSelection?: boolean
   toolbarActions?: React.ReactNode
 }
@@ -168,7 +140,6 @@ export function DataTable<TData, TValue>({
     data,
     onSelectionChange,
     searchPlaceholder,
-    pageSize = 10,
     enableRowSelection = true,
     toolbarActions,
 }: DataTableProps<TData, TValue>) {
@@ -183,7 +154,7 @@ export function DataTable<TData, TValue>({
     columns,
     initialState: {
       pagination: {
-        pageSize,
+        pageSize: 5,
       },
     },
     state: {

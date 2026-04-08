@@ -65,11 +65,11 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="border-none"
+      className="border-none md:p-3"
       {...props}
     >
-      <div className="flex h-full flex-col bg-[linear-gradient(180deg,hsl(var(--sidebar-background)),hsl(var(--sidebar-accent)))] text-sidebar-foreground">
-        <SidebarHeader className="border-b border-sidebar-border/70 px-4 py-4">
+      <div className="flex h-full flex-col rounded-[26px] bg-[linear-gradient(180deg,hsl(var(--sidebar-background))_0%,hsl(var(--sidebar-accent))_100%)] text-sidebar-foreground">
+        <SidebarHeader className="border-b border-sidebar-border/55 px-3.5 py-3">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -77,14 +77,14 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           >
             <Link
               href="/dashboard"
-              className="inline-flex items-center rounded-xl px-1 py-1 transition-opacity hover:opacity-80"
+              className="inline-flex items-center rounded-2xl px-1.5 py-1 transition-opacity hover:opacity-80"
             >
-              <Logo className="h-6 w-auto text-sidebar-foreground" />
+              <Logo className="h-5 w-auto text-sidebar-foreground" />
             </Link>
           </motion.div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3 py-3">
+        <SidebarContent className="px-2.5 py-2.5">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -97,7 +97,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               },
             }}
           >
-            <SidebarMenu className="gap-1 font-sidebar">
+            <SidebarMenu className="gap-0.5 font-sidebar">
               <SidebarMenuItem>
                 <motion.div
                   variants={{
@@ -110,7 +110,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                     asChild
                     isActive={(pathname === '/dashboard' && activeView === 'activations') || isPatientRoute}
                     tooltip="Activation"
-                    className="h-9 rounded-xl border border-transparent px-3 text-[13px] font-semibold tracking-[0.01em] text-sidebar-foreground/80 transition-all duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/80 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
+                    className="h-8 rounded-[16px] border border-transparent px-2.5 text-[12.5px] font-semibold tracking-[0.005em] text-sidebar-foreground/82 transition-all duration-200 hover:border-sidebar-border/65 hover:bg-sidebar-primary/16 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
                   >
                     <Link href="/dashboard?view=activations">
                       <span>Activation</span>
@@ -132,7 +132,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                     isActive={isAnalyticsOpen}
                     tooltip="Dashboard"
                     onClick={() => setDashboardOpen((open) => !open)}
-                    className="h-9 rounded-xl border border-transparent px-3 text-[13px] font-semibold tracking-[0.01em] text-sidebar-foreground/80 transition-all duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/80 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
+                    className="h-8 rounded-[16px] border border-transparent px-2.5 text-[12.5px] font-semibold tracking-[0.005em] text-sidebar-foreground/82 transition-all duration-200 hover:border-sidebar-border/65 hover:bg-sidebar-primary/16 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
                   >
                     <span>Dashboard</span>
                   </SidebarMenuButton>
@@ -146,12 +146,12 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                       transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <SidebarMenuSub className="mt-1 ml-3 mr-0 gap-1 border-sidebar-border/50 px-2 py-0">
+                      <SidebarMenuSub className="mt-0.5 ml-2.5 mr-0 gap-0.5 border-sidebar-border/45 px-1.5 py-0">
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton
                             asChild
                             isActive={pathname === '/dashboard' && activeView === 'passport'}
-                            className="h-8 rounded-lg border border-transparent px-3 text-[12px] font-medium text-sidebar-foreground/68 transition-all duration-200 hover:bg-sidebar-primary/12 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
+                            className="h-7 rounded-[14px] border border-transparent px-2.5 text-[11.5px] font-medium text-sidebar-foreground/72 transition-all duration-200 hover:border-sidebar-border/55 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/65 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
                           >
                             <Link href="/dashboard?view=passport">
                               <span>Taria Passport</span>
@@ -162,7 +162,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                           <SidebarMenuSubButton
                             asChild
                             isActive={pathname === '/dashboard' && activeView === 'partner'}
-                            className="h-8 rounded-lg border border-transparent px-3 text-[12px] font-medium text-sidebar-foreground/68 transition-all duration-200 hover:bg-sidebar-primary/12 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
+                            className="h-7 rounded-[14px] border border-transparent px-2.5 text-[11.5px] font-medium text-sidebar-foreground/72 transition-all duration-200 hover:border-sidebar-border/55 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/65 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
                           >
                             <Link href="/dashboard?view=partner">
                               <span>Partners Snapshot</span>
@@ -189,7 +189,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                       isActive={isSettingsOpen}
                       tooltip="Setting"
                       onClick={() => setSettingsOpen((open) => !open)}
-                      className="h-9 rounded-xl border border-transparent px-3 text-[13px] font-semibold tracking-[0.01em] text-sidebar-foreground/80 transition-all duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/80 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
+                      className="h-8 rounded-[16px] border border-transparent px-2.5 text-[12.5px] font-semibold tracking-[0.005em] text-sidebar-foreground/82 transition-all duration-200 hover:border-sidebar-border/65 hover:bg-sidebar-primary/16 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/10 data-[active=true]:text-sidebar-foreground"
                     >
                       <span>Setting</span>
                     </SidebarMenuButton>
@@ -203,12 +203,12 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                         transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                         className="overflow-hidden"
                       >
-                        <SidebarMenuSub className="mt-1 ml-3 mr-0 gap-1 border-sidebar-border/50 px-2 py-0">
+                        <SidebarMenuSub className="mt-0.5 ml-2.5 mr-0 gap-0.5 border-sidebar-border/45 px-1.5 py-0">
                           <SidebarMenuSubItem>
                             <SidebarMenuSubButton
                               asChild
                               isActive={pathname === '/dashboard' && activeView === 'settings' && subView === 'corporates'}
-                              className="h-8 rounded-lg border border-transparent px-3 text-[12px] font-medium text-sidebar-foreground/68 transition-all duration-200 hover:bg-sidebar-primary/12 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
+                              className="h-7 rounded-[14px] border border-transparent px-2.5 text-[11.5px] font-medium text-sidebar-foreground/72 transition-all duration-200 hover:border-sidebar-border/55 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/65 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
                             >
                               <Link href="/dashboard?view=settings&sub=corporates">
                                 <span>Corporates</span>
@@ -219,7 +219,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                             <SidebarMenuSubButton
                               asChild
                               isActive={pathname === '/dashboard' && activeView === 'settings' && subView === 'users'}
-                              className="h-8 rounded-lg border border-transparent px-3 text-[12px] font-medium text-sidebar-foreground/68 transition-all duration-200 hover:bg-sidebar-primary/12 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/70 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
+                              className="h-7 rounded-[14px] border border-transparent px-2.5 text-[11.5px] font-medium text-sidebar-foreground/72 transition-all duration-200 hover:border-sidebar-border/55 hover:bg-sidebar-primary/14 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border/65 data-[active=true]:bg-sidebar-primary/8 data-[active=true]:text-sidebar-foreground"
                             >
                               <Link href="/dashboard?view=settings&sub=users">
                                 <span>User Accounts</span>
@@ -236,18 +236,18 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           </motion.div>
         </SidebarContent>
 
-        <SidebarFooter className="mt-auto border-t border-sidebar-border/70 px-4 py-4 font-sidebar">
+        <SidebarFooter className="mt-auto border-t border-sidebar-border/55 px-3 py-3 font-sidebar">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.24, delay: 0.12, ease: 'easeOut' }}
-            className="space-y-3"
+            className="space-y-2"
           >
-            <div className="rounded-2xl bg-sidebar-primary/8 px-3 py-3">
-              <p className="text-[11px] font-medium text-sidebar-foreground">
+            <div className="rounded-[18px] border border-sidebar-border/45 bg-sidebar-primary/7 px-2.5 py-2">
+              <p className="text-[10.5px] font-medium text-sidebar-foreground">
                 {user?.name || 'Taria User'}
               </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-sidebar-foreground/55">
+              <p className="mt-0.5 text-[9.5px] uppercase tracking-[0.12em] text-sidebar-foreground/55">
                 {user?.role || 'staff'} · {initials}
               </p>
             </div>
@@ -255,7 +255,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               type="button"
               variant="ghost"
               onClick={handleLogout}
-              className="h-9 w-full justify-start rounded-xl px-3 text-[12px] font-medium text-sidebar-foreground/72 hover:bg-destructive/10 hover:text-destructive"
+              className="h-8 w-full justify-start rounded-[16px] px-2.5 text-[11.5px] font-medium text-sidebar-foreground/72 hover:bg-destructive/10 hover:text-destructive"
             >
               Sign out
             </Button>

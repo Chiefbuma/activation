@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Suspense
         fallback={<div className="hidden h-svh w-12 border-r border-border/70 bg-sidebar/50 md:block" />}
       >
-        <AppSidebar user={user} variant="inset" />
+        <AppSidebar user={user} variant="floating" />
       </Suspense>
 
       <SidebarInset className="min-w-0 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.08),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(148,163,184,0.1),_transparent_24%)]">

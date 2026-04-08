@@ -28,7 +28,7 @@ export default {
       fontFamily: {
         sans: segoeStack,
         headline: segoeStack,
-        sidebar: segoeStack,
+        sidebar: ['"Aptos"', '"Trebuchet MS"', '"Segoe UI"', 'ui-sans-serif', ...fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -99,7 +99,6 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                         <DataTable 
                             columns={columns} 
                             data={patients} 
-                            pageSize={10}
                             searchPlaceholder="Search participants..."
                             toolbarActions={
                                 <>

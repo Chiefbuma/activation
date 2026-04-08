@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Loader2, UsersRound } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 type PartnerSnapshotViewProps = {
@@ -199,32 +199,6 @@ export default function PartnerSnapshotView({
                 subtitle="Based on expected participants"
               />
             </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <StatCard
-                title="Expected Participants"
-                value={metrics.expectedParticipants?.toString() ?? 'Not set'}
-              />
-              <StatCard
-                title="Completed Screenings"
-                value={metrics.screeningsCompleted.toString()}
-              />
-              <StatCard
-                title="Participation Status"
-                value={
-                  metrics.turnoutRate === null
-                    ? 'Needs target'
-                    : metrics.turnoutRate >= 90
-                      ? 'Excellent'
-                      : metrics.turnoutRate >= 75
-                        ? 'Strong'
-                        : metrics.turnoutRate >= 50
-                          ? 'Moderate'
-                          : 'Low'
-                }
-              />
-            </div>
-
             {!metrics.expectedParticipants ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
                 Add <span className="font-semibold">Expected Participants</span> in
@@ -272,18 +246,6 @@ function SnapshotTile({
           {value}
         </p>
       </div>
-    </div>
-  );
-}
-
-function StatCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{title}</p>
-      <p className="mt-3 flex items-center gap-2 text-2xl font-semibold text-slate-900">
-        <UsersRound className="h-5 w-5 text-primary" />
-        {value}
-      </p>
     </div>
   );
 }
