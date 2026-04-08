@@ -9,9 +9,6 @@ import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -78,10 +75,6 @@ export default function RegisterParticipantPage() {
   return (
     <div className="container mx-auto flex justify-center items-start py-8 px-4">
       <Card className="w-full max-w-4xl border-primary/20 shadow-lg dark:border-primary/40">
-        <CardHeader className="text-center bg-muted/30 pb-8">
-          <CardTitle className="text-2xl text-primary font-bold">New Participant Registration</CardTitle>
-          <CardDescription>Enter participant details to create a new activation record.</CardDescription>
-        </CardHeader>
         <CardContent className="pt-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

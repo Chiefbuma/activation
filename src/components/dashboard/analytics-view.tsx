@@ -14,7 +14,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,10 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
   }, [corporates, searchQuery]);
 
   const distributions = useMemo(() => getPassportDistributions(filteredPatients), [filteredPatients]);
+  const reportScopeLabel =
+    selectedCorporateId === 'all'
+      ? 'Cross-partner passport overview'
+      : `${selectedCorporate?.name || 'Corporate partner'} passport overview`;
 
   const handleDownloadPdf = async () => {
     if (!reportRef.current) return;
@@ -92,79 +96,96 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border border-primary/10">
-        <div className="w-full md:w-auto">
-          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={isPopoverOpen}
-                className="w-full md:w-[350px] justify-between bg-background font-normal"
-              >
-                {selectedCorporateId === "all"
-                  ? "All Corporate Partners"
-                  : corporates.find((c) => String(c.id) === selectedCorporateId)?.name}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[350px] p-0" align="start">
-              <div className="flex items-center border-b px-3">
-                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                <Input
-                  placeholder="Search corporate..."
-                  className="h-10 w-full border-0 bg-transparent focus-visible:ring-0"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <ScrollArea className="h-72">
-                <div className="p-1">
-                  <div
-                    className={cn(
-                      "flex items-center px-2 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent",
-                      selectedCorporateId === "all" && "bg-accent"
-                    )}
-                    onClick={() => {
-                      setSelectedCorporateId("all");
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    <Check className={cn("mr-2 h-4 w-4", selectedCorporateId === "all" ? "opacity-100" : "opacity-0")} />
-                    All Corporate Partners
-                  </div>
-                  {filteredCorporateList.map((c) => (
+      <div className="flex flex-col gap-4 rounded-[28px] border border-border/70 bg-card/90 p-4 shadow-[0_20px_45px_-32px_rgba(15,23,42,0.2)] backdrop-blur md:flex-row md:items-center md:justify-between md:p-5 dark:bg-card/90">
+        <div className="min-w-0 flex-1">
+          <div className="w-full md:max-w-[380px]">
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={isPopoverOpen}
+                  className="h-11 w-full justify-between rounded-2xl border-border/70 bg-background px-4 text-left text-sm font-medium shadow-sm dark:bg-card"
+                >
+                  {selectedCorporateId === 'all'
+                    ? 'All Corporate Partners'
+                    : selectedCorporate?.name}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[350px] rounded-2xl border-border/70 p-0 shadow-xl" align="start">
+                <div className="flex items-center border-b border-border/70 px-3">
+                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  <Input
+                    placeholder="Search corporate..."
+                    className="h-10 w-full border-0 bg-transparent focus-visible:ring-0"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <ScrollArea className="h-72">
+                  <div className="p-1">
                     <div
-                      key={c.id}
                       className={cn(
-                        "flex items-center px-2 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent",
-                        selectedCorporateId === String(c.id) && "bg-accent"
+                        'flex items-center rounded-sm px-2 py-2 text-sm cursor-pointer hover:bg-accent',
+                        selectedCorporateId === 'all' && 'bg-accent'
                       )}
                       onClick={() => {
-                        setSelectedCorporateId(String(c.id));
+                        setSelectedCorporateId('all');
                         setIsPopoverOpen(false);
                       }}
                     >
-                      <Check className={cn("mr-2 h-4 w-4", selectedCorporateId === String(c.id) ? "opacity-100" : "opacity-0")} />
-                      {c.name}
+                      <Check className={cn('mr-2 h-4 w-4', selectedCorporateId === 'all' ? 'opacity-100' : 'opacity-0')} />
+                      All Corporate Partners
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
+                    {filteredCorporateList.map((c) => (
+                      <div
+                        key={c.id}
+                        className={cn(
+                          'flex items-center rounded-sm px-2 py-2 text-sm cursor-pointer hover:bg-accent',
+                          selectedCorporateId === String(c.id) && 'bg-accent'
+                        )}
+                        onClick={() => {
+                          setSelectedCorporateId(String(c.id));
+                          setIsPopoverOpen(false);
+                        }}
+                      >
+                        <Check className={cn('mr-2 h-4 w-4', selectedCorporateId === String(c.id) ? 'opacity-100' : 'opacity-0')} />
+                        {c.name}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="rounded-full border border-border/70 bg-background px-3 py-1 font-medium dark:bg-card">
+              {reportScopeLabel}
+            </span>
+            <span className="rounded-full border border-border/70 bg-background px-3 py-1 font-medium dark:bg-card">
+              {filteredPatients.length} participants
+            </span>
+          </div>
         </div>
-        <Button onClick={handleDownloadPdf} disabled={isDownloading} className="w-full md:w-auto shadow-md">
+        <Button
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
+          className="h-11 w-full rounded-2xl px-5 text-sm shadow-md md:w-auto"
+        >
           {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
           Download Passport PDF
         </Button>
       </div>
 
-      <div ref={reportRef} className="bg-card p-8 md:p-12 rounded-[24px] border shadow-xl text-foreground space-y-8 max-w-[1000px] mx-auto transition-colors">
-        <div className="flex flex-col items-center gap-6 border-b-2 border-primary/10 pb-8">
-          <img src="/images/taria-logo.png" alt="Taria Health" className="w-[450px] h-auto dark:invert" />
-          <div className="text-center">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mt-1">
+      <div ref={reportRef} className="mx-auto max-w-[1080px] space-y-8 rounded-[32px] border border-border/70 bg-card/95 p-6 text-foreground shadow-[0_28px_70px_-40px_rgba(15,23,42,0.24)] transition-colors md:p-10 dark:bg-card/95">
+        <div className="flex flex-col items-center gap-5 border-b border-border/70 pb-8">
+          <img src="/images/taria-logo.png" alt="Taria Health" className="h-auto w-full max-w-[340px] dark:invert md:max-w-[380px]" />
+          <div className="space-y-2 text-center">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+              {selectedCorporateId === 'all' ? 'All Corporate Partners' : selectedCorporate?.name || 'Corporate Partner'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Wellness Date: {selectedCorporate?.wellness_date ? format(new Date(selectedCorporate.wellness_date), 'dd MMM yyyy') : format(new Date(), 'dd MMM yyyy')}
             </p>
           </div>
@@ -243,9 +264,9 @@ export default function AnalyticsView({ patients, corporates }: AnalyticsViewPro
           />
         </div>
 
-        <div className="pt-8 border-t border-primary/10">
-          <div className="bg-muted/30 border border-primary/10 rounded-2xl p-6">
-            <p className="text-[10px] text-muted-foreground italic leading-relaxed text-justify">
+        <div className="border-t border-border/70 pt-8">
+          <div className="rounded-[24px] border border-border/70 bg-muted/25 p-5 dark:bg-muted/20">
+            <p className="text-[11px] leading-6 text-muted-foreground">
               This passport provides an aggregate view of health screenings conducted within the Taria Health framework. 
               The data points reflect the latest recorded physiology for each participant at the time of export. 
               Thresholds and classifications follow standard clinical guidelines for general population wellness screening.

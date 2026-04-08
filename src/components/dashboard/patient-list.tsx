@@ -9,7 +9,7 @@ import { DataTable } from '../ui/data-table';
 import { columns } from '../../app/dashboard/columns';
 import Link from 'next/link';
 import PatientCard from './patient-card';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -93,45 +93,41 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
         </AnimatePresence>
 
         <Card className="dark:border-primary/40">
-            <CardHeader>
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div>
-                        <CardTitle>All Participants</CardTitle>
-                        <CardDescription>View, search, and manage activation records.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg border">
-                            <Button 
-                                variant={viewMode === 'table' ? 'secondary' : 'ghost'} 
-                                size="icon" 
-                                onClick={() => setViewMode('table')}
-                                className="h-8 w-8"
-                            >
-                                <List className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                                variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
-                                size="icon" 
-                                onClick={() => setViewMode('grid')}
-                                className="h-8 w-8"
-                            >
-                                <LayoutGrid className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <Button asChild className="flex-1 md:flex-none">
-                            <Link href="/dashboard/register-patient">
-                                <PlusCircle className="mr-2 h-4 w-4" /> Add Participant
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 {viewMode === 'table' ? (
                     <div className="overflow-x-auto">
                         <DataTable 
                             columns={columns} 
                             data={patients} 
+                            pageSize={10}
+                            searchPlaceholder="Search participants..."
+                            toolbarActions={
+                                <>
+                                    <div className="flex items-center gap-1 rounded-lg border bg-muted/40 p-1">
+                                        <Button
+                                            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                                            size="icon"
+                                            onClick={() => setViewMode('table')}
+                                            className="h-8 w-8"
+                                        >
+                                            <List className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                                            size="icon"
+                                            onClick={() => setViewMode('grid')}
+                                            className="h-8 w-8"
+                                        >
+                                            <LayoutGrid className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    <Button asChild className="h-8 shrink-0">
+                                        <Link href="/dashboard/register-patient">
+                                            <PlusCircle className="mr-2 h-4 w-4" /> Add Participant
+                                        </Link>
+                                    </Button>
+                                </>
+                            }
                             onSelectionChange={(count, rows) => {
                                 setSelectedCount(count);
                                 setSelectedRows(rows);
@@ -139,11 +135,20 @@ export default function PatientList({ patients }: { patients: Registration[] }) 
                         />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                        {patients.map((patient, index) => (
-                            <PatientCard key={patient.id} patient={patient} index={index}/>
-                        ))}
-                    </div>
+                    <>
+                        <div className="mb-4 flex justify-end">
+                            <Button asChild className="h-8">
+                                <Link href="/dashboard/register-patient">
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Participant
+                                </Link>
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+                            {patients.map((patient, index) => (
+                                <PatientCard key={patient.id} patient={patient} index={index}/>
+                            ))}
+                        </div>
+                    </>
                 )}
             </CardContent>
         </Card>

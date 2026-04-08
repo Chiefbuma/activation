@@ -24,41 +24,10 @@ function DashboardContent({
   const activeViewFromUrl = searchParams.get('view') || 'activations';
   const subViewFromUrl = (searchParams.get('sub') as 'corporates' | 'users') || 'corporates';
 
-  const getViewTitle = () => {
-    switch(activeViewFromUrl) {
-        case 'activations': return 'Activations';
-        case 'passport': return 'Taria Passport';
-        case 'partner': return 'Partner Snapshot';
-        case 'settings': return 'Settings Center';
-        default: return 'Activations';
-    }
-  };
-
-  const getViewSubtitle = () => {
-    switch(activeViewFromUrl) {
-        case 'activations': return 'Manage participant registration and assessment history';
-        case 'passport': return 'High-density aggregate screening outcome reports';
-        case 'partner': return 'Corporate participation summary and PDF-ready snapshots';
-        case 'settings': return `System configuration for ${subViewFromUrl}`;
-        default: return 'Registry';
-    }
-  };
-
   const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <div className="space-y-8">
-       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-primary/10 pb-6">
-            <div className="w-full md:w-auto">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                    {getViewTitle()}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                    {getViewSubtitle()}
-                </p>
-            </div>
-       </div>
-      
+    <div className="space-y-6">
       <div className="w-full">
           {activeViewFromUrl === 'activations' && (
             <div className="max-w-full overflow-hidden">
@@ -77,7 +46,7 @@ function DashboardContent({
                 onCorporatesUpdate={() => {}} 
                 users={users}
                 onUsersUpdate={() => {}}
-                defaultTab={subViewFromUrl}
+                view={subViewFromUrl}
             />
           )}
       </div>

@@ -242,16 +242,16 @@ export default function UserManagement({ initialUsers, onUsersUpdate }: UserMana
         )}
       </AnimatePresence>
 
-      <div className="flex justify-end">
-        <Button onClick={() => handleOpenModal()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <PlusCircle className="mr-2 h-4 w-4" /> Add System User
-        </Button>
-      </div>
-
       <div className="overflow-x-auto">
         <DataTable 
             columns={columns} 
             data={users} 
+            searchPlaceholder="Search users..."
+            toolbarActions={
+              <Button onClick={() => handleOpenModal()} className="h-8 bg-primary text-primary-foreground hover:bg-primary/90">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add System User
+              </Button>
+            }
             onSelectionChange={(count, rows) => {
                 setSelectedCount(count);
                 setSelectedRows(rows);

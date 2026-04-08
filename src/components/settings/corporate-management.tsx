@@ -226,16 +226,16 @@ export default function CorporateManagement({ initialCorporates, onCorporatesUpd
         )}
       </AnimatePresence>
 
-      <div className="flex justify-end">
-        <Button onClick={() => handleOpenModal()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Partner
-        </Button>
-      </div>
-
       <div className="overflow-x-auto">
         <DataTable 
             columns={columns} 
             data={corporates} 
+            searchPlaceholder="Search partners..."
+            toolbarActions={
+              <Button onClick={() => handleOpenModal()} className="h-8 bg-primary text-primary-foreground hover:bg-primary/90">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Partner
+              </Button>
+            }
             onSelectionChange={(count, rows) => {
                 setSelectedCount(count);
                 setSelectedRows(rows);

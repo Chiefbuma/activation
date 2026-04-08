@@ -8,9 +8,6 @@ import { buildPartnerNarrative, getPartnerSnapshotMetrics } from '@/lib/dashboar
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Select,
@@ -97,10 +94,9 @@ export default function PartnerSnapshotView({
   if (corporates.length === 0) {
     return (
       <Card className="border-primary/10">
-        <CardHeader>
-          <CardTitle>Partner Snapshot</CardTitle>
-          <CardDescription>Add a corporate partner to generate participation reports.</CardDescription>
-        </CardHeader>
+        <CardContent className="py-8 text-sm text-muted-foreground">
+          Add a corporate partner to generate participation reports.
+        </CardContent>
       </Card>
     );
   }
@@ -108,13 +104,7 @@ export default function PartnerSnapshotView({
   return (
     <div className="space-y-6">
       <Card className="border-primary/10">
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">Partner Snapshot</CardTitle>
-            <CardDescription>
-              PDF-ready participation summary based on registered participants and expected turnout.
-            </CardDescription>
-          </div>
+        <CardContent className="flex flex-col gap-4 pt-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row">
             <Select value={selectedCorporateId} onValueChange={setSelectedCorporateId}>
               <SelectTrigger className="w-full min-w-[240px] bg-background">
@@ -137,7 +127,7 @@ export default function PartnerSnapshotView({
               Download PDF
             </Button>
           </div>
-        </CardHeader>
+        </CardContent>
       </Card>
 
       {metrics ? (

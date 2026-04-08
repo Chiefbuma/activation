@@ -16,19 +16,10 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  ListFilter,
   X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -48,64 +39,37 @@ import {
 
 interface DataTableToolbarProps<TData> {
   table: ReturnType<typeof useReactTable<TData>>
+  searchPlaceholder?: string
+  toolbarActions?: React.ReactNode
 }
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({
+  table,
+  searchPlaceholder = "Search records...",
+  toolbarActions,
+}: DataTableToolbarProps<TData>) {
   const isFiltered = !!table.getState().globalFilter
 
   return (
-    <div className="flex items-center justify-between pb-4">
-      <div className="flex flex-1 items-center space-x-2">
+      <div className="flex items-center justify-end gap-2 overflow-x-auto pb-2">
+        {toolbarActions}
         <Input
-          placeholder="Search records..."
+          placeholder={searchPlaceholder}
           value={(table.getState().globalFilter as string) ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="h-9 w-[150px] lg:w-[250px]"
+          className="h-8 min-w-[190px] max-w-[260px] shrink-0 text-[13px]"
         />
         {isFiltered && (
           <Button
             variant="ghost"
             onClick={() => table.setGlobalFilter("")}
-            className="h-9 px-2 lg:px-3"
+            className="h-8 shrink-0 px-2 text-[12px] lg:px-3"
           >
             Reset
             <X className="ml-2 h-4 w-4" />
           </Button>
         )}
       </div>
-      <div className="flex items-center space-x-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="ml-auto hidden h-9 lg:flex">
-              <ListFilter className="mr-2 h-4 w-4" />
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[150px]">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {table
-              .getAllColumns()
-              .filter(
-                (column) =>
-                  typeof column.accessorFn !== "undefined" && column.getCanHide()
-              )
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id.match(/\b\w/g)?.join(' ') || column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
   )
 }
 
@@ -114,14 +78,23 @@ interface DataTablePaginationProps<TData> {
 }
 
 export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+  const currentPage = table.getState().pagination.pageIndex + 1
+  const totalPages = table.getPageCount()
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1).slice(
+    Math.max(currentPage - 2, 0),
+    Math.max(currentPage - 2, 0) + 5
+  )
+  const rowSelectionEnabled = table.options.enableRowSelection !== false
+
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
-      <div className="text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} selected
+    <div className="flex flex-col items-center justify-between gap-2 px-2 py-2 sm:flex-row">
+      <div className="text-xs text-muted-foreground">
+        {rowSelectionEnabled
+          ? `${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} selected`
+          : `${table.getFilteredRowModel().rows.length} records`}
       </div>
-      <div className="flex wrap items-center gap-4 lg:gap-8">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center gap-3 lg:gap-6">
+        <div className="flex items-center gap-2">
           <p className="text-xs font-medium">Rows</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
@@ -129,7 +102,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
               table.setPageSize(Number(value))
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-7 w-[68px]">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -145,10 +118,10 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1">
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -156,12 +129,24 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+        </div>
+        <div className="flex items-center gap-1">
+          {pageNumbers.map((pageNumber) => (
+            <Button
+              key={pageNumber}
+              variant={pageNumber === currentPage ? "default" : "outline"}
+              className="h-7 min-w-7 px-2 text-xs"
+              onClick={() => table.setPageIndex(pageNumber - 1)}
+            >
+              {pageNumber}
+            </Button>
+          ))}
         </div>
       </div>
     </div>
@@ -172,12 +157,20 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   onSelectionChange?: (count: number, selectedRows: TData[]) => void
+  searchPlaceholder?: string
+  pageSize?: number
+  enableRowSelection?: boolean
+  toolbarActions?: React.ReactNode
 }
 
 export function DataTable<TData, TValue>({ 
     columns, 
     data,
-    onSelectionChange 
+    onSelectionChange,
+    searchPlaceholder,
+    pageSize = 10,
+    enableRowSelection = true,
+    toolbarActions,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -190,7 +183,7 @@ export function DataTable<TData, TValue>({
     columns,
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize,
       },
     },
     state: {
@@ -200,7 +193,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       globalFilter,
     },
-    enableRowSelection: true,
+    enableRowSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -229,8 +222,12 @@ export function DataTable<TData, TValue>({
   }, [rowSelection, table, onSelectionChange])
 
   return (
-    <div className="space-y-4">
-      <DataTableToolbar table={table} />
+    <div className="space-y-2">
+      <DataTableToolbar
+        table={table}
+        searchPlaceholder={searchPlaceholder}
+        toolbarActions={toolbarActions}
+      />
         <div className="relative w-full overflow-auto rounded-xl border dark:border-primary/20 bg-background">
             <Table>
             <TableHeader className="bg-muted/50">
@@ -238,7 +235,7 @@ export function DataTable<TData, TValue>({
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                     return (
-                        <TableHead key={header.id} colSpan={header.colSpan} className="font-bold text-primary text-xs uppercase tracking-wider">
+                        <TableHead key={header.id} colSpan={header.colSpan} className="font-bold text-primary text-[11px] uppercase tracking-[0.16em]">
                         {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -260,7 +257,7 @@ export function DataTable<TData, TValue>({
                     className="hover:bg-primary/5 transition-colors"
                     >
                     {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-3 px-4">
+                        <TableCell key={cell.id} className="px-2.5 py-1.5 text-[12px]">
                         {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
