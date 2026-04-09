@@ -25,12 +25,19 @@ const safeSplitLines = (text: string | null | undefined): string[] => {
   }
 };
 
-const formatKgValue = (value: number | null | undefined) => {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+const formatKgValue = (value: number | string | null | undefined) => {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number(value)
+        : NaN;
+
+  if (Number.isNaN(parsed)) {
     return null;
   }
 
-  return `${value.toFixed(2)}kgs`;
+  return `${parsed.toFixed(2)}kgs`;
 };
 
 export default function Report({ patient, corporate }: ReportProps) {
