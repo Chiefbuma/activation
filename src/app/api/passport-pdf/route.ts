@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -13,7 +13,6 @@ const PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || '/tmp/taria-pdf-r
 const PUPPETEER_USER_DATA_DIR =
   process.env.PUPPETEER_USER_DATA_DIR || '/tmp/taria-pdf-runtime/.profile';
 const EXECUTABLE_NAMES = new Set(['chrome', 'chrome-headless-shell']);
-const runtimeRequire = createRequire(import.meta.url);
 
 type PuppeteerModule = {
   launch: (options: Record<string, unknown>) => Promise<{
@@ -54,12 +53,22 @@ async function findExecutable(root: string, depth = 0): Promise<string | null> {
   return null;
 }
 
-function getPuppeteer(): PuppeteerModule {
-  return runtimeRequire(PUPPETEER_RUNTIME_PATH) as PuppeteerModule;
+async function getPuppeteer(): Promise<PuppeteerModule> {
+  const specifier = PUPPETEER_RUNTIME_PATH.startsWith('.')
+    ? pathToFileURL(join(process.cwd(), PUPPETEER_RUNTIME_PATH)).href
+    : PUPPETEER_RUNTIME_PATH.startsWith('/')
+      ? pathToFileURL(PUPPETEER_RUNTIME_PATH).href
+      : PUPPETEER_RUNTIME_PATH;
+
+  const module = (await import(/* webpackIgnore: true */ specifier)) as {
+    default?: PuppeteerModule;
+  } & PuppeteerModule;
+
+  return module.default ?? module;
 }
 
 async function buildPassportPdf(renderUrl: string) {
-  const puppeteer = getPuppeteer();
+  const puppeteer = await getPuppeteer();
   const executablePath = await findExecutable(PUPPETEER_CACHE_DIR);
 
   if (!executablePath) {
