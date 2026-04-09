@@ -44,25 +44,29 @@ export function DataTableToolbar<TData>({
   const isFiltered = !!table.getState().globalFilter
 
   return (
-      <div className="flex items-center justify-end gap-2 overflow-x-auto pb-2">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-wrap items-center gap-2">
         {toolbarActions}
+      </div>
+      <div className="flex items-center gap-2">
         <Input
           placeholder={searchPlaceholder}
           value={(table.getState().globalFilter as string) ?? ""}
           onChange={(event) => table.setGlobalFilter(event.target.value)}
-          className="h-8 min-w-[190px] max-w-[260px] shrink-0 text-[13px]"
+          className="h-9 min-w-[220px] max-w-[280px] shrink-0 border-border/70 bg-background text-[13px]"
         />
         {isFiltered && (
           <Button
             variant="ghost"
             onClick={() => table.setGlobalFilter("")}
-            className="h-8 shrink-0 px-2 text-[12px] lg:px-3"
+            className="h-9 shrink-0 px-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
           >
             Reset
-            <X className="ml-2 h-4 w-4" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
+    </div>
   )
 }
 
@@ -80,21 +84,21 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
   const rowSelectionEnabled = table.options.enableRowSelection !== false
 
   return (
-    <div className="flex flex-col items-center justify-between gap-2 px-2 py-2 sm:flex-row">
+    <div className="flex flex-col items-center justify-between gap-3 border-t border-border/70 pt-3 sm:flex-row">
       <div className="text-xs text-muted-foreground">
         {rowSelectionEnabled
           ? `${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} selected`
           : `${table.getFilteredRowModel().rows.length} records`}
       </div>
-      <div className="flex flex-wrap items-center gap-3 lg:gap-6">
-        <div className="flex items-center justify-center text-xs font-medium">
+      <div className="flex flex-wrap items-center gap-3 lg:gap-4">
+        <div className="flex items-center justify-center text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
-            className="h-7 w-7 p-0"
+            className="h-8 w-8 border-border/70 p-0"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -102,7 +106,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           </Button>
           <Button
             variant="outline"
-            className="h-7 w-7 p-0"
+            className="h-8 w-8 border-border/70 p-0"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -114,7 +118,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
             <Button
               key={pageNumber}
               variant={pageNumber === currentPage ? "default" : "outline"}
-              className="h-7 min-w-7 px-2 text-xs"
+              className="h-8 min-w-8 border-border/70 px-2 text-xs"
               onClick={() => table.setPageIndex(pageNumber - 1)}
             >
               {pageNumber}
@@ -193,63 +197,61 @@ export function DataTable<TData, TValue>({
   }, [rowSelection, table, onSelectionChange])
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <DataTableToolbar
         table={table}
         searchPlaceholder={searchPlaceholder}
         toolbarActions={toolbarActions}
       />
-        <div className="relative w-full overflow-auto rounded-xl border dark:border-primary/20 bg-background">
-            <Table>
-            <TableHeader className="bg-muted/50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                    {headerGroup.headers.map((header) => {
-                    return (
-                        <TableHead key={header.id} colSpan={header.colSpan} className="font-bold text-primary text-[11px] uppercase tracking-[0.16em]">
-                        {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                            )}
-                        </TableHead>
-                    )
-                    })}
-                </TableRow>
-                ))}
-            </TableHeader>
-            <TableBody>
-                {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                    <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-primary/5 transition-colors"
-                    >
-                    {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-2.5 py-1.5 text-[12px]">
-                        {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
+      <Table className="min-w-[720px]">
+        <TableHeader className="bg-muted/35">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id} colSpan={header.colSpan}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                        </TableCell>
-                    ))}
-                    </TableRow>
-                ))
-                ) : (
-                <TableRow>
-                    <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                    >
-                    No records found.
-                    </TableCell>
-                </TableRow>
-                )}
-            </TableBody>
-            </Table>
-        </div>
+                  </TableHead>
+                )
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className="transition-colors hover:bg-primary/5"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className="text-[13px]">
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-muted-foreground"
+              >
+                No records found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
       <DataTablePagination table={table} />
     </div>
   )

@@ -3,13 +3,11 @@
 import type React from 'react';
 import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { User } from '@/lib/types';
 import Logo from '@/components/logo';
 import Header from '@/components/header';
 import { AppSidebar } from '@/components/dashboard/app-sidebar';
-import { Button } from '@/components/ui/button';
 import {
   SidebarInset,
   SidebarProvider,
@@ -45,37 +43,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <SidebarProvider defaultOpen open>
+    <SidebarProvider defaultOpen>
       <Suspense
-        fallback={<div className="hidden h-svh w-12 border-r border-border/70 bg-sidebar/50 md:block" />}
+        fallback={<div className="hidden h-svh w-64 border-r border-border/70 bg-card md:block" />}
       >
-        <AppSidebar user={user} variant="floating" />
+        <AppSidebar user={user} />
       </Suspense>
 
-      <SidebarInset className="min-w-0 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.08),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(148,163,184,0.1),_transparent_24%)]">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/70 bg-background/90 px-4 backdrop-blur md:px-6">
+      <SidebarInset className="min-w-0 bg-background">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/70 bg-card px-4 md:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {isMobile && (
-              <SidebarTrigger className="h-10 w-10 rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:bg-muted/70 md:hidden" />
+              <SidebarTrigger className="h-9 w-9 rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden" />
             )}
             <Logo className="h-5 w-auto md:hidden" />
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-10 w-10 rounded-2xl border border-transparent text-muted-foreground transition-colors hover:border-border/70 hover:bg-card hover:text-foreground"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-primary ring-2 ring-background" />
-            </Button>
-            <Header user={user} />
-          </div>
+          <Header user={user} />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1600px]">
+        <main className="flex-1 overflow-y-auto bg-background/50 p-4 md:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-6xl">
             <motion.div
               key={pathname}
               initial={{ opacity: 0, y: 6 }}
