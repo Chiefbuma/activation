@@ -25,6 +25,14 @@ const safeSplitLines = (text: string | null | undefined): string[] => {
   }
 };
 
+const formatKgValue = (value: number | null | undefined) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return null;
+  }
+
+  return `${value.toFixed(2)}kgs`;
+};
+
 export default function Report({ patient, corporate }: ReportProps) {
   const latestVital = patient.vitals?.[0];
   const latestNutrition = patient.nutritions?.[0];
@@ -56,6 +64,12 @@ export default function Report({ patient, corporate }: ReportProps) {
     ...outcomes,
     ...doctorNotes,
   ];
+  const healthyWeightLower = formatKgValue(latestNutrition?.llw);
+  const healthyWeightUpper = formatKgValue(latestNutrition?.ulw);
+  const healthyWeightRange =
+    healthyWeightLower && healthyWeightUpper
+      ? `${healthyWeightLower} - ${healthyWeightUpper}`
+      : null;
 
   return (
     <div className="report-body-container">
@@ -118,7 +132,9 @@ export default function Report({ patient, corporate }: ReportProps) {
               </div>
 
               <div className="reference-box">
-                <div className="guidance-line">Your Recommended Healthy weight for height range is 52.20kgs - 70.60kgs</div>
+                {healthyWeightRange ? (
+                  <div className="guidance-line">Your Recommended Healthy weight for height range is {healthyWeightRange}</div>
+                ) : null}
                 <div className="guidance-line">Recommended Healthy Body fat % ranges for Men 18-24%</div>
                 <div className="guidance-line">Recommended Healthy Body fat % ranges for Women 24-31%</div>
                 <div className="guidance-line">Recommended Visceral fat range: Under 12</div>
