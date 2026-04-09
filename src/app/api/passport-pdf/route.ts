@@ -13,6 +13,7 @@ const PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || '/tmp/taria-pdf-r
 const PUPPETEER_USER_DATA_DIR =
   process.env.PUPPETEER_USER_DATA_DIR || '/tmp/taria-pdf-runtime/.profile';
 const EXECUTABLE_NAMES = new Set(['chrome', 'chrome-headless-shell']);
+const runtimeRequire = createRequire(import.meta.url);
 
 type PuppeteerModule = {
   launch: (options: Record<string, unknown>) => Promise<{
@@ -54,8 +55,7 @@ async function findExecutable(root: string, depth = 0): Promise<string | null> {
 }
 
 function getPuppeteer(): PuppeteerModule {
-  const require = createRequire(process.cwd() + '/package.json');
-  return require(PUPPETEER_RUNTIME_PATH) as PuppeteerModule;
+  return runtimeRequire(PUPPETEER_RUNTIME_PATH) as PuppeteerModule;
 }
 
 async function buildPassportPdf(renderUrl: string) {
